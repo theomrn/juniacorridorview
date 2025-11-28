@@ -5,3 +5,7 @@
 /src/server/database*
 /src/client/src/firebaseConfig.js
 /src/server/yp-2425-10-firebase-adminsdk-fbsvc-7dfe32071b.json
+
+/src/server/Pictures/*
+
+*.vscode/

@@ -202,7 +202,7 @@ const AdminBuilding = () => {
                                             <div className="flex flex-col items-center justify-center pt-2 border-t">
                                                 <h6 className="font-title">Plan de l'étage</h6>
                                                 <div className="overflow-hidden flex items-center">
-                                                    <img src={`data:image/jpeg;base64,${Buffer.from(floor.plan).toString('base64')}`} alt={`Preview of ${floor.name}`} className="object-cover h-90% rounded-xl" />
+                                                    <img src={`http://localhost:5078/${floor.plan_path}`} alt={`Preview of ${floor.name}`} className="object-cover h-90% rounded-xl" />
                                                 </div>
                                             </div>
                                         )}

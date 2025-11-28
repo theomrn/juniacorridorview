@@ -40,8 +40,15 @@ const ModalAddEditBuilding = ({
         const formData = new FormData();
         formData.append('name', buildingName);
         if(editMode) {
+            
             formData.append('id_buildings', building.id_buildings);
-            api.updateBuilding(formData)
+
+            const data = {
+                idBuildings: building.id_buildings,
+                name: buildingName
+            };
+
+            api.updateBuilding(data)
                 .then(() => {
                     toast.success("Bâtiment modifié avec succès");
                     toggle();
@@ -53,6 +60,7 @@ const ModalAddEditBuilding = ({
                 });
         } else {
             // Call the API to create a new building
+
             api.insertBuilding(formData)
                 .then(() => {
                     toast.success("Bâtiment ajouté avec succès");

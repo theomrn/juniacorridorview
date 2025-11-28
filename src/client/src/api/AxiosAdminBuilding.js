@@ -1,5 +1,5 @@
 import axios from "axios";
-
+axios.defaults.baseURL = 'http://localhost:5078';
 /*
    _____ ______ _______
   / ____|  ____|__   __|
@@ -12,6 +12,7 @@ import axios from "axios";
 const getBuildings = async () => {
     try {
         const response = await axios.get('/api/buildings');
+        console.log('AxiosAdminBuilding - getBuildings - response.data:', response.data);
         return response.data;
     } catch (error) {
         console.error('Error fetching buildings', error);
@@ -22,6 +23,7 @@ const getBuildings = async () => {
 const getFloors = async () => {
     try {
         const response = await axios.get('/api/floors');
+        console.log('AxiosAdminBuilding - getFloors - response.data:', response.data);
         return response.data;
     } catch (error) {
         console.error('Error fetching floors', error);
@@ -38,12 +40,27 @@ const getFloors = async () => {
  |_____|_| \_|_____/|______|_|  \_\ |_|
  */
 
-const insertBuilding = async (formData) => {
+// const insertBuilding = async (formData) => {
+//     try {
+//         console.log("AxiosAdminBuilding - insertBuilding - formData:", formData);
+//         const response = await axios.post('/api/add-building', formData);
+//     } catch (error) {
+//         console.error('Error inserting building', error);
+//     }
+// }
+
+const insertBuilding = async (formdata) => {
+    // try {
+    //     const response = await fetch('/api/add-building', {
+    //         method: 'POST',
+    //         body: formdata
+    //     });
+    // } catch (error) {
+    //     console.error('Error inserting building', error);
+    // }
     try {
-        const response = await axios.post('/api/add-building', formData);
-    } catch (error) {
-        console.error('Error inserting building', error);
-    }
+        axios.post('/api/add-building', formdata);
+    }catch (error) {}
 }
 
 const insertFloor = async (formData) => {
@@ -67,7 +84,7 @@ const updateBuilding = async (formData) => {
     try {
         const response = await axios.post('/api/update-building', formData);
     } catch (error) {
-        console.error('Error updating building', error);
+        console.error('Error updating floor', error);
     }
 }
 

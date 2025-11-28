@@ -368,13 +368,13 @@ const AdminRoom = () => {
       }
     } else {*/
       // Make sure to also include the building name if your API requires it
-      formData.append('id_buildings', newRoomData.buildingId);
-      formData.append('building_name', newRoomData.building);
-      formData.append('floor', newRoomData.floor);
+      // formData.append('id_buildings', newRoomData.buildingId);
+      // formData.append('building_name', newRoomData.building);
+      // formData.append('floor', newRoomData.floor);
+
       formData.append('id_floors', newRoomData.floorId);
-      formData.append('plan_x', newRoomData.plan_x);
-      formData.append('plan_y', newRoomData.plan_y);
-    //}
+      formData.append('plan_x',Number(newRoomData.plan_x).toFixed(2)).replace('.', ','); 
+      formData.append('plan_y', Number(newRoomData.plan_y).toFixed(2).replace('.', ','));    //}
     
     // Add preview image to form data
     if (newRoomData.previewImage) {
@@ -382,9 +382,9 @@ const AdminRoom = () => {
     }
 
     // Add images to form data
-    newRoomData.images.forEach(image => {
-      formData.append('images', image);
-    });
+    // newRoomData.images.forEach(image => {
+    //   formData.append('images', image);
+    // });
 
     try {
       const createRoomPromise = api.createRoom(formData);

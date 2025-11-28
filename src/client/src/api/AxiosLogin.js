@@ -1,5 +1,4 @@
 import axios from 'axios';
-
 const getLogin = async () => {
     const response = await axios.get('/api/login');
     return response.data;

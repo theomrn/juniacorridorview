@@ -86,6 +86,9 @@ const createRoom = async (formData) => {
     const response = await axios.post('/api/add-room', formData);
     const id_rooms = response.data.id_rooms;
 
+    console.log('Created room with ID:', id_rooms);
+    
+    
     const imageUploadPromises = formData.getAll('images').map((image) => {
       const imageFormData = new FormData();
       imageFormData.append('id_rooms', id_rooms);

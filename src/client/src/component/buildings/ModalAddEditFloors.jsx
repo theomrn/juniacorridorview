@@ -59,8 +59,9 @@ const ModalAddEditFloors = ({
         }
         const formData = new FormData();
         formData.append('name', floorName);
-        formData.append('plan', file);
+        formData.append('file', file);
         formData.append('id_buildings', id_buildings);
+        
         if(editMode) {
             formData.append('id_floors', floor.id_floors);
             api.updateFloor(formData)
