@@ -46,6 +46,21 @@ public class ApiController : ControllerBase
         }
     }
 
+    [HttpGet("pictures-by-room/{id}")]
+    public async Task<IActionResult> GetPicturesByRoomId(int id)
+    {
+        try
+        {
+            var pics = await _db.GetPicturesByRoomIdAsync(id);
+            return Ok(pics);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error get room by id");
+            return StatusCode(500, "Error get room by id");
+        }
+    }
+
     [HttpPost("upload")]
     [RequestSizeLimit(50_000_000)]
     public async Task<IActionResult> UploadImage([FromForm] int id_rooms)
@@ -141,7 +156,7 @@ public class ApiController : ControllerBase
     {
         try
         {
-            var roomId = await _db.AddRoomAsync(name, number, id_floors, double.Parse(plan_x), double.Parse(plan_y));
+            var roomId = await _db.AddRoomAsync(name, number, id_floors, double.Parse(plan_x.Replace(".", ",")), double.Parse(plan_y.Replace(".", ",")));
             if (previewImage != null)
             {
                 await _db.InsertRoomPreviewFileAsync(roomId, previewImage);

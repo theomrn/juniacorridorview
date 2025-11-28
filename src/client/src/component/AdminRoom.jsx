@@ -373,8 +373,8 @@ const AdminRoom = () => {
       // formData.append('floor', newRoomData.floor);
 
       formData.append('id_floors', newRoomData.floorId);
-      formData.append('plan_x',Number(newRoomData.plan_x).toFixed(2)).replace('.', ','); 
-      formData.append('plan_y', Number(newRoomData.plan_y).toFixed(2).replace('.', ','));    //}
+      formData.append('plan_x',Number(newRoomData.plan_x).toFixed(2)); 
+      formData.append('plan_y', Number(newRoomData.plan_y).toFixed(2));    //}
     
     // Add preview image to form data
     if (newRoomData.previewImage) {
