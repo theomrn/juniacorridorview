@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { NavLink, useLocation, useHistory } from 'react-router-dom';
-import * as api from '../api/AxiosLogin';
 import '../style/Navbar.css';
 import { FaHome } from "react-icons/fa";
 import { AppContext } from '../App';
@@ -11,21 +10,12 @@ import { RiAdminFill } from "react-icons/ri";
 
 const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
   const { setIsAuthenticated } = useContext(AppContext);
-  const [login, setLogin] = useState(false);
   const location = useLocation();
   const history = useHistory();
   const [routeName, setRouteName] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false); // State to toggle modal visibility
   const [userEmail, setUserEmail] = useState(""); // State to store the user's email
   const modalRef = useRef(null);
-
-  useEffect(() => {
-    const checkLogin = async () => {
-      let val = await api.getLogin();
-      setLogin(val.login);
-    };
-    checkLogin();
-  }, []);
 
   useEffect(() => {
     switch (location.pathname) {
