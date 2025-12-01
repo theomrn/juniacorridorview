@@ -195,11 +195,11 @@ public class ApiController : ControllerBase
     }
 
     [HttpPut("update-room")]
-    public async Task<IActionResult> UpdateRoom([FromForm] int id_rooms, [FromForm] string name, [FromForm] string number, [FromForm] int id_floors, [FromForm] double? plan_x, [FromForm] double? plan_y, IFormFile? previewImage)
+    public async Task<IActionResult> UpdateRoom([FromForm] int id_rooms, [FromForm] string name, [FromForm] string number, [FromForm] int id_floors, [FromForm] string? plan_x, [FromForm] string? plan_y, IFormFile? previewImage)
     {
         try
         {
-            var res = await _db.UpdateRoomAsync(id_rooms, name, number, id_floors, plan_x, plan_y);
+            var res = await _db.UpdateRoomAsync(id_rooms, name, number, id_floors, double.Parse(plan_x.Replace(".",",")), double.Parse(plan_y.Replace(".",",")));
             if (previewImage != null)
             {
                 await _db.InsertRoomPreviewFileAsync(id_rooms, previewImage);

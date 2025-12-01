@@ -134,7 +134,7 @@ const createBuilding = async (buildingData) => {
 
 const updateRoom = async (formData) => {
     try {
-        const response = await axios.post('/api/update-room', formData);
+        const response = await axios.put('/api/update-room', formData);
         const id_rooms = formData.get('id_rooms');
 
         // Create a picture for each uploaded image
