@@ -143,12 +143,36 @@ public class ApiController : ControllerBase
         }
     }
 
+
+    [HttpGet("room-id/{id_pictures}")]
+    public async Task<IActionResult> GetRoomIdByPictureID(int id_pictures)
+    {
+        try
+        {
+            var room = await _db.GetRoomIdByPictureIdAsync(id_pictures);
+            return Ok(room);
+        }catch(Exception ex)
+        {
+            _logger.LogError(ex, "error in GetRoomIdByPictureID");
+            return StatusCode(500, "error in GetRoomIdByPictureID");
+        }
+    }
+
     [HttpGet("room/{id}")]
     public async Task<IActionResult> GetRoom(int id)
     {
-        var room = await _db.GetRoomByIdAsync(id);
-        if (room == null) return NotFound();
-        return Ok(room);
+        try
+        {
+            var room = await _db.GetRoomByIdAsync(id);
+            if (room == null) return NotFound();
+            return Ok(room);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error GetRoom");
+            return StatusCode(500, "Error GetRoom");
+            throw;
+        }
     }
 
     [HttpPost("add-room")]
@@ -245,21 +269,21 @@ public class ApiController : ControllerBase
     [HttpPost("retrieveLinkByIdPicture")]
     public async Task<IActionResult> RetrieveLinkByIdPicture([FromBody] IdDto dto)
     {
-        var res = await _db.RetrieveLinkByIdPictureAsync(dto.Id);
+        var res = await _db.RetrieveLinkByIdPictureAsync(dto.id_pictures);
         return Ok(res);
     }
 
     [HttpPost("insertLink")]
     public async Task<IActionResult> InsertLink([FromBody] InsertLinkDto dto)
     {
-        var res = await _db.InsertLinkAsync(dto.IdPictures, dto.PosX, dto.PosY, dto.PosZ, dto.IdPicturesDestination);
+        var res = await _db.InsertLinkAsync(dto.id_pictures, double.Parse(dto.PosX.Replace(".",",")), double.Parse(dto.PosY.Replace(".",",")), double.Parse(dto.PosZ.Replace(".", ",")), dto.IdPicturesDestination);
         return Ok(new { inserted = res });
     }
 
     [HttpPut("update-link")]
     public async Task<IActionResult> UpdateLink([FromBody] UpdateLinkDto dto)
     {
-        var res = await _db.UpdateLinkAsync(dto.IdLinks, dto.IdPictures, dto.PosX, dto.PosY, dto.PosZ, dto.IdPicturesDestination);
+        var res = await _db.UpdateLinkAsync(dto.IdLinks, dto.IdPictures, double.Parse(dto.PosX.Replace(".", ",")), double.Parse(dto.PosY.Replace(".", ",")), double.Parse(dto.PosZ.Replace(".", ",")), dto.IdPicturesDestination);
         return Ok(new { updated = res });
     }
 
@@ -274,16 +298,16 @@ public class ApiController : ControllerBase
     [HttpPost("retrieveInfoPopUpByIdPicture")]
     public async Task<IActionResult> RetrieveInfoPopUpByIdPicture([FromBody] IdDto dto)
     {
-        var res = await _db.RetrieveInfoPopUpByIdPictureAsync(dto.Id);
+        var res = await _db.RetrieveInfoPopUpByIdPictureAsync(dto.id_pictures);
         return Ok(res);
     }
 
     [HttpPost("insertInfoPopUp")]
     [RequestSizeLimit(50_000_000)]
-    public async Task<IActionResult> InsertInfoPopUp([FromForm] int id_pictures, [FromForm] double posX, [FromForm] double posY, [FromForm] double posZ, [FromForm] string text, [FromForm] string title)
+    public async Task<IActionResult> InsertInfoPopUp([FromForm] int id_pictures, [FromForm] string posX, [FromForm] string posY, [FromForm] string posZ, [FromForm] string text, [FromForm] string title)
     {
         var file = Request.Form.Files.FirstOrDefault();
-        var res = await _db.InsertInfoPopUpAsync(id_pictures, posX, posY, posZ, text, title, file);
+        var res = await _db.InsertInfoPopUpAsync(id_pictures, double.Parse(posX.Replace(".",",")), double.Parse(posY.Replace(".", ",")), double.Parse(posZ.Replace(".", ",")), text, title, file);
         return Ok(new { inserted = res });
     }
 
@@ -428,13 +452,13 @@ public class ApiController : ControllerBase
 }
 
 // DTOs
-public record IdDto(int Id);
+public record IdDto(int id_pictures);
 public record UpdateVisibilityDto(int IdRooms, bool Hidden);
 public record UpdateVisibilityTourDto(int IdTours, bool Hidden);
 public record NameDto(string Name);
 public record UpdateBuildingDto(int IdBuildings, string Name);
-public record InsertLinkDto(int IdPictures, double PosX, double PosY, double PosZ, int IdPicturesDestination);
-public record UpdateLinkDto(int IdLinks, int IdPictures, double PosX, double PosY, double PosZ, int IdPicturesDestination);
+public record InsertLinkDto(int id_pictures, string PosX, string PosY, string PosZ, int IdPicturesDestination);
+public record UpdateLinkDto(int IdLinks, int IdPictures, string PosX, string PosY, string PosZ, int IdPicturesDestination);
 public record UpdateTourStepsDto(int IdTours, IEnumerable<dynamic> Steps, string? Title, string? Description);
 public record AddTourStepDto(int IdTours, dynamic Step);
 public record CreateTourDto(string Title, string Description, IEnumerable<dynamic> Steps);

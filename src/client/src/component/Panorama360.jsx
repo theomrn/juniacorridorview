@@ -242,7 +242,7 @@ const Panorama360 = ({ infoPopups, selectedPicture, links, onLinkClick, onPositi
       popupGroup.add(mesh);
     };
 
-    image.src = URL.createObjectURL(new Blob([new Uint8Array(popup.image.data)], { type: 'image/png' }));
+    image.src = `http://localhost:5078/${popup.image_path}`;
 
     return popupGroup;
   };

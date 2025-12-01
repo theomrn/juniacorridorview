@@ -85,7 +85,7 @@ const getRoomName = async (id_rooms) => {
 const getRoomIdByPictureId = async (id_pictures) => {
   try {
     const response = await axios.get(`/api/room-id/${id_pictures}`);
-    return response.data.id_rooms;
+    return response.data;
   } catch (error) {
     console.error('Error fetching plan ID by picture ID', error);
     return null;
