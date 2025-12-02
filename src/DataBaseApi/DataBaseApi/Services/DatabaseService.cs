@@ -78,15 +78,14 @@ public class DatabaseService
         return await conn.ExecuteAsync(sql, new { Id = id_pictures });
     }
 
-    public async Task<(byte[]?, string?)> FetchImageByIdAsync(int id)
+    public async Task<string?> FetchImageByIdAsync(int id)
     {
         using var conn = CreateConnection();
         var row = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT picture_path FROM Pictures WHERE id_pictures = @Id", new { Id = id });
-        if (row == null) return (null, null);
+        if (row == null) return (null);
         var relativePath = (string)row.picture_path;
-        var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
-        if (!File.Exists(fullPath)) return (null, null);
-        return (await File.ReadAllBytesAsync(fullPath), Path.GetExtension(fullPath));
+        if (relativePath == null) return (null);
+        return row.picture_path;
     }
 
     // Rooms
@@ -159,15 +158,24 @@ public class DatabaseService
         return await conn.ExecuteAsync("DELETE FROM Room_Previews WHERE id_rooms = @Id", new { Id = id_rooms });
     }
 
-    public async Task<(byte[]?, string?)> GetRoomPreviewAsync(int id_rooms)
+    public async Task<string?> GetRoomPreviewAsync(int id_rooms)
     {
+        //using var conn = CreateConnection();
+        //var row = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT preview_path FROM Room_Previews WHERE id_rooms = @Id LIMIT 1", new { Id = id_rooms });
+        //if (row == null) return (null, null);
+        //var rel = (string)row.preview_path;
+        //var full = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", rel.Replace("/", Path.DirectorySeparatorChar.ToString()));
+        //if (!File.Exists(full)) return (null, null);
+        //return (await File.ReadAllBytesAsync(full), Path.GetExtension(full));
+
         using var conn = CreateConnection();
         var row = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT preview_path FROM Room_Previews WHERE id_rooms = @Id LIMIT 1", new { Id = id_rooms });
-        if (row == null) return (null, null);
+        if (row == null) return (null);
         var rel = (string)row.preview_path;
-        var full = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", rel.Replace("/", Path.DirectorySeparatorChar.ToString()));
-        if (!File.Exists(full)) return (null, null);
-        return (await File.ReadAllBytesAsync(full), Path.GetExtension(full));
+        //var full = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", rel.Replace("/", Path.DirectorySeparatorChar.ToString()));
+        //if (!File.Exists(full)) return (null);
+        return rel;
+        //return (await File.ReadAllBytesAsync(full), Path.GetExtension(full));
     }
 
     // Links

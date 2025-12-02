@@ -56,7 +56,7 @@ const getLinks = async (imageId) => {
 
 export const getImage = async (id, retries = 3, delay = 1000) => {
   try {
-    const response = await axios.get(`/api/fetch/${id}`, { responseType: 'blob' });
+    const response = await axios.get(`/api/fetch/${id}`);
     return response.data;
   } catch (error) {
     if (error.code === 'ECONNABORTED') {
@@ -135,7 +135,6 @@ const getFirstPictureByRoomId = async (id_rooms) => {
 const getRoomPreview = async (id_rooms) => {
   try {
     const response = await axios.get(`/api/room-preview/${id_rooms}`, { 
-      responseType: 'blob',
       validateStatus: status => {
         // Consider both 200 and 404 as valid responses
         return status === 200 || status === 404;
@@ -144,11 +143,10 @@ const getRoomPreview = async (id_rooms) => {
     
     // If we got a successful response with image data
     if (response.status === 200) { 
-      const imageUrl = URL.createObjectURL(response.data);
+      // const imageUrl = URL.createObjectURL(response.data);
+      const imageUrl = `http://localhost:5078/${response.data}`;
       return imageUrl;
     }
-    
-    // If we got a 404, return null (no preview image available)
     return null;
   } catch (error) {
     // Only log errors that aren't 404s

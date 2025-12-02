@@ -27,7 +27,7 @@ const getPicturesByRoomId = async (id_rooms) => {
 const getImage = async (id) => {
   try {
     const response = await axios.get(`/api/fetch/${id}`, { responseType: 'blob' });
-    const imageUrl = URL.createObjectURL(response.data);
+    const imageUrl = `http://localhost:5078/${response.data}`;
     return imageUrl;
   } catch (error) {
     console.error('Error fetching image:', error);
@@ -85,11 +85,10 @@ const createRoom = async (formData) => {
   try {
     const response = await axios.post('/api/add-room', formData);
     const id_rooms = response.data.id_rooms;
-
-    console.log('Created room with ID:', id_rooms);
     
     
     const imageUploadPromises = formData.getAll('images').map((image) => {
+      console.log(image);
       const imageFormData = new FormData();
       imageFormData.append('id_rooms', id_rooms);
       imageFormData.append('pic', image);
@@ -190,7 +189,6 @@ const updateRoomVisibility = async (id_rooms, hidden) => {
 const getRoomPreview = async (id_rooms) => {
   try {
     const response = await axios.get(`/api/room-preview/${id_rooms}`, { 
-      responseType: 'blob',
       validateStatus: status => {
         // Consider both 200 and 404 as valid responses
         return status === 200 || status === 404;
@@ -199,7 +197,7 @@ const getRoomPreview = async (id_rooms) => {
     
     // If we got a successful response with image data
     if (response.status === 200) { 
-      const imageUrl = URL.createObjectURL(response.data);
+      const imageUrl = `http://localhost:5078/${response.data}`;
       return imageUrl;
     }
     

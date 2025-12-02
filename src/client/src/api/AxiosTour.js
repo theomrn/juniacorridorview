@@ -112,7 +112,7 @@ const getFirstPictureByRoomId = async (id_rooms) => {
 const getImage = async (id) => {
   try {
     const response = await axios.get(`/api/fetch/${id}`, { responseType: 'blob' });
-    const imageUrl = URL.createObjectURL(response.data);
+    const imageUrl = `http://localhost:5078/${response.data}`;
     return imageUrl;
   } catch (error) {
     console.error('Error fetching image:', error);
@@ -141,7 +141,7 @@ const getRoomPreview = async (id_rooms) => {
     
     // If we got a successful response with image data
     if (response.status === 200) {
-      const imageUrl = URL.createObjectURL(response.data);
+      const imageUrl = `http://localhost:5078/${response.data}`;
       return imageUrl;
     }
     

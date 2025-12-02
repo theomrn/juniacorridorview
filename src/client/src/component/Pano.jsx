@@ -89,7 +89,6 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
         try {
           // Try to get plan preview first
           const previewUrl = await api.getRoomPreview(room.id_rooms);
-          
           if (previewUrl) {
             // If we got a preview, use it and flag it as a preview
             return { id_rooms: room.id_rooms, imageUrl: previewUrl, isPreview: true };
@@ -99,8 +98,7 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
           const pictures = await api.getPicturesByRoomId(room.id_rooms);
           const images = pictures.length > 0 ? 
             await api.getImage(pictures[0].id_pictures) : null;
-            
-          return { id_rooms: room.id_rooms, imageUrl: images, isPreview: false };
+                      return { id_rooms: room.id_rooms, imageUrl: images, isPreview: false };
         } catch (error) {
           console.error(`Error fetching preview for room ${room.id_rooms}:`, error);
           return { id_rooms: room.id_rooms, imageUrl: null, isPreview: false };
@@ -111,17 +109,12 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
       
       // Set plan previews
       const roomPreviewsObj = {};
-      
       roomPreviewsData.forEach(preview => {
         if (preview.isPreview) {
           // If it's a true preview, use it directly
           roomPreviewsObj[preview.id_rooms] = preview.imageUrl;
-        } else if (preview.imageUrl) {
-          // If it's a blob from panorama image, create a URL
-          roomPreviewsObj[preview.id_rooms] = URL.createObjectURL(preview.imageUrl);
         }
       });
-      
       setRoomPreviews(roomPreviewsObj);
       
       // Set preview flags
@@ -137,24 +130,29 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
         const pictures = await api.getPicturesByRoomId(room.id_rooms);
         const images = await Promise.all(
           pictures.map(async picture => {
-            const imageBlob = await api.getImage(picture.id_pictures);
-            return { id: picture.id_pictures, imageBlob };
+            const imagePath = await api.getImage(picture.id_pictures);
+            const imageUrl = `http://localhost:5078/${imagePath}`;
+            return { id: picture.id_pictures, imageUrl };
           })
         );
         return { id_rooms: room.id_rooms, images };
       });
       
       const allRoomImagesData = await Promise.all(roomImagesPromises);
-      
+
       // Charger toutes les images des pièces
       const allRoomImages = allRoomImagesData.reduce((acc, preview) => {
         acc[preview.id_rooms] = preview.images;
         return acc;
       }, {});
+
+      console.log("allRoomImages :", allRoomImages);
+
       setAllRoomImages(allRoomImages);
-  
+      
       // Charger les images principales
       const imagesData = allRoomImagesData.flatMap(preview => preview.images);
+      console.log("imagesData :", imagesData);  
       setImages(imagesData);
       isLoading.current = false;
     } catch (error) {
@@ -217,7 +215,7 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
     }
   }
 
-  const displayImage = async (imageBlob, id) => {
+  const displayImage = async (id) => {
     cleanUrlParams();
     if (currentImageId !== id) setCurrentImageId(id);
   
@@ -261,7 +259,7 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
       const pictures = roomImages;
       if (pictures.length > 0) {
         const firstImage = pictures[0];
-        displayImage(firstImage.imageBlob, firstImage.id);
+        displayImage(firstImage.id);
       }
     }
     setCurrentRoomNumber(id_rooms); // This sets the room id, but currentRoomNumber is the room number string. You may want to update this logic.
@@ -271,7 +269,7 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
     setLoadingImageBeforeRoomSwitch(true);
     const image = images.find(img => img.id === id_pictures_destination);
     if (image) {
-      displayImage(image.imageBlob, image.id);
+      displayImage(image.id);
     }
   };
 
@@ -280,7 +278,7 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
       if (loadingImage.current) return;
       loadingImage.current = true;
       const firstImage = images[0];
-      displayImage(firstImage.imageBlob, firstImage.id);
+      displayImage(firstImage.id);
       // setSelectedImageName(currentRoomName || ''); // Remove this line
       firstLoad.current = false;
     }
@@ -338,8 +336,7 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
           
             <Panorama360 
                 infoPopups={infoPopups[currentImageId] || []} 
-                selectedPicture={images.find(image => image.id === currentImageId)?.imageBlob ? 
-                  URL.createObjectURL(images.find(image => image.id === currentImageId).imageBlob) : null} 
+                selectedPicture={images.find(image => image.id === currentImageId) || null} 
                 links={links[currentImageId] || []}
                 onLinkClick={handleLinkClick}
                 isLoading={(isLoading.current || firstLoad.current || loadingImageBeforeRoomSwitch) }

@@ -322,7 +322,7 @@ const Panorama360 = ({ infoPopups, selectedPicture, links, onLinkClick, onPositi
     const geometry = new THREE.SphereGeometry(500, 32, 16);
     geometry.scale(-1, 1, 1);
     const textureLoader = new THREE.TextureLoader();
-    const texture = textureLoader.load(selectedPicture);
+    const texture = textureLoader.load(selectedPicture.imageUrl);
     texture.colorSpace = THREE.SRGBColorSpace;
     const material = new THREE.MeshBasicMaterial({ 
       map: texture
@@ -540,7 +540,7 @@ const Panorama360 = ({ infoPopups, selectedPicture, links, onLinkClick, onPositi
             maxHeight: "15vh",
             maxWidth: "15vw"
           }}>
-            <PlanImage image={floor.plan} altText={"plan"} pinX={floor.plan_x} pinY={floor.plan_y} />
+            <PlanImage image={floor.plan_path} altText={"plan"} pinX={floor.plan_x} pinY={floor.plan_y} />
           </div>
       )}
       {/*<img

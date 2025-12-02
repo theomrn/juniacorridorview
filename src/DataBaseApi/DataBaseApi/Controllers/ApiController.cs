@@ -115,16 +115,9 @@ public class ApiController : ControllerBase
     [HttpGet("fetch/{id}")]
     public async Task<IActionResult> FetchImage(int id)
     {
-        var (data, ext) = await _db.FetchImageByIdAsync(id);
+        string data = await _db.FetchImageByIdAsync(id);
         if (data == null) return NotFound();
-        var contentType = ext switch
-        {
-            ".png" => "image/png",
-            ".jpg" or ".jpeg" => "image/jpeg",
-            ".gif" => "image/gif",
-            _ => "application/octet-stream"
-        };
-        return File(data, contentType);
+        return Ok(data);
     }
 
     // Rooms CRUD
@@ -247,15 +240,16 @@ public class ApiController : ControllerBase
     [HttpGet("room-preview/{id}")]
     public async Task<IActionResult> RoomPreview(int id)
     {
-        var (data, ext) = await _db.GetRoomPreviewAsync(id);
-        if (data == null) return NotFound();
-        var contentType = ext switch
-        {
-            ".png" => "image/png",
-            ".jpg" or ".jpeg" => "image/jpeg",
-            _ => "application/octet-stream"
-        };
-        return File(data, contentType);
+        var fullUrl = await _db.GetRoomPreviewAsync(id);
+        if (fullUrl == null) return NotFound();
+        return Ok(fullUrl);
+        //var contentType = ext switch
+        //{
+        //    ".png" => "image/png",
+        //    ".jpg" or ".jpeg" => "image/jpeg",
+        //    _ => "application/octet-stream"
+        //};
+        //return File(data, contentType);
     }
 
     [HttpDelete("room-preview/{id}")]
