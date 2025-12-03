@@ -26,7 +26,7 @@ const getPicturesByRoomId = async (id_rooms) => {
 
 const getImage = async (id) => {
   try {
-    const response = await axios.get(`/api/fetch/${id}`, { responseType: 'blob' });
+    const response = await axios.get(`/api/fetch/${id}`);
     const imageUrl = `http://localhost:5078/${response.data}`;
     return imageUrl;
   } catch (error) {

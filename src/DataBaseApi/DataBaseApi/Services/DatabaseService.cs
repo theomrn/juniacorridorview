@@ -31,6 +31,20 @@ public class DatabaseService
         return relPath; // path relative to wwwroot
     }
 
+    private void TryDeleteFile(string relativePath)
+    {
+        if (string.IsNullOrEmpty(relativePath)) return;
+        var full = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+        try
+        {
+            if (File.Exists(full)) File.Delete(full);
+        }
+        catch
+        {
+            // log if needed, ignore deletion errors to avoid throwing
+        }
+    }
+
     public async Task<IEnumerable<string>> GetTablesAsync()
     {
         using var conn = CreateConnection();
@@ -58,6 +72,12 @@ public class DatabaseService
     {
         var relPath = await SaveFileAsync(file, "images");
         using var conn = CreateConnection();
+        // delete old file if exists
+        var old = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT picture_path FROM Pictures WHERE id_pictures = @Id", new { Id = id_pictures });
+        if (old != null && old.picture_path != null)
+        {
+            TryDeleteFile((string)old.picture_path);
+        }
         var sql = "UPDATE Pictures SET picture_path = @Path WHERE id_pictures = @Id";
         var res = await conn.ExecuteAsync(sql, new { Path = relPath, Id = id_pictures });
         return res;
@@ -66,13 +86,11 @@ public class DatabaseService
     public async Task<int> DeleteImageAsync(int id_pictures)
     {
         using var conn = CreateConnection();
-        // Optionally fetch path to delete file
+        // fetch path to delete file
         var row = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT picture_path FROM Pictures WHERE id_pictures = @Id", new { Id = id_pictures });
-        if (row != null)
+        if (row != null && row.picture_path != null)
         {
-            var rel = (string)row.picture_path;
-            var full = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", rel.Replace("/", Path.DirectorySeparatorChar.ToString()));
-            try { if (File.Exists(full)) File.Delete(full); } catch { }
+            TryDeleteFile((string)row.picture_path);
         }
         var sql = "DELETE FROM Pictures WHERE id_pictures = @Id";
         return await conn.ExecuteAsync(sql, new { Id = id_pictures });
@@ -92,14 +110,19 @@ public class DatabaseService
     public async Task<IEnumerable<dynamic>> GetRoomsAsync()
     {
         using var conn = CreateConnection();
-        var rows = await conn.QueryAsync("SELECT * FROM Rooms ORDER BY name ASC");
-        return rows;
+        return await conn.QueryAsync("SELECT * FROM Rooms ORDER BY name ASC");
     }
 
     public async Task<dynamic?> GetRoomByIdAsync(int id_rooms)
     {
         using var conn = CreateConnection();
         return await conn.QueryFirstOrDefaultAsync("SELECT * FROM Rooms WHERE id_rooms = @Id", new { Id = id_rooms });
+    }
+
+    public async Task<dynamic?> GetRoomIdByIdFloorAsync(int id_floors)
+    {
+        using var conn = CreateConnection();
+        return await conn.QueryFirstOrDefaultAsync("SELECT id_rooms FROM Rooms WHERE id_floors = @Id", new { Id = id_floors });
     }
 
     public async Task<int> AddRoomAsync(string name, string number, int id_floors, double? plan_x, double? plan_y)
@@ -120,6 +143,35 @@ public class DatabaseService
     public async Task<int> DeleteRoomAsync(int id_rooms)
     {
         using var conn = CreateConnection();
+
+        // delete pictures files and records
+        var pictures = await conn.QueryAsync<dynamic>("SELECT id_pictures, picture_path FROM Pictures WHERE id_rooms = @Id", new { Id = id_rooms });
+        foreach (var p in pictures)
+        {
+            if (p.picture_path != null)
+            {
+                TryDeleteFile((string)p.picture_path);
+            }
+        }
+        await conn.ExecuteAsync("DELETE FROM Pictures WHERE id_rooms = @Id", new { Id = id_rooms });
+
+        // delete room preview file and record
+        var preview = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT preview_path FROM Room_Previews WHERE id_rooms = @Id", new { Id = id_rooms });
+        if (preview != null && preview.preview_path != null)
+        {
+            TryDeleteFile((string)preview.preview_path);
+            await conn.ExecuteAsync("DELETE FROM Room_Previews WHERE id_rooms = @Id", new { Id = id_rooms });
+        }
+
+        // delete infospots images related to pictures in this room
+        var infospots = await conn.QueryAsync<dynamic>("SELECT image_path FROM Info_Popup WHERE id_pictures IN (SELECT id_pictures FROM Pictures WHERE id_rooms = @Id)", new { Id = id_rooms });
+        foreach (var ip in infospots)
+        {
+            if (ip.image_path != null) TryDeleteFile((string)ip.image_path);
+        }
+        await conn.ExecuteAsync("DELETE FROM Info_Popup WHERE id_pictures IN (SELECT id_pictures FROM Pictures WHERE id_rooms = @Id)", new { Id = id_rooms });
+
+        // finally delete room
         return await conn.ExecuteAsync("DELETE FROM Rooms WHERE id_rooms = @Id", new { Id = id_rooms });
     }
 
@@ -137,6 +189,9 @@ public class DatabaseService
         var exists = await conn.QueryFirstOrDefaultAsync<int?>("SELECT COUNT(1) FROM Room_Previews WHERE id_rooms = @Id", new { Id = id_rooms });
         if (exists.GetValueOrDefault() > 0)
         {
+            // delete old file
+            var old = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT preview_path FROM Room_Previews WHERE id_rooms = @Id", new { Id = id_rooms });
+            if (old != null && old.preview_path != null) TryDeleteFile((string)old.preview_path);
             return await conn.ExecuteAsync("UPDATE Room_Previews SET preview_path = @Path WHERE id_rooms = @Id", new { Path = relPath, Id = id_rooms });
         }
         else
@@ -149,25 +204,16 @@ public class DatabaseService
     {
         using var conn = CreateConnection();
         var row = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT preview_path FROM Room_Previews WHERE id_rooms = @Id", new { Id = id_rooms });
-        if (row != null)
+        if (row != null && row.preview_path != null)
         {
-            var rel = (string)row.preview_path;
-            var full = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", rel.Replace("/", Path.DirectorySeparatorChar.ToString()));
-            try { if (File.Exists(full)) File.Delete(full); } catch { }
+            TryDeleteFile((string)row.preview_path);
         }
-        return await conn.ExecuteAsync("DELETE FROM Room_Previews WHERE id_rooms = @Id", new { Id = id_rooms });
+        var sql = "DELETE FROM Room_Previews WHERE id_rooms = @Id";
+        return await conn.ExecuteAsync(sql, new { Id = id_rooms });
     }
 
     public async Task<string?> GetRoomPreviewAsync(int id_rooms)
     {
-        //using var conn = CreateConnection();
-        //var row = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT preview_path FROM Room_Previews WHERE id_rooms = @Id LIMIT 1", new { Id = id_rooms });
-        //if (row == null) return (null, null);
-        //var rel = (string)row.preview_path;
-        //var full = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", rel.Replace("/", Path.DirectorySeparatorChar.ToString()));
-        //if (!File.Exists(full)) return (null, null);
-        //return (await File.ReadAllBytesAsync(full), Path.GetExtension(full));
-
         using var conn = CreateConnection();
         var row = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT preview_path FROM Room_Previews WHERE id_rooms = @Id LIMIT 1", new { Id = id_rooms });
         if (row == null) return (null);
@@ -237,9 +283,49 @@ public class DatabaseService
         }
     }
 
+    public void DeletePlansFiles(List<string> listFloorsPath)
+    {
+        try
+        {
+            foreach (string path in listFloorsPath)
+            {
+                TryDeleteFile(path);
+            }
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    public async Task<List<string>> GetPlansToDelete(int idBuilding)
+    {
+        List<string> listFloorsPath = new List<string>();
+
+        try
+        {
+            listFloorsPath = await GetPlanPathByIdBuildingAsync(idBuilding);
+            foreach (string path in listFloorsPath)
+            {
+                listFloorsPath.Add(path);
+            }
+            return listFloorsPath;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
     public async Task<int> DeleteInfoPopUpAsync(int id_info_popup)
     {
         using var conn = CreateConnection();
+        // delete associated image file if present
+        var row = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT image_path FROM Info_Popup WHERE id_info_popup = @Id", new { Id = id_info_popup });
+        if (row != null && row.image_path != null)
+        {
+            TryDeleteFile((string)row.image_path);
+        }
         return await conn.ExecuteAsync("DELETE FROM Info_Popup WHERE id_info_popup = @Id", new { Id = id_info_popup });
     }
 
@@ -370,6 +456,18 @@ public class DatabaseService
         return await conn.QueryFirstOrDefaultAsync("SELECT * FROM Floors WHERE id_floors = @Id", new { Id = id_floors });
     }
 
+    public async Task<dynamic?> GetFloorIdByIdBuildingAsync(int id_buildings)
+    {
+        using var conn = CreateConnection();
+        return await conn.QueryFirstOrDefaultAsync("SELECT id_floors FROM Floors WHERE id_buildings = @Id", new { Id = id_buildings });
+    }
+
+    public async Task<dynamic?> GetPlanPathByIdBuildingAsync(int id_building)
+    {
+        using var conn = CreateConnection();
+        return await conn.QueryFirstOrDefaultAsync("SELECT plan_path FROM Floors WHERE id_buildings = @Id", new { Id = id_building });
+    }
+
     public async Task<int> AddFloorAsync(string name, int id_buildings, IFormFile? planFile)
     {
         string? path = null;
@@ -385,6 +483,9 @@ public class DatabaseService
         if (planFile != null)
         {
             var path = await SaveFileAsync(planFile, "previews");
+            // delete old plan file if present
+            var old = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT plan_path FROM Floors WHERE id_floors = @Id", new { Id = id_floors });
+            if (old != null && old.plan_path != null) TryDeleteFile((string)old.plan_path);
             return await conn.ExecuteAsync("UPDATE Floors SET name = @Name, id_buildings = @Building, plan_path = @Plan WHERE id_floors = @Id", new { Name = name, Building = id_buildings, Plan = path, Id = id_floors });
         }
         else
@@ -396,6 +497,11 @@ public class DatabaseService
     public async Task<int> DeleteFloorAsync(int id_floors)
     {
         using var conn = CreateConnection();
+        var row = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT plan_path FROM Floors WHERE id_floors = @Id", new { Id = id_floors });
+        if (row != null && row.plan_path != null)
+        {
+            TryDeleteFile((string)row.plan_path);
+        }
         return await conn.ExecuteAsync("DELETE FROM Floors WHERE id_floors = @Id", new { Id = id_floors });
     }
 }

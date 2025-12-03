@@ -1,6 +1,6 @@
 using DataBaseApi.Services;
 using Microsoft.AspNetCore.Mvc;
-
+using System.Linq;
 namespace DataBaseApi.Controllers;
 
 [ApiController]
@@ -211,6 +211,8 @@ public class ApiController : ControllerBase
     {
         try
         {
+            var listPicturesToDelete = await _db.GetPicturesByRoomIdAsync(id);
+
             var res = await _db.DeleteRoomAsync(id);
             return Ok(new { deleted = res });
         }
@@ -321,6 +323,14 @@ public class ApiController : ControllerBase
         return Ok(new { deleted = res });
     }
 
+    [HttpGet("GetPlansToDelete/{id}")]
+    public async Task<IActionResult> GetPlansToDelete(int id)
+    {
+        var res = await _db.GetPlansToDelete(id);
+
+        return Ok(res);
+    }
+
     // Tours
     [HttpGet("tours")]
     public async Task<IActionResult> GetTours()
@@ -389,6 +399,22 @@ public class ApiController : ControllerBase
     [HttpDelete("building/{id}")]
     public async Task<IActionResult> DeleteBuilding(int id)
     {
+        var listIdFloors = await _db.GetFloorIdByIdBuildingAsync(id);
+
+        foreach (var idFloor in listIdFloors)
+        {
+            var listIdRooms = await _db.GetRoomIdByIdFloorAsync(idFloor.Value);
+         
+            foreach (var idRoom in listIdRooms)
+            {
+                var listIdPictures = await _db.GetPicturesByRoomIdAsync(idRoom.Value);
+                await _db.DeleteRoomAsync(idRoom.Value);
+            }
+
+
+            await _db.DeleteFloorAsync(idFloor.Value);
+        }
+
         await _db.DeleteBuildingAsync(id);
         return Ok();
     }
