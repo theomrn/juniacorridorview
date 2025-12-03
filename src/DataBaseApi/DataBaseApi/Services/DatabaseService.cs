@@ -1,5 +1,6 @@
 using System.Data;
 using Dapper;
+using DataBaseApi.Controllers;
 using MySqlConnector;
 
 namespace DataBaseApi.Services;
@@ -369,19 +370,36 @@ public class DatabaseService
         return await conn.ExecuteAsync(sql, new { IdStep = id, IdTour = id_tours, IdRoom = step.id_rooms, Num = step.step_number });
     }
 
-    public async Task<int> CreateTourWithStepsAsync(string title, string description, IEnumerable<dynamic> steps)
+    public async Task<int> CreateTourWithStepsAsync(
+        string title,
+        string description,
+        IEnumerable<StepDto> steps)
     {
         using var conn = CreateConnection();
+
         var sql = "INSERT INTO Tours (title, description) VALUES (@Title, @Desc); SELECT LAST_INSERT_ID();";
         var tourId = await conn.ExecuteScalarAsync<int>(sql, new { Title = title, Desc = description });
-        var insertStepSql = "INSERT INTO Tour_Steps (id_tour_steps, id_tours, id_rooms, step_number) VALUES (@IdStep, @IdTour, @IdRoom, @Num)";
+
+        var insertStepSql =
+            "INSERT INTO Tour_Steps (id_tours, id_rooms, step_number)" +
+            " VALUES (@IdTour, @IdRoom, @Num)";
+
         foreach (var s in steps)
         {
-            var idStep = Guid.NewGuid().ToString();
-            await conn.ExecuteAsync(insertStepSql, new { IdStep = idStep, IdTour = tourId, IdRoom = s.id_rooms, Num = s.step_number });
+            //var idStep = Guid.NewGuid().ToString();
+
+            await conn.ExecuteAsync(insertStepSql, new
+            {
+                //IdStep = idStep,
+                IdTour = tourId,
+                IdRoom = s.id_rooms,
+                Num = s.step_number
+            });
         }
+
         return tourId;
     }
+
 
     public async Task<int> DeleteTourAsync(int id_tours)
     {

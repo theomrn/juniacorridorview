@@ -226,6 +226,8 @@ const AdminTour = () => {
       const allPanoramaUrls = await fetchPanoramaUrls(allSteps);
     
       // Batch state updates
+      console.log("tourData :",toursData);
+      console.log("steps :",steps);
       setTours(toursData);
       setTourSteps(steps);
       setRooms(roomsData);
@@ -465,6 +467,9 @@ const AdminTour = () => {
     
     // Create images array with placeholders for missing images
     const images = tourSteps[tourId].map(step => { 
+      // console.log('Getting panorama for step:', step);
+      console.log('Panorama URL:', panoramaUrls[step.id_rooms]);
+
       return { 
         src: panoramaUrls[step.id_rooms] || 'https://via.placeholder.com/800x600?text=No+Image+Available', 
         alt: `Panorama of ${step.room_name}`, 

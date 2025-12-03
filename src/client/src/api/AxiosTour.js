@@ -132,7 +132,6 @@ const getRooms = async () => {
 const getRoomPreview = async (id_rooms) => {
   try {
     const response = await axios.get(`/api/room-preview/${id_rooms}`, { 
-      responseType: 'blob',
       validateStatus: status => {
         // Consider both 200 and 404 as valid responses
         return status === 200 || status === 404;

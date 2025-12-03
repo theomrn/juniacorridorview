@@ -93,9 +93,8 @@ const AdminRoomDetails = () => {
       setPictures(picturesWithUrls);
       if (picturesWithUrls.length > 0) {
         const firstPicture = picturesWithUrls[0];
-        setSelectedPicture(firstPicture.imageUrl);
-        
-        handlePictureClick(firstPicture.imageUrl, firstPicture.id_pictures);
+        setSelectedPicture(firstPicture);
+        handlePictureClick(firstPicture, firstPicture.id_pictures);
       }
       const allInfoPopups = await Promise.all(
         picturesData.map(async (pic) => await api.getInfoPopup(pic.id_pictures))
@@ -123,7 +122,7 @@ const AdminRoomDetails = () => {
     }
   }, [id]);
 
-  const handlePictureClick = async (imageUrl, pictureId) => {
+  const handlePictureClick = async (picture, pictureId) => {
     setIsLoading(true);
     const getInfoPopupPromise = getInfoPopup(pictureId);
     const getLinksPromise = getLinks(pictureId);
@@ -131,7 +130,7 @@ const AdminRoomDetails = () => {
       showLoading([getInfoPopupPromise, getLinksPromise], 'Chargement des détails de la pièce...', 'Chargement des détails réussi', 'Erreur lors du chargement des détails');
     }
     Promise.all([getInfoPopupPromise,getLinksPromise]).then(() => {
-    setSelectedPicture(imageUrl);
+    setSelectedPicture(picture);
     setSelectedPictureId(pictureId);
     setIsLoading(false);
     });
@@ -150,8 +149,8 @@ const AdminRoomDetails = () => {
   }
 
   const handleLinkClick = async (pictureId) => {
-    const imageUrl = pictures.find(pic => pic.id_pictures === pictureId).imageUrl;
-    handlePictureClick(imageUrl, pictureId);
+    const picture = pictures.find(pic => pic.id_pictures === pictureId);
+    handlePictureClick(picture, pictureId);
   };
 
   const filteredInfoPopups = infoPopups.filter(popup =>
@@ -234,6 +233,7 @@ const AdminRoomDetails = () => {
     if (pictures.length > 0) {
       const firstPicture = pictures[0];
       setIsLoadingModal(true);
+
       setModalSelectedPicture(selectedPicture);
       setSelectedImageId(selectedPictureId);
 
@@ -535,7 +535,7 @@ const AdminRoomDetails = () => {
                   <img
                       src={picture.imageUrl}
                       alt={`Aperçu de ${picture.id_pictures}`}
-                      onClick={() => handlePictureClick(picture.imageUrl, picture.id_pictures)}
+                      onClick={() => handlePictureClick(picture, picture.id_pictures)}
                       className="image-card rounded-lg cursor-pointer shadow hover:shadow-lg transition-shadow duration-300 w-full"
                   />
                   <div className="flex gap-1 absolute" style={{ bottom: '5px', right: '5px' }}>
