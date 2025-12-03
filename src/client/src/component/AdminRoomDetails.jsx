@@ -273,8 +273,7 @@ const AdminRoomDetails = () => {
     setPosZ(null);
 
     if (pictures.length > 0) {
-      const firstPicture = pictures[0];
-      setIsLoadingModal(true);
+            setIsLoadingModal(true);
       setModalSelectedPicture(selectedPicture);
       setSelectedImageId(selectedPictureId);
 
@@ -368,8 +367,8 @@ const AdminRoomDetails = () => {
     setPosX(popup.position_x);
     setPosY(popup.position_y);
     setPosZ(popup.position_z);
-    const imageUrl = pictures.find(pic => pic.id_pictures === popup.id_pictures).imageUrl;
-    handleModalPictureClick(imageUrl, popup.id_pictures);
+    const image = pictures.find(pic => pic.id_pictures === popup.id_pictures);
+    handleModalPictureClick(image, popup.id_pictures);
     setNewInfospotModalOpen(true);
   }
 
@@ -626,9 +625,9 @@ const AdminRoomDetails = () => {
                   <span className="text-junia-orange">{popup.id_pictures}</span>
                 </div>
                 <div className="flex justify-center ">
-                  {popup.image && (
+                  {popup.image_path && (
                     <div className="max-h-30">
-                      <img src={`data:image/jpeg;base64,${Buffer.from(popup.image).toString('base64')}`} alt={`Aperçu de ${popup.title}`}/>
+                      <img src={`http://localhost:5078/${popup.image_path}`} alt={`Aperçu de ${popup.title}`}/>
                     </div>
                   )}
                 </div>
