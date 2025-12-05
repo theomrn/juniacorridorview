@@ -16,3 +16,4 @@ src/DataBaseApi/DataBaseApi/wwwroot/images/*
 src/DataBaseApi/DataBaseApi/wwwroot/previews/*
 /src/DataBaseApi/DataBaseApi/DataBaseApi.csproj.user
 /src/DataBaseApi/appsettings.json
+.vs/*

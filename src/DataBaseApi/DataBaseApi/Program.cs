@@ -27,6 +27,15 @@ builder.Services.AddResponseCompression(options =>
     options.EnableForHttps = true;
     options.Providers.Add<GzipCompressionProvider>();
     options.Providers.Add<BrotliCompressionProvider>();
+    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
+ {
+        "image/svg+xml",
+        "image/avif", // Ajout du support pour les images AVIF
+        "image/png",
+        "application/javascript",
+        "text/css",
+        "application/octet-stream", // Pour les polices web ou autres binaires
+    });
 });
 
 builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
