@@ -469,6 +469,23 @@ public class ApiController : ControllerBase
 
     [HttpGet("ping")]
     public IActionResult Ping() => Ok("pong");
+
+
+    [HttpPost("file-converter")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> ConvertFile([FromForm] FileDto fileRequest)
+    {
+        if (fileRequest.file == null || fileRequest.file.Length == 0)
+            return BadRequest("No file uploaded");
+
+        var result = await FileOptimiserService.ConvertFileToAvifAsync(fileRequest.file);
+
+        return File(
+            result,
+            "image/avif",
+            Path.ChangeExtension(fileRequest.file.FileName, ".avif")
+        );
+    }
 }
 
 // DTOs
@@ -490,5 +507,7 @@ public class StepDto
     public int id_rooms { get; set; }
     public int step_number { get; set; }
 }
+
+public class FileDto { public IFormFile file { get; set; } }
 
 
