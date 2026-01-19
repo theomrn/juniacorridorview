@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState, useCallback} from "react";
 import { useHistory } from "react-router-dom";
 import * as api from '../api/AxiosTour';
+import { useTranslation } from 'react-i18next';
 import '../style/Tour.css';
 import { Buffer } from 'buffer';
 import Carousel from '../reactbits/Components/Carousel/Carousel'
@@ -10,6 +11,7 @@ import Masonry from 'react-masonry-css';
 
 const TourViewer = () => {
   Buffer.from = Buffer.from || require('buffer').Buffer;
+  const { t } = useTranslation('tour');
   const [tours, setTours] = useState([]);
   const [tourSteps, setTourSteps] = useState({});
   const [rooms, setRooms] = useState({});
@@ -20,7 +22,7 @@ const TourViewer = () => {
   const history = useHistory();
 
   const [isLoading, setIsLoading] = useState(true);
-  const [textLoading, setTextLoading] = useState("Chargement des données...");
+  const [textLoading, setTextLoading] = useState(t('loading'));
 
   // Define breakpoints for Masonry layout
   const breakpointColumnsObj = {

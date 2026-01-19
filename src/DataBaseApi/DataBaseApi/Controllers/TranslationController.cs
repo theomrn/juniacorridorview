@@ -55,4 +55,13 @@ public class TranslationController : ControllerBase
         await _db.DeleteTranslationAsync(id);
         return Ok();
     }
+    [HttpGet]
+    public async Task<ActionResult<List<int>>> GetLanguagesId()
+    {
+        var res = await _db.GetLanguagesIdAsync();
+
+        var ids = res.Select(x => x.id_language).ToList();
+
+        return Ok(ids);
+    }
 }
