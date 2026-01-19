@@ -578,4 +578,30 @@ public class DatabaseService
         using var conn = CreateConnection();
         return await conn.ExecuteAsync("UPDATE Languages SET name_language = @Name WHERE id_language = @Id", new { Name = name_language, Id = id_language });
     }
+
+    // Visitor Types
+    public async Task<int> InsertVisitorTypeAsync(string name_visitor_type)
+    {
+        using var conn = CreateConnection();
+        var sql = "INSERT INTO Visitor_Type (name_visitor_type) VALUES (@Name)";
+        return await conn.ExecuteAsync(sql, new { Name = name_visitor_type });
+    }
+
+    public async Task<IEnumerable<dynamic>> GetVisitorTypesAsync()
+    {
+        using var conn = CreateConnection();
+        return await conn.QueryAsync("SELECT * FROM Visitor_Type");
+    }
+
+    public async Task<int> DeleteVisitorTypeAsync(int id_visitor_type)
+    {
+        using var conn = CreateConnection();
+        return await conn.ExecuteAsync("DELETE FROM Visitor_Type WHERE id_visitor_type = @Id", new { Id = id_visitor_type });
+    }
+
+    public async Task<int> UpdateVisitorTypeAsync(int id_visitor_type, string name_visitor_type)
+    {
+        using var conn = CreateConnection();
+        return await conn.ExecuteAsync("UPDATE Visitor_Type SET name_visitor_type = @Name WHERE id_visitor_type = @Id", new { Name = name_visitor_type, Id = id_visitor_type });
+    }
 }

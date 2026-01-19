@@ -10,11 +10,17 @@ public class ApiController : ControllerBase
     private readonly DatabaseService _db;
     private readonly ILogger<ApiController> _logger;
 
+    #region Constructor
+
     public ApiController(DatabaseService db, ILogger<ApiController> logger)
     {
         _db = db;
         _logger = logger;
     }
+
+    #endregion
+
+    #region Tables
 
     [HttpGet("tables")]
     public async Task<IActionResult> GetTables()
@@ -30,6 +36,10 @@ public class ApiController : ControllerBase
             return StatusCode(500, "Error fetching tables");
         }
     }
+
+    #endregion
+
+    #region Pictures
 
     [HttpGet("pictures")]
     public async Task<IActionResult> GetPictures()
@@ -120,7 +130,10 @@ public class ApiController : ControllerBase
         return Ok(data);
     }
 
-    // Rooms CRUD
+    #endregion
+
+    #region Rooms
+
     [HttpGet("rooms")]
     public async Task<IActionResult> GetRooms()
     {
@@ -238,7 +251,10 @@ public class ApiController : ControllerBase
         }
     }
 
-    // Room previews
+    #endregion
+
+    #region Room Previews
+
     [HttpGet("room-preview/{id}")]
     public async Task<IActionResult> RoomPreview(int id)
     {
@@ -261,7 +277,10 @@ public class ApiController : ControllerBase
         return Ok(new { deleted = res });
     }
 
-    // Links
+    #endregion
+
+    #region Links
+
     [HttpPost("retrieveLinkByIdPicture")]
     public async Task<IActionResult> RetrieveLinkByIdPicture([FromBody] IdDto dto)
     {
@@ -290,7 +309,10 @@ public class ApiController : ControllerBase
         return Ok(new { deleted = res });
     }
 
-    // Info popups
+    #endregion
+
+    #region Info PopUps
+
     [HttpPost("retrieveInfoPopUpByIdPicture")]
     public async Task<IActionResult> RetrieveInfoPopUpByIdPicture([FromBody] IdDto dto)
     {
@@ -331,7 +353,10 @@ public class ApiController : ControllerBase
         return Ok(res);
     }
 
-    // Tours
+    #endregion
+
+    #region Tours
+
     [HttpGet("tours")]
     public async Task<IActionResult> GetTours()
     {
@@ -381,7 +406,10 @@ public class ApiController : ControllerBase
         return Ok();
     }
 
-    // Buildings
+    #endregion
+
+    #region Buildings
+
     [HttpGet("buildings")]
     public async Task<IActionResult> GetBuildings()
     {
@@ -426,7 +454,10 @@ public class ApiController : ControllerBase
         return Ok();
     }
 
-    // Floors
+    #endregion
+
+    #region Floors
+
     [HttpGet("floors")]
     public async Task<IActionResult> GetFloors()
     {
@@ -467,6 +498,10 @@ public class ApiController : ControllerBase
         return Ok();
     }
 
+    #endregion
+
+    #region Utility
+
     [HttpGet("ping")]
     public IActionResult Ping() => Ok("pong");
 
@@ -486,6 +521,10 @@ public class ApiController : ControllerBase
             Path.ChangeExtension(fileRequest.file.FileName, ".avif")
         );
     }
+
+    #endregion
+
+    #region Languages
 
     [HttpPost("insert-language")]
     public async Task<IActionResult> InsertLanguage([FromBody] NameDto dto)
@@ -514,10 +553,43 @@ public class ApiController : ControllerBase
         await _db.UpdateLanguageAsync(id, dto.Name);
         return Ok();
     }
+    #endregion
 
+    // Visitor Types
+    #region Visitor Types
+
+    [HttpGet("visitor-types")]
+    public async Task<IActionResult> GetVisitorTypes()
+    {
+        var res = await _db.GetVisitorTypesAsync();
+        return Ok(res);
+    }
+
+    [HttpPost("insert-visitor-type")]
+    public async Task<IActionResult> InsertVisitorType([FromBody] NameDto dto)
+    {
+        var id = await _db.InsertVisitorTypeAsync(dto.Name);
+        return Ok(new { id });
+    }
+
+    [HttpDelete("delete-visitor-type/{id}")]
+    public async Task<IActionResult> DeleteVisitorType(int id)
+    {
+        await _db.DeleteVisitorTypeAsync(id);
+        return Ok();    
+    }
+
+    [HttpPut("update-visitor-type/{id}")]
+    public async Task<IActionResult> UpdateVisitorType(int id, [FromBody] NameDto dto)
+    {
+        await _db.UpdateVisitorTypeAsync(id, dto.Name);
+        return Ok();    
+    }
+
+    #endregion
 }
 
-// DTOs
+#region DTOs
 public record IdDto(int id_pictures);
 public record UpdateVisibilityDto(int IdRooms, bool Hidden);
 public record UpdateVisibilityTourDto(int IdTours, bool Hidden);
@@ -539,4 +611,4 @@ public class StepDto
 
 public class FileDto { public IFormFile file { get; set; } }
 
-
+#endregion
