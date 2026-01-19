@@ -253,34 +253,64 @@ public class DatabaseService
     }
 
     // Info popups
-    public async Task<int> InsertInfoPopUpAsync(int id_pictures, double posX, double posY, double posZ, string text, string title, IFormFile? imageFile)
+    public async Task<int> InsertInfoPopUpAsync(int id_pictures, double posX, double posY, double posZ, IFormFile? imageFile)
     {
         string? path = null;
         if (imageFile != null) path = await SaveFileAsync(imageFile, "images");
         using var conn = CreateConnection();
-        var sql = "INSERT INTO Info_Popup (id_pictures, position_x, position_y, position_z, text, title, image_path) VALUES (@Id, @X, @Y, @Z, @Text, @Title, @Img)";
-        return await conn.ExecuteAsync(sql, new { Id = id_pictures, X = posX, Y = posY, Z = posZ, Text = text, Title = title, Img = path });
+        var sql = "INSERT INTO Info_Popup (id_pictures, position_x, position_y, position_z, image_path) VALUES (@Id, @X, @Y, @Z, @Img)";
+        return await conn.ExecuteAsync(sql, new { Id = id_pictures, X = posX, Y = posY, Z = posZ, Img = path });
+    }
+
+    public async Task<int> InsertInfoPopUpTranslationAsync(int id_info_popup, string text, string title, int id_languages, int id_visitor_type)
+    {
+        using var conn = CreateConnection();
+        var sql = "INSERT INTO Info_popup_translation (id_info_popup, title, text) VALUES (@Id, @Title, @Text)";
+        return await conn.ExecuteAsync(sql, new { Id = id_info_popup, Title = title, Text = text });
     }
 
     public async Task<IEnumerable<dynamic>> RetrieveInfoPopUpByIdPictureAsync(int id_pictures)
     {
         using var conn = CreateConnection();
-        return await conn.QueryAsync("SELECT * FROM Info_Popup WHERE id_pictures = @Id", new { Id = id_pictures });
+
+        var sql = @"
+            SELECT 
+                ip.id_info_popup,
+                ip.id_pictures,
+                ip.position_x,
+                ip.position_y,
+                ip.position_z,
+                ip.image_path,
+                ipt.id_languages,
+                ipt.title,
+                ipt.text,
+                ipt.id_visitor_type
+            FROM Info_Popup ip
+            INNER JOIN Info_popup_translation ipt 
+                ON ip.id_info_popup = ipt.id_info_popup
+            WHERE ip.id_pictures = @Id;
+        ";
+
+        return await conn.QueryAsync(sql, new { Id = id_pictures });
     }
 
-    public async Task<int> UpdateInfospotAsync(int id_info_popup, int id_pictures, double posX, double posY, double posZ, string text, string title, IFormFile? imageFile)
+    public async Task<int> UpdateInfospotAsync(int id_info_popup, int id_pictures, double posX, double posY, double posZ, string text, string title, IFormFile? imageFile, string id_languages, string id_visitor_type)
     {
         using var conn = CreateConnection();
         if (imageFile != null)
         {
             var path = await SaveFileAsync(imageFile, "images");
-            var sql = "UPDATE Info_Popup SET id_pictures = @IdP, position_x = @X, position_y = @Y, position_z = @Z, text = @Text, title = @Title, image_path = @Img WHERE id_info_popup = @Id";
-            return await conn.ExecuteAsync(sql, new { IdP = id_pictures, X = posX, Y = posY, Z = posZ, Text = text, Title = title, Img = path, Id = id_info_popup });
+            var sqlInfoPopup = "UPDATE Info_Popup SET id_pictures = @IdP, position_x = @X, position_y = @Y, position_z = @Z, image_path = @Img WHERE id_info_popup = @Id AND id_languages = @Lang AND id_visitor_type = @Vis";
+            var sqlTranslation = "UPDATE Info_popup_translation SET title = @Title, text = @Text WHERE id_info_popup = @Id";
+            await conn.ExecuteAsync(sqlInfoPopup, new { IdP = id_pictures, X = posX, Y = posY, Z = posZ, Img = path, Id = id_info_popup, Lang = id_languages, Vis = id_visitor_type });
+            return await conn.ExecuteAsync(sqlTranslation, new { Title = title, Text = text, Id = id_info_popup });
         }
         else
         {
-            var sql = "UPDATE Info_Popup SET id_pictures = @IdP, position_x = @X, position_y = @Y, position_z = @Z, text = @Text, title = @Title WHERE id_info_popup = @Id";
-            return await conn.ExecuteAsync(sql, new { IdP = id_pictures, X = posX, Y = posY, Z = posZ, Text = text, Title = title, Id = id_info_popup });
+            var sqlInfoPopup = "UPDATE Info_Popup SET id_pictures = @IdP, position_x = @X, position_y = @Y, position_z = @Z WHERE id_info_popup = @Id";
+            var sqlTranslation = "UPDATE Info_popup_translation SET title = @Title, text = @Text WHERE id_info_popup = @Id";
+            await conn.ExecuteAsync(sqlTranslation, new { Title = title, Text = text, Id = id_info_popup });
+            return await conn.ExecuteAsync(sqlInfoPopup, new { IdP = id_pictures, X = posX, Y = posY, Z = posZ, Id = id_info_popup });
         }
     }
 

@@ -300,19 +300,19 @@ public class ApiController : ControllerBase
 
     [HttpPost("insertInfoPopUp")]
     [RequestSizeLimit(50_000_000)]
-    public async Task<IActionResult> InsertInfoPopUp([FromForm] int id_pictures, [FromForm] string posX, [FromForm] string posY, [FromForm] string posZ, [FromForm] string text, [FromForm] string title)
+    public async Task<IActionResult> InsertInfoPopUp([FromForm] int id_pictures, [FromForm] string posX, [FromForm] string posY, [FromForm] string posZ)
     {
         var file = Request.Form.Files.FirstOrDefault();
-        var res = await _db.InsertInfoPopUpAsync(id_pictures, double.Parse(posX.Replace(".",",")), double.Parse(posY.Replace(".", ",")), double.Parse(posZ.Replace(".", ",")), text, title, file);
+        var res = await _db.InsertInfoPopUpAsync(id_pictures, double.Parse(posX.Replace(".",",")), double.Parse(posY.Replace(".", ",")), double.Parse(posZ.Replace(".", ",")), file);
         return Ok(new { inserted = res });
     }
 
     [HttpPut("update-infospot")]
     [RequestSizeLimit(50_000_000)]
-    public async Task<IActionResult> UpdateInfospot([FromForm] int id_info_popup, [FromForm] int id_pictures, [FromForm] double posX, [FromForm] double posY, [FromForm] double posZ, [FromForm] string text, [FromForm] string title)
+    public async Task<IActionResult> UpdateInfospot([FromForm] int id_info_popup, [FromForm] int id_pictures, [FromForm] double posX, [FromForm] double posY, [FromForm] double posZ, [FromForm] string text, [FromForm] string title, [FromForm] string id_languages, [FromForm] string id_visitor_type)
     {
         var file = Request.Form.Files.FirstOrDefault();
-        var res = await _db.UpdateInfospotAsync(id_info_popup, id_pictures, posX, posY, posZ, text, title, file);
+        var res = await _db.UpdateInfospotAsync(id_info_popup, id_pictures, posX, posY, posZ, text, title, file, id_languages, id_visitor_type);
         return Ok(new { updated = res });
     }
 
