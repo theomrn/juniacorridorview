@@ -1,9 +1,12 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import '../style/Home.css'; // Importing the CSS file
+import { useTranslation } from 'react-i18next';
 import SpotlightCard from '../reactbits/Components/SpotlightCard/SpotlightCard';
 
 const Home = () => {
+
+  const { t } = useTranslation('home');
   return (
     <>
       <section className="bg-junia-lavender body-container">
@@ -11,10 +14,10 @@ const Home = () => {
             <div className="flex flex-row h-full pr-5 gap-30">
               <div className="flex flex-col gap-15 basis-1/3 h-grow justify-center">
                 <NavLink to="/tour?type=guided" className=" flex justify-center items-center bouton-orange text-white h-20vh rounded-r-3xl text-6xl font-bold ">
-                  Visite Guidée
+                  {t('guidedTour')}
                 </NavLink>
                 <NavLink to="/pano?type=free" className="flex justify-center items-center bouton-orange text-white h-20vh rounded-r-3xl text-6xl font-bold">
-                  Visite Libre
+                  {t('freeTour')}
                 </NavLink>
               </div>
 
