@@ -10,11 +10,17 @@ public class ApiController : ControllerBase
     private readonly DatabaseService _db;
     private readonly ILogger<ApiController> _logger;
 
+    #region Constructor
+
     public ApiController(DatabaseService db, ILogger<ApiController> logger)
     {
         _db = db;
         _logger = logger;
     }
+
+    #endregion
+
+    #region Tables
 
     [HttpGet("tables")]
     public async Task<IActionResult> GetTables()
@@ -30,6 +36,10 @@ public class ApiController : ControllerBase
             return StatusCode(500, "Error fetching tables");
         }
     }
+
+    #endregion
+
+    #region Pictures
 
     [HttpGet("pictures")]
     public async Task<IActionResult> GetPictures()
@@ -120,7 +130,10 @@ public class ApiController : ControllerBase
         return Ok(data);
     }
 
-    // Rooms CRUD
+    #endregion
+
+    #region Rooms
+
     [HttpGet("rooms")]
     public async Task<IActionResult> GetRooms()
     {
@@ -238,7 +251,10 @@ public class ApiController : ControllerBase
         }
     }
 
-    // Room previews
+    #endregion
+
+    #region Room Previews
+
     [HttpGet("room-preview/{id}")]
     public async Task<IActionResult> RoomPreview(int id)
     {
@@ -261,7 +277,10 @@ public class ApiController : ControllerBase
         return Ok(new { deleted = res });
     }
 
-    // Links
+    #endregion
+
+    #region Links
+
     [HttpPost("retrieveLinkByIdPicture")]
     public async Task<IActionResult> RetrieveLinkByIdPicture([FromBody] IdDto dto)
     {
@@ -290,7 +309,10 @@ public class ApiController : ControllerBase
         return Ok(new { deleted = res });
     }
 
-    // Info popups
+    #endregion
+
+    #region Info PopUps
+
     [HttpPost("retrieveInfoPopUpByIdPicture")]
     public async Task<IActionResult> RetrieveInfoPopUpByIdPicture([FromBody] IdDto dto)
     {
@@ -300,19 +322,19 @@ public class ApiController : ControllerBase
 
     [HttpPost("insertInfoPopUp")]
     [RequestSizeLimit(50_000_000)]
-    public async Task<IActionResult> InsertInfoPopUp([FromForm] int id_pictures, [FromForm] string posX, [FromForm] string posY, [FromForm] string posZ, [FromForm] string text, [FromForm] string title)
+    public async Task<IActionResult> InsertInfoPopUp([FromForm] int id_pictures, [FromForm] string posX, [FromForm] string posY, [FromForm] string posZ)
     {
         var file = Request.Form.Files.FirstOrDefault();
-        var res = await _db.InsertInfoPopUpAsync(id_pictures, double.Parse(posX.Replace(".",",")), double.Parse(posY.Replace(".", ",")), double.Parse(posZ.Replace(".", ",")), text, title, file);
+        var res = await _db.InsertInfoPopUpAsync(id_pictures, double.Parse(posX.Replace(".",",")), double.Parse(posY.Replace(".", ",")), double.Parse(posZ.Replace(".", ",")), file);
         return Ok(new { inserted = res });
     }
 
     [HttpPut("update-infospot")]
     [RequestSizeLimit(50_000_000)]
-    public async Task<IActionResult> UpdateInfospot([FromForm] int id_info_popup, [FromForm] int id_pictures, [FromForm] double posX, [FromForm] double posY, [FromForm] double posZ, [FromForm] string text, [FromForm] string title)
+    public async Task<IActionResult> UpdateInfospot([FromForm] int id_info_popup, [FromForm] int id_pictures, [FromForm] double posX, [FromForm] double posY, [FromForm] double posZ, [FromForm] string text, [FromForm] string title, [FromForm] string id_languages, [FromForm] string id_visitor_type)
     {
         var file = Request.Form.Files.FirstOrDefault();
-        var res = await _db.UpdateInfospotAsync(id_info_popup, id_pictures, posX, posY, posZ, text, title, file);
+        var res = await _db.UpdateInfospotAsync(id_info_popup, id_pictures, posX, posY, posZ, text, title, file, id_languages, id_visitor_type);
         return Ok(new { updated = res });
     }
 
@@ -331,7 +353,10 @@ public class ApiController : ControllerBase
         return Ok(res);
     }
 
-    // Tours
+    #endregion
+
+    #region Tours
+
     [HttpGet("tours")]
     public async Task<IActionResult> GetTours()
     {
@@ -381,7 +406,10 @@ public class ApiController : ControllerBase
         return Ok();
     }
 
-    // Buildings
+    #endregion
+
+    #region Buildings
+
     [HttpGet("buildings")]
     public async Task<IActionResult> GetBuildings()
     {
@@ -426,7 +454,10 @@ public class ApiController : ControllerBase
         return Ok();
     }
 
-    // Floors
+    #endregion
+
+    #region Floors
+
     [HttpGet("floors")]
     public async Task<IActionResult> GetFloors()
     {
@@ -467,6 +498,10 @@ public class ApiController : ControllerBase
         return Ok();
     }
 
+    #endregion
+
+    #region Utility
+
     [HttpGet("ping")]
     public IActionResult Ping() => Ok("pong");
 
@@ -486,28 +521,70 @@ public class ApiController : ControllerBase
             Path.ChangeExtension(fileRequest.file.FileName, ".avif")
         );
     }
+
+    #endregion
+
+    #region Languages
+
+    [HttpPost("insert-language")]
+    public async Task<IActionResult> InsertLanguage([FromBody] NameDto dto)
+    {
+        var id = await _db.InsertLanguageAsync(dto.Name);
+        return Ok(new { id });
+    }
+
+    [HttpGet("languages")]
+    public async Task<IActionResult> GetLanguages()
+    {
+        var res = await _db.GetLanguagesAsync();
+        return Ok(res);
+    }
+
+    [HttpDelete("delete-language/{id}")]
+    public async Task<IActionResult> DeleteLanguage(int id)
+    {
+        await _db.DeleteLanguageAsync(id);
+        return Ok();
+    }
+
+    [HttpPut("update-language/{id}")]
+    public async Task<IActionResult> UpdateLanguage(int id, [FromBody] NameDto dto)
+    {
+        await _db.UpdateLanguageAsync(id, dto.Name);
+        return Ok();
+    }
+    #endregion
+
+    // Visitor Types
+    #region Visitor Types
+
+    [HttpGet("visitor-types")]
+    public async Task<IActionResult> GetVisitorTypes()
+    {
+        var res = await _db.GetVisitorTypesAsync();
+        return Ok(res);
+    }
+
+    [HttpPost("insert-visitor-type")]
+    public async Task<IActionResult> InsertVisitorType([FromBody] NameDto dto)
+    {
+        var id = await _db.InsertVisitorTypeAsync(dto.Name);
+        return Ok(new { id });
+    }
+
+    [HttpDelete("delete-visitor-type/{id}")]
+    public async Task<IActionResult> DeleteVisitorType(int id)
+    {
+        await _db.DeleteVisitorTypeAsync(id);
+        return Ok();    
+    }
+
+    [HttpPut("update-visitor-type/{id}")]
+    public async Task<IActionResult> UpdateVisitorType(int id, [FromBody] NameDto dto)
+    {
+        await _db.UpdateVisitorTypeAsync(id, dto.Name);
+        return Ok();    
+    }
+
+    #endregion
 }
-
-// DTOs
-public record IdDto(int id_pictures);
-public record UpdateVisibilityDto(int IdRooms, bool Hidden);
-public record UpdateVisibilityTourDto(int IdTours, bool Hidden);
-public record NameDto(string Name);
-public record UpdateBuildingDto(int IdBuildings, string Name);
-public record InsertLinkDto(int id_pictures, string PosX, string PosY, string PosZ, int IdPicturesDestination);
-public record UpdateLinkDto(int IdLinks, int IdPictures, string PosX, string PosY, string PosZ, int IdPicturesDestination);
-public record UpdateTourStepsDto(int IdTours, IEnumerable<dynamic> Steps, string? Title, string? Description);
-public record AddTourStepDto(int IdTours, dynamic Step);
-public record CreateTourDto(string Title, string Description, List<StepDto> Steps);
-public record AddTourDto(string Title, string Description, IEnumerable<dynamic> Steps);
-public record InsertInfoPopUpDto(int IdPictures, double PosX, double PosY, double PosZ, string Text, string Title);
-public class StepDto
-{
-    public string? id_tour_steps { get; set; }
-    public int id_rooms { get; set; }
-    public int step_number { get; set; }
-}
-
-public class FileDto { public IFormFile file { get; set; } }
-
-

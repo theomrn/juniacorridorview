@@ -1,0 +1,21 @@
+
+public record IdDto(int id_pictures);
+public record UpdateVisibilityDto(int IdRooms, bool Hidden);
+public record UpdateVisibilityTourDto(int IdTours, bool Hidden);
+public record NameDto(string Name);
+public record UpdateBuildingDto(int IdBuildings, string Name);
+public record InsertLinkDto(int id_pictures, string PosX, string PosY, string PosZ, int IdPicturesDestination);
+public record UpdateLinkDto(int IdLinks, int IdPictures, string PosX, string PosY, string PosZ, int IdPicturesDestination);
+public record UpdateTourStepsDto(int IdTours, IEnumerable<dynamic> Steps, string? Title, string? Description);
+public record AddTourStepDto(int IdTours, dynamic Step);
+public record CreateTourDto(string Title, string Description, List<StepDto> Steps);
+public record AddTourDto(string Title, string Description, IEnumerable<dynamic> Steps);
+public record InsertInfoPopUpDto(int IdPictures, double PosX, double PosY, double PosZ, string Text, string Title);
+public class StepDto
+{
+    public string? id_tour_steps { get; set; }
+    public int id_rooms { get; set; }
+    public int step_number { get; set; }
+}
+
+public class FileDto { public IFormFile file { get; set; } }
