@@ -19,3 +19,6 @@ public class StepDto
 }
 
 public class FileDto { public IFormFile file { get; set; } }
+
+public record UpdateTranslationDto(int id_translation, string text);
+public record InsertTranslationDto(int id_language,string translation_namespace,string translation_key,string text);

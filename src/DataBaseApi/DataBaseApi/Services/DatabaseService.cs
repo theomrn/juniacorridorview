@@ -604,4 +604,36 @@ public class DatabaseService
         using var conn = CreateConnection();
         return await conn.ExecuteAsync("UPDATE Visitor_Type SET name_visitor_type = @Name WHERE id_visitor_type = @Id", new { Name = name_visitor_type, Id = id_visitor_type });
     }
+
+    public async Task<int> CreateTranslationAsync(int id_language,string translation_namespace,string translation_key,string text)
+    {
+        using var conn = CreateConnection();
+        var sql = "INSERT INTO Translations (id_language,namespace,translation_key,text) VALUES (@IdLanguage,@Namespace,@TranslationKey,@Text)";
+        return await conn.ExecuteAsync(sql, new { IdLanguage = id_language, Namespace = @translation_namespace, TranslationKey = translation_key, Text = text });
+    }
+
+    public async Task<int> UpdateTranslationAsync(int id_translation,string text)
+    {
+        using var conn = CreateConnection();
+        var sql = "UPDATE Translations SET text = @Text WHERE id_translation = @IdTranslation";
+        return await conn.ExecuteAsync(sql, new { Text = text, IdTranslation = id_translation});
+    }
+
+    public async Task<int> DeleteTranslationAsync(int id_translation)
+    {
+        using var conn = CreateConnection();
+        var sql = "DELETE FROM Translations WHERE id_translation = @IdTranslation";
+        return await conn.ExecuteAsync(sql, new { IdTranslation = id_translation });
+    }
+
+    public async Task<IEnumerable<dynamic>> GetTranslationsByLanguageAsync(int id_language)
+    {
+        using var conn = CreateConnection();
+        var sql = "SELECT * FROM Translations WHERE id_language = @IdLanguage";
+        return await conn.QueryAsync(sql, new { IdLanguage = id_language });
+    }
+
+
+
+
 }
