@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { useHistory } from "react-router-dom";
 import firebase from "firebase/compat/app"; // Use compat version
 import "firebase/compat/auth"; // Use compat version for auth
+import { useTranslation } from "react-i18next";
 import firebaseConfig from "../firebaseConfig";
 import { AppContext } from "../App";
 import "../style/Login.css"; // Add this line to import the new CSS file
@@ -12,6 +13,7 @@ if (!firebase.apps.length) {
 }
 
 const Login = () => {
+  const { t } = useTranslation('login');
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -49,7 +51,7 @@ const Login = () => {
     <div className="login-container bg-junia-lavender flex justify-center items-center h-screen">
       <div className="login-box bg-white px-12 py-12 rounded-lg shadow-lg w-full max-w-lg">
         <h1 className="text-junia-purple font-title text-2xl mb-6 text-center">
-          Connexion
+          {t('title')}
         </h1>
         {error && (
           <p className="text-red-500 text-center mb-4">{error}</p>
@@ -60,7 +62,7 @@ const Login = () => {
         >
           <input
             type="email"
-            placeholder="Email"
+            placeholder={t('email')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -68,14 +70,14 @@ const Login = () => {
           />
           <input
             type="password"
-            placeholder="Mot de passe"
+            placeholder={t('password')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             className="input-field"
           />
           <button type="submit" className="button-type">
-            Se connecter
+            {t('login')}
           </button>
         </form>
       </div>

@@ -1,16 +1,22 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client'; // <-- Utilisation de React 18
+import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 
 import App from './App';
-import './i18n';
-import './output.css'; // Vérifie si ce fichier existe bien
-import './App.css'
-// Utilisation de createRoot pour React 18
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </React.StrictMode>
-);
+import { initI18n } from './i18n';
+import './output.css';
+import './App.css';
+
+async function bootstrap() {
+  await initI18n();
+
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    <React.StrictMode>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </React.StrictMode>
+  );
+}
+
+bootstrap();

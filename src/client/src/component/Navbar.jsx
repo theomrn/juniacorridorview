@@ -7,8 +7,10 @@ import firebase from "firebase/compat/app"; // Use compat version
 import "firebase/compat/auth"; // Use compat version for auth
 import { FaUserCog, FaUser } from "react-icons/fa"; // Ajout de l'icône user settings
 import { RiAdminFill } from "react-icons/ri";
+import { useTranslation } from 'react-i18next';
 
 const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
+  const { t } = useTranslation('navbar');
   const { setIsAuthenticated } = useContext(AppContext);
   const location = useLocation();
   const history = useHistory();
@@ -20,48 +22,48 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
   useEffect(() => {
     switch (location.pathname) {
       case '/':
-        setRouteName('Accueil');
+        setRouteName(t('homeTooltip'));
         break;
       case '/pano':
         // Correction ici : afficher "numéro de la salle - nom de la salle"
         const safeImageName = selectedImageName || '';
         const safeRoomNumber = currentRoomNumber || '';
         if(safeImageName === '' || safeRoomNumber === '') {
-          setRouteName('Immersion');
+          setRouteName(t('immersion'));
         }
         else {
           setRouteName(safeRoomNumber + ' - ' + safeImageName);
         }
         break;
       case '/tour':
-        setRouteName('Visite Guidée');
+        setRouteName(t('guidedTour'));
         break;
       case '/admin':
-        setRouteName('Administrateur');
+        setRouteName(t('adminPanel'));
         break;
       case '/admin/tour':
-        setRouteName('Gestion des Parcours');
+        setRouteName(t('adminTour'));
         break;
       case '/admin/room':
-        setRouteName('Gestion des Salles');
+        setRouteName(t('adminRoom'));
         break;
       case '/admin/building':
-        setRouteName('Gestion des Bâtiments');
+        setRouteName(t('adminBuilding'));
         break;
       case '/admin/user':
-        setRouteName('Gestion des Administrateurs');
+        setRouteName(t('adminUser'));
         break;
       case '/admin/convert':
         setRouteName('Conversion AVIF');
       break;
       case location.pathname.match(/^\/admin\/room\/\d+$/)?.input:
-        setRouteName('Gestion d\'une Salle');
+        setRouteName(t('adminRoomDetails'));
       break;
 
       default:
         setRouteName('Menu Principal');
     }
-  }, [location, selectedImageName, currentRoomNumber]);
+  }, [location, selectedImageName, currentRoomNumber, t]);
 
   useEffect(() => {
     const fetchUserEmail = () => {
@@ -113,16 +115,16 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
         </div>
         <div className="flex items-center text-xl text-junia-orange font-title gap-2">
           <NavLink to="/" className="text-inherit no-underline hover:text-inherit" >
-            <FaHome className="text-4xl" title="Page d'accueil" />
+            <FaHome className="text-4xl" title={t('homeTooltip')} />
           </NavLink>
           {isAuthenticated && (
             <NavLink to="/admin/room" className="text-inherit no-underline hover:text-inherit">
-              <RiAdminFill className="text-4xl" title="Gestion des salles"/>
+              <RiAdminFill className="text-4xl" title={t('adminTooltip')}/>
             </NavLink>
           )}
           {!isAuthenticated && !isAdminPage && (
             <NavLink to="/login" className="text-inherit no-underline hover:text-inherit">
-              <RiAdminFill className="text-4xl" title="Panneau d'administration"/>
+              <RiAdminFill className="text-4xl" title={t('adminPanelTooltip')}/>
             </NavLink>
           )}
           {isAuthenticated && (
@@ -130,9 +132,9 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
               to="/admin/user"
               className="text-inherit no-underline hover:text-inherit flex items-center"
               style={{ display: "inline-flex", alignItems: "center" }}
-              title="Paramètres utilisateur"
+              title={t('userSettingsTooltip')}
             >
-              <FaUserCog className="text-4xl cursor-pointer" title="Paramètres administrateurs" />
+              <FaUserCog className="text-4xl cursor-pointer" title={t('adminSettingsTooltip')} />
             </NavLink>
           )}
           {isAuthenticated && (
@@ -143,7 +145,7 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
                 style={{ background: "none", border: "none", padding: 0, margin: 0, lineHeight: 1 }}
                 className="text-inherit no-underline hover:text-inherit flex items-center"
               >
-                <FaUser className="text-4xl align-middle cursor-pointer" style={{ verticalAlign: "middle", fontSize: "1.75rem" }} title="Utilisateur" />
+                <FaUser className="text-4xl align-middle cursor-pointer" style={{ verticalAlign: "middle", fontSize: "1.75rem" }} title={t('userTooltip')} />
               </button>
               {isModalOpen && (
                 <div
@@ -171,7 +173,7 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
                       cursor: "pointer",
                     }}
                   >
-                    Se Déconnecter
+                    {t('logout')}
                   </button>
                 </div>
               )}
