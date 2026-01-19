@@ -22,6 +22,19 @@ public class TranslationController : ControllerBase
         return Ok(res);
     }
 
+    [HttpGet("{id_language}/{translation_namespace}")]
+    public async Task<IActionResult> GetTranslationsByNamespace(int id_language, string translation_namespace)
+    {
+        var res = await _db.GetTranslationsByNamespaceAsync(id_language, translation_namespace);
+        // Transformation de la liste en dictionnaire
+        var formattedTranslations = res.ToDictionary(
+            item => $"{item.translation_key}", // La clé : "home.guidedTour"
+            item => item.text                                  // La valeur : "Tour guidé"
+        );
+
+        return Ok(formattedTranslations);
+    }
+
     [HttpPut("update-translation")]
     public async Task<IActionResult> UpdateTranslation([FromBody] UpdateTranslationDto dto)
     {

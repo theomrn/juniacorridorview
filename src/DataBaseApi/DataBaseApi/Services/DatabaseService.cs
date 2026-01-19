@@ -633,6 +633,13 @@ public class DatabaseService
         return await conn.QueryAsync(sql, new { IdLanguage = id_language });
     }
 
+    public async Task<IEnumerable<dynamic>> GetTranslationsByNamespaceAsync(int id_language, string translation_namespace)
+    {
+        using var conn = CreateConnection();
+        var sql = "SELECT * FROM Translations WHERE id_language = @IdLanguage AND namespace = @Namespace";
+        return await conn.QueryAsync(sql, new { IdLanguage = id_language, Namespace = translation_namespace });
+    }
+
 
 
 
