@@ -12,12 +12,15 @@ DROP TABLE IF EXISTS `Tour_Steps`;
 DROP TABLE IF EXISTS `Tours`;
 DROP TABLE IF EXISTS `Links`;
 DROP TABLE IF EXISTS `Info_Popup`;
+DROP TABLE IF EXISTS `Info_popup_translation`;
 DROP TABLE IF EXISTS `Picture_Meta`;
 DROP TABLE IF EXISTS `Room_Previews`;
 DROP TABLE IF EXISTS `Pictures`;
 DROP TABLE IF EXISTS `Rooms`;
 DROP TABLE IF EXISTS `Floors`;
 DROP TABLE IF EXISTS `Buildings`;
+DROP TABLE IF EXISTS `Languages`;
+DROP TABLE IF EXISTS `Visitor_type`;
 
 -- Réactiver la vérification pour la création des tables
 SET FOREIGN_KEY_CHECKS = 1;
@@ -113,18 +116,42 @@ CONSTRAINT `Room_Previews_ibfk_1` FOREIGN KEY (`id_rooms`) REFERENCES `Rooms` (`
 
 -- 2.9. Info_Popup (Dépend de Pictures)
 CREATE TABLE `Info_Popup` (
-`id_info_popup` int NOT NULL AUTO_INCREMENT,
-`id_pictures` int DEFAULT NULL,
-`position_x` float DEFAULT NULL,
-`position_y` float DEFAULT NULL,
-`position_z` float DEFAULT NULL,
-`text` longtext,
-`title` longtext,
-`image_path` varchar(255) DEFAULT NULL,
-PRIMARY KEY (`id_info_popup`),
-KEY `fk_info_popup_pictures` (`id_pictures`),
-CONSTRAINT `fk_info_popup_pictures` FOREIGN KEY (`id_pictures`) REFERENCES `Pictures` (`id_pictures`) ON DELETE CASCADE
+  `id_info_popup` int NOT NULL AUTO_INCREMENT,
+  `id_pictures` int DEFAULT NULL,
+  `position_x` float DEFAULT NULL,
+  `position_y` float DEFAULT NULL,
+  `position_z` float DEFAULT NULL,
+  `image_path` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id_info_popup`),
+  KEY `fk_info_popup_pictures` (`id_pictures`),
+  CONSTRAINT `fk_info_popup_pictures` FOREIGN KEY (`id_pictures`) REFERENCES `Pictures` (`id_pictures`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=157 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Visitor_type` (
+  `id_visitor_type` int NOT NULL AUTO_INCREMENT,
+  `name_visitor_type` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id_visitor_type`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Languages` (
+  `name_language` varchar(100) NOT NULL,
+  `id_language` int NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id_language`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Info_popup_translation` (
+  `id_info_popup` int NOT NULL,
+  `id_languages` int NOT NULL,
+  `title` varchar(50) DEFAULT NULL,
+  `text` longtext,
+  `id_visitor_type` int DEFAULT NULL,
+  PRIMARY KEY (`id_info_popup`,`id_languages`),
+  KEY `Info_popup_translation_Languages_FK` (`id_languages`),
+  KEY `Info_popup_translation_Visitor_type_FK` (`id_visitor_type`),
+  CONSTRAINT `Info_popup_translation_Info_Popup_FK` FOREIGN KEY (`id_info_popup`) REFERENCES `Info_Popup` (`id_info_popup`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `Info_popup_translation_Languages_FK` FOREIGN KEY (`id_languages`) REFERENCES `Languages` (`id_language`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `Info_popup_translation_Visitor_type_FK` FOREIGN KEY (`id_visitor_type`) REFERENCES `Visitor_type` (`id_visitor_type`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 2.10. Links (Dépend de Pictures)
 CREATE TABLE `Links` (
