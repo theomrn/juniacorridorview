@@ -552,4 +552,30 @@ public class DatabaseService
         }
         return await conn.ExecuteAsync("DELETE FROM Floors WHERE id_floors = @Id", new { Id = id_floors });
     }
+
+    // Languages
+    public async Task<int> InsertLanguageAsync(string name_language)
+    {
+        using var conn = CreateConnection();
+        var sql = "INSERT INTO Languages (name_language) VALUES (@Name)";
+        return await conn.ExecuteAsync(sql, new {Name = name_language });
+    }
+
+    public async Task<IEnumerable<dynamic>> GetLanguagesAsync()
+    {
+        using var conn = CreateConnection();
+        return await conn.QueryAsync("SELECT * FROM Languages");
+    }
+
+    public async Task<int> DeleteLanguageAsync(int id_language)
+    {
+        using var conn = CreateConnection();
+        return await conn.ExecuteAsync("DELETE FROM Languages WHERE id_language = @Id", new { Id = id_language });
+    }
+
+    public async Task<int> UpdateLanguageAsync(int id_language, string name_language)
+    {
+        using var conn = CreateConnection();
+        return await conn.ExecuteAsync("UPDATE Languages SET name_language = @Name WHERE id_language = @Id", new { Name = name_language, Id = id_language });
+    }
 }

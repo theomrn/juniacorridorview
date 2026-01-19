@@ -486,6 +486,35 @@ public class ApiController : ControllerBase
             Path.ChangeExtension(fileRequest.file.FileName, ".avif")
         );
     }
+
+    [HttpPost("insert-language")]
+    public async Task<IActionResult> InsertLanguage([FromBody] NameDto dto)
+    {
+        var id = await _db.InsertLanguageAsync(dto.Name);
+        return Ok(new { id });
+    }
+
+    [HttpGet("languages")]
+    public async Task<IActionResult> GetLanguages()
+    {
+        var res = await _db.GetLanguagesAsync();
+        return Ok(res);
+    }
+
+    [HttpDelete("delete-language/{id}")]
+    public async Task<IActionResult> DeleteLanguage(int id)
+    {
+        await _db.DeleteLanguageAsync(id);
+        return Ok();
+    }
+
+    [HttpPut("update-language/{id}")]
+    public async Task<IActionResult> UpdateLanguage(int id, [FromBody] NameDto dto)
+    {
+        await _db.UpdateLanguageAsync(id, dto.Name);
+        return Ok();
+    }
+
 }
 
 // DTOs
