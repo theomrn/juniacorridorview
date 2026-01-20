@@ -654,7 +654,13 @@ const AdminRoom = () => {
             >
               <FaPlusCircle className="admin-button-icon" /> Ajouter une salle
             </button>
-            
+
+            <button
+                onClick={() => history.push('/admin/convert')}
+                className="admin-button-responsive">
+                Convertion fichier
+            </button>
+
             <button
                 onClick={() => history.push('/admin/tour')}
                 className="admin-button-responsive">
