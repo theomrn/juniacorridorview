@@ -51,6 +51,9 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
       case '/admin/user':
         setRouteName('Gestion des Administrateurs');
         break;
+      case '/admin/convert':
+        setRouteName('Conversion AVIF');
+      break;
       case location.pathname.match(/^\/admin\/room\/\d+$/)?.input:
         setRouteName('Gestion d\'une Salle');
       break;
