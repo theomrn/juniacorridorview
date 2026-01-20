@@ -65,6 +65,11 @@ const insertInfoPopUp = async (formData) => {
 
 const insertLink = async (data) => {
   try {
+    console.log(data.posX);
+        console.log(data.posY);
+        console.log(data.posZ);
+    console.log(data.selectedPictureId);
+    console.log(data.id_pictures_destination);
       await axios.post('/api/insertLink', data);
   } catch (error) {
       console.error('Error inserting link:', error);
@@ -222,7 +227,7 @@ const updateInfospot = async (formData) => {
 
 const updateLink = async (formData) => {
     try {
-        await axios.post('/api/update-link', formData);
+        await axios.put('/api/update-link', formData);
     } catch (error) {
         console.error('Error updating link:', error);
     }
