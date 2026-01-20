@@ -289,16 +289,16 @@ public class ApiController : ControllerBase
     }
 
     [HttpPost("insertLink")]
-    public async Task<IActionResult> InsertLink([FromBody] InsertLinkDto dto)
+    public async Task<IActionResult> InsertLink([FromForm] InsertLinkDto dto)
     {
-        var res = await _db.InsertLinkAsync(dto.id_pictures, double.Parse(dto.PosX.Replace(".",",")), double.Parse(dto.PosY.Replace(".",",")), double.Parse(dto.PosZ.Replace(".", ",")), dto.IdPicturesDestination);
+        var res = await _db.InsertLinkAsync(dto.id_pictures, double.Parse(dto.PosX.Replace(".",",")), double.Parse(dto.PosY.Replace(".",",")), double.Parse(dto.PosZ.Replace(".", ",")), dto.id_pictures_destination);
         return Ok(new { inserted = res });
     }
 
     [HttpPut("update-link")]
-    public async Task<IActionResult> UpdateLink([FromBody] UpdateLinkDto dto)
+    public async Task<IActionResult> UpdateLink([FromForm] UpdateLinkDto dto)
     {
-        var res = await _db.UpdateLinkAsync(dto.IdLinks, dto.IdPictures, double.Parse(dto.PosX.Replace(".", ",")), double.Parse(dto.PosY.Replace(".", ",")), double.Parse(dto.PosZ.Replace(".", ",")), dto.IdPicturesDestination);
+        var res = await _db.UpdateLinkAsync(dto.id_links, dto.id_pictures, double.Parse(dto.PosX.Replace(".", ",")), double.Parse(dto.PosY.Replace(".", ",")), double.Parse(dto.PosZ.Replace(".", ",")), dto.id_pictures_destination);
         return Ok(new { updated = res });
     }
 
