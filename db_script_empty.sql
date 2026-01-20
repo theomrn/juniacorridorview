@@ -159,7 +159,7 @@ CREATE TABLE `translations` (
   `id_language` int DEFAULT NULL,
   `namespace` varchar(50) DEFAULT NULL,
   `translation_key` varchar(50) DEFAULT NULL,
-  `text` varchar(100) DEFAULT NULL,
+  `text` longtext DEFAULT NULL,
   PRIMARY KEY (`id_translation`),
   KEY `translations_languages_FK` (`id_language`),
   CONSTRAINT `translations_languages_FK` FOREIGN KEY (`id_language`) REFERENCES `languages` (`id_language`) ON DELETE CASCADE
