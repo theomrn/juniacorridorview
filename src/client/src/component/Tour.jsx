@@ -215,7 +215,7 @@ const TourViewer = () => {
                   <div className="font-texts text-junia-purple">{tour.description}</div>
                   {getPanoramaImagesForTour(tour.id_tours).length > 0 && (
                     <div className="mt-4" style={{ height: "500px" }}>
-                        <p className="font-title font-bold text-center text-junia-purple">Salle : {currentRoomName[tour.id_tours] || getPanoramaImagesForTour(tour.id_tours)[0]?.roomName}</p>
+                        <p className="font-title font-bold text-center text-junia-purple">{t('room')} : {currentRoomName[tour.id_tours] || getPanoramaImagesForTour(tour.id_tours)[0]?.roomName}</p>
                         <div style={{ height: "500px" }}>
                           <Carousel
                             items={getPanoramaImagesForTour(tour.id_tours)}
@@ -235,7 +235,7 @@ const TourViewer = () => {
                       onClick={() => handleTourClick(tour.id_tours)}
                       className="text-xl text-white font-bold shadow-md font-title text-center bg-junia-orange rounded-3xl px-4 py-2 w-auto whitespace-nowrap inline-block mb-2 mt-2 cursor-pointer bouton-modifier"
                     >
-                      Commencer le parcours
+                      {t('startTour')}
                     </div>
                   </div>
                 </div>

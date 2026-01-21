@@ -205,9 +205,9 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
     if (!isLoading.current || firstLoad.current) {
       showLoading(
         [popupsPromise, linksPromise, roomIdPromise],
-        'Chargement des données...',
-        'Chargement des données réussi',
-        'Erreur lors du chargement des données'
+        t('currentLoading'),
+        t('loadingSuccess'),
+        t('loadingError')
       );
     }
 
@@ -273,7 +273,7 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
 
         {/* SIDEBAR – ROOMS LIST */}
         <div className="h-full scrollable-list flex-col w-15" id="style-2">
-          <div className="other-rooms-title">Autres Salles</div>
+          <div className="other-rooms-title">{t('otherRooms')}</div>
 
           {filteredRooms.map(room => (
             <div

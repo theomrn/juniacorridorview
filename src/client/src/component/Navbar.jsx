@@ -8,9 +8,11 @@ import "firebase/compat/auth"; // Use compat version for auth
 import { FaUserCog, FaUser } from "react-icons/fa"; // Ajout de l'icône user settings
 import { RiAdminFill } from "react-icons/ri";
 import { useTranslation } from 'react-i18next';
+import { getLanguages } from '../api/AxiosTranslation';
+import Select from 'react-select';
 
 const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
-  const { t } = useTranslation('navbar');
+  const { t, i18n } = useTranslation('navbar');
   const { setIsAuthenticated } = useContext(AppContext);
   const location = useLocation();
   const history = useHistory();
@@ -18,18 +20,20 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
   const [isModalOpen, setIsModalOpen] = useState(false); // State to toggle modal visibility
   const [userEmail, setUserEmail] = useState(""); // State to store the user's email
   const modalRef = useRef(null);
+  const [languages, setLanguages] = useState([]);
+  const [currentLanguage, setCurrentLanguage] = useState(null);
 
   useEffect(() => {
     switch (location.pathname) {
       case '/':
-        setRouteName(t('homeTooltip'));
+        setRouteName('Accueil');
         break;
       case '/pano':
         // Correction ici : afficher "numéro de la salle - nom de la salle"
         const safeImageName = selectedImageName || '';
         const safeRoomNumber = currentRoomNumber || '';
         if(safeImageName === '' || safeRoomNumber === '') {
-          setRouteName(t('immersion'));
+          setRouteName('Immersion');
         }
         else {
           setRouteName(safeRoomNumber + ' - ' + safeImageName);
@@ -39,31 +43,31 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
         setRouteName(t('guidedTour'));
         break;
       case '/admin':
-        setRouteName(t('adminPanel'));
+        setRouteName('Administrateur');
         break;
       case '/admin/tour':
-        setRouteName(t('adminTour'));
+        setRouteName('Gestion des Parcours');
         break;
       case '/admin/room':
-        setRouteName(t('adminRoom'));
+        setRouteName('Gestion des Salles');
         break;
       case '/admin/building':
-        setRouteName(t('adminBuilding'));
+        setRouteName('Gestion des Bâtiments');
         break;
       case '/admin/user':
-        setRouteName(t('adminUser'));
+        setRouteName('Gestion des Administrateurs');
         break;
       case '/admin/convert':
         setRouteName('Conversion AVIF');
       break;
       case location.pathname.match(/^\/admin\/room\/\d+$/)?.input:
-        setRouteName(t('adminRoomDetails'));
+        setRouteName('Gestion d\'une Salle');
       break;
 
       default:
         setRouteName('Menu Principal');
     }
-  }, [location, selectedImageName, currentRoomNumber, t]);
+  }, [location, selectedImageName, currentRoomNumber]);
 
   useEffect(() => {
     const fetchUserEmail = () => {
@@ -82,6 +86,33 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
     setIsAuthenticated(false);
     history.push("/login");
   };
+
+    // ---------- LANGUAGES ----------
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const response = await getLanguages();
+        setLanguages(response);
+
+        const current = response.find(l => String(l.id_language) === i18n.language);
+        if (current) setCurrentLanguage(current.id_language);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des langues:', error);
+      }
+    };
+    fetchLanguages();
+  }, [i18n.language]);
+
+  const languageOptions = languages.map(l => ({
+    value: l.id_language,
+    label: l.name_language
+  }));
+
+  const changeLanguage = (id_language) => {
+    setCurrentLanguage(id_language);
+    i18n.changeLanguage(String(id_language));
+  };
+
 
   const toggleModal = () => {
     setIsModalOpen((prev) => !prev);
@@ -114,17 +145,31 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
           {routeName}
         </div>
         <div className="flex items-center text-xl text-junia-orange font-title gap-2">
+
+      <Select
+            options={languageOptions}
+            value={languageOptions.find(o => o.value === currentLanguage)}
+            onChange={(selected) => changeLanguage(selected.value)}
+            placeholder="Langue"
+            isSearchable={false}
+            className="w-48"
+          />
+
           <NavLink to="/" className="text-inherit no-underline hover:text-inherit" >
-            <FaHome className="text-4xl" title={t('homeTooltip')} />
+            <FaHome className="text-4xl" title="Page d'accueil" />
           </NavLink>
+
+ 
+
+
           {isAuthenticated && (
             <NavLink to="/admin/room" className="text-inherit no-underline hover:text-inherit">
-              <RiAdminFill className="text-4xl" title={t('adminTooltip')}/>
+              <RiAdminFill className="text-4xl" title="Gestion des salles"/>
             </NavLink>
           )}
           {!isAuthenticated && !isAdminPage && (
             <NavLink to="/login" className="text-inherit no-underline hover:text-inherit">
-              <RiAdminFill className="text-4xl" title={t('adminPanelTooltip')}/>
+              <RiAdminFill className="text-4xl" title="Panneau d'administration"/>
             </NavLink>
           )}
           {isAuthenticated && (
@@ -132,9 +177,9 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
               to="/admin/user"
               className="text-inherit no-underline hover:text-inherit flex items-center"
               style={{ display: "inline-flex", alignItems: "center" }}
-              title={t('userSettingsTooltip')}
+              title="Paramètres utilisateur"
             >
-              <FaUserCog className="text-4xl cursor-pointer" title={t('adminSettingsTooltip')} />
+              <FaUserCog className="text-4xl cursor-pointer" title="Paramètres administrateurs" />
             </NavLink>
           )}
           {isAuthenticated && (
@@ -145,7 +190,7 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
                 style={{ background: "none", border: "none", padding: 0, margin: 0, lineHeight: 1 }}
                 className="text-inherit no-underline hover:text-inherit flex items-center"
               >
-                <FaUser className="text-4xl align-middle cursor-pointer" style={{ verticalAlign: "middle", fontSize: "1.75rem" }} title={t('userTooltip')} />
+                <FaUser className="text-4xl align-middle cursor-pointer" style={{ verticalAlign: "middle", fontSize: "1.75rem" }} title="Utilisateur" />
               </button>
               {isModalOpen && (
                 <div
@@ -173,7 +218,7 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
                       cursor: "pointer",
                     }}
                   >
-                    {t('logout')}
+                    Se Déconnecter
                   </button>
                 </div>
               )}

@@ -64,4 +64,11 @@ public class TranslationController : ControllerBase
 
         return Ok(ids);
     }
+
+    [HttpGet("languages")]
+    public async Task<IActionResult> GetLanguages()
+    {
+        var res = await _db.GetLanguagesAsync();
+        return Ok(res);
+    }
 }
