@@ -88,7 +88,7 @@ const createRoom = async (formData) => {
     
     
     const imageUploadPromises = formData.getAll('images').map((image) => {
-      console.log(image);
+      // console.log(image);
       const imageFormData = new FormData();
       imageFormData.append('id_rooms', id_rooms);
       imageFormData.append('pic', image);
