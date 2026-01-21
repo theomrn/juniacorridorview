@@ -20,6 +20,7 @@ DROP TABLE IF EXISTS `Rooms`;
 DROP TABLE IF EXISTS `Floors`;
 DROP TABLE IF EXISTS `Buildings`;
 DROP TABLE IF EXISTS `Languages`;
+DROP TABLE IF EXISTS `Translations`;
 DROP TABLE IF EXISTS `Visitor_type`;
 
 -- Réactiver la vérification pour la création des tables
@@ -151,6 +152,17 @@ CREATE TABLE `Info_popup_translation` (
   CONSTRAINT `Info_popup_translation_Info_Popup_FK` FOREIGN KEY (`id_info_popup`) REFERENCES `Info_Popup` (`id_info_popup`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `Info_popup_translation_Languages_FK` FOREIGN KEY (`id_languages`) REFERENCES `Languages` (`id_language`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `Info_popup_translation_Visitor_type_FK` FOREIGN KEY (`id_visitor_type`) REFERENCES `Visitor_type` (`id_visitor_type`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `translations` (
+  `id_translation` int NOT NULL AUTO_INCREMENT,
+  `id_language` int DEFAULT NULL,
+  `namespace` varchar(50) DEFAULT NULL,
+  `translation_key` varchar(50) DEFAULT NULL,
+  `text` longtext DEFAULT NULL,
+  PRIMARY KEY (`id_translation`),
+  KEY `translations_languages_FK` (`id_language`),
+  CONSTRAINT `translations_languages_FK` FOREIGN KEY (`id_language`) REFERENCES `languages` (`id_language`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 2.10. Links (Dépend de Pictures)

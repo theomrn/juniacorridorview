@@ -7,8 +7,12 @@ import firebase from "firebase/compat/app"; // Use compat version
 import "firebase/compat/auth"; // Use compat version for auth
 import { FaUserCog, FaUser } from "react-icons/fa"; // Ajout de l'icône user settings
 import { RiAdminFill } from "react-icons/ri";
+import { useTranslation } from 'react-i18next';
+import { getLanguages } from '../api/AxiosTranslation';
+import Select from 'react-select';
 
 const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
+  const { t, i18n } = useTranslation('navbar');
   const { setIsAuthenticated } = useContext(AppContext);
   const location = useLocation();
   const history = useHistory();
@@ -16,6 +20,8 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
   const [isModalOpen, setIsModalOpen] = useState(false); // State to toggle modal visibility
   const [userEmail, setUserEmail] = useState(""); // State to store the user's email
   const modalRef = useRef(null);
+  const [languages, setLanguages] = useState([]);
+  const [currentLanguage, setCurrentLanguage] = useState(null);
 
   useEffect(() => {
     switch (location.pathname) {
@@ -34,7 +40,7 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
         }
         break;
       case '/tour':
-        setRouteName('Visite Guidée');
+        setRouteName(t('guidedTour'));
         break;
       case '/admin':
         setRouteName('Administrateur');
@@ -81,6 +87,33 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
     history.push("/login");
   };
 
+    // ---------- LANGUAGES ----------
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const response = await getLanguages();
+        setLanguages(response);
+
+        const current = response.find(l => String(l.id_language) === i18n.language);
+        if (current) setCurrentLanguage(current.id_language);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des langues:', error);
+      }
+    };
+    fetchLanguages();
+  }, [i18n.language]);
+
+  const languageOptions = languages.map(l => ({
+    value: l.id_language,
+    label: l.name_language
+  }));
+
+  const changeLanguage = (id_language) => {
+    setCurrentLanguage(id_language);
+    i18n.changeLanguage(String(id_language));
+  };
+
+
   const toggleModal = () => {
     setIsModalOpen((prev) => !prev);
   };
@@ -112,9 +145,23 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
           {routeName}
         </div>
         <div className="flex items-center text-xl text-junia-orange font-title gap-2">
+
+      <Select
+            options={languageOptions}
+            value={languageOptions.find(o => o.value === currentLanguage)}
+            onChange={(selected) => changeLanguage(selected.value)}
+            placeholder="Langue"
+            isSearchable={false}
+            className="w-48"
+          />
+
           <NavLink to="/" className="text-inherit no-underline hover:text-inherit" >
             <FaHome className="text-4xl" title="Page d'accueil" />
           </NavLink>
+
+ 
+
+
           {isAuthenticated && (
             <NavLink to="/admin/room" className="text-inherit no-underline hover:text-inherit">
               <RiAdminFill className="text-4xl" title="Gestion des salles"/>

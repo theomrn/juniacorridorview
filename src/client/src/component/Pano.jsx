@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import * as api from '../api/AxiosPano';
 import { getTourSteps } from '../api/AxiosTour';
+import { useTranslation } from 'react-i18next';
 import '../style/Pano.css';
 import { toast } from "sonner";
 import Panorama360 from './Panorama360';
@@ -17,6 +18,8 @@ import Navbar from './Navbar';
 const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }) => {
 
   Buffer.from = Buffer.from || require('buffer').Buffer;
+
+  const { t } = useTranslation('pano');
 
   // ------------------- STATES -------------------
   const [images, setImages] = useState([]);
@@ -28,12 +31,12 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
   const [rooms, setRooms] = useState([]);
   const [roomPreviews, setRoomPreviews] = useState({});
   const [previewFlags, setPreviewFlags] = useState({});
-  const [visitType, setVisitType] = useState('Visite libre');
+  const [visitType, setVisitType] = useState(t('freeTour'));
   const [tourSteps, setTourSteps] = useState([]);
   const [allRoomImages, setAllRoomImages] = useState({});
   const [currentFloor, setCurrentFloor] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [textLoading, setTextLoading] = useState("Chargement des données...");
+  const [textLoading, setTextLoading] = useState(t('loading'));
 
   // ------------------- REFS -------------------
   const firstLoad = useRef(true);
@@ -117,7 +120,7 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
         );
 
         roomsData = roomsData.filter(r => r.hidden !== 1);
-        setVisitType(`Visite guidée, Parcours ${tourId}`);
+        setVisitType(`${t('guidedTour')}, Parcours ${tourId}`);
       } else {
         roomsData = await api.getRooms();
         roomsData = roomsData.filter(r => r.hidden !== 1);
@@ -202,9 +205,9 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
     if (!isLoading.current || firstLoad.current) {
       showLoading(
         [popupsPromise, linksPromise, roomIdPromise],
-        'Chargement des données...',
-        'Chargement des données réussi',
-        'Erreur lors du chargement des données'
+        t('currentLoading'),
+        t('loadingSuccess'),
+        t('loadingError')
       );
     }
 
@@ -270,7 +273,7 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
 
         {/* SIDEBAR – ROOMS LIST */}
         <div className="h-full scrollable-list flex-col w-15" id="style-2">
-          <div className="other-rooms-title">Autres Salles</div>
+          <div className="other-rooms-title">{t('otherRooms')}</div>
 
           {filteredRooms.map(room => (
             <div

@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState, useCallback} from "react";
 import { useHistory } from "react-router-dom";
 import * as api from '../api/AxiosTour';
+import { useTranslation } from 'react-i18next';
 import '../style/Tour.css';
 import { Buffer } from 'buffer';
 import Carousel from '../reactbits/Components/Carousel/Carousel'
@@ -10,6 +11,7 @@ import Masonry from 'react-masonry-css';
 
 const TourViewer = () => {
   Buffer.from = Buffer.from || require('buffer').Buffer;
+  const { t } = useTranslation('tour');
   const [tours, setTours] = useState([]);
   const [tourSteps, setTourSteps] = useState({});
   const [rooms, setRooms] = useState({});
@@ -20,7 +22,7 @@ const TourViewer = () => {
   const history = useHistory();
 
   const [isLoading, setIsLoading] = useState(true);
-  const [textLoading, setTextLoading] = useState("Chargement des données...");
+  const [textLoading, setTextLoading] = useState(t('loading'));
 
   // Define breakpoints for Masonry layout
   const breakpointColumnsObj = {
@@ -213,7 +215,7 @@ const TourViewer = () => {
                   <div className="font-texts text-junia-purple">{tour.description}</div>
                   {getPanoramaImagesForTour(tour.id_tours).length > 0 && (
                     <div className="mt-4" style={{ height: "500px" }}>
-                        <p className="font-title font-bold text-center text-junia-purple">Salle : {currentRoomName[tour.id_tours] || getPanoramaImagesForTour(tour.id_tours)[0]?.roomName}</p>
+                        <p className="font-title font-bold text-center text-junia-purple">{t('room')} : {currentRoomName[tour.id_tours] || getPanoramaImagesForTour(tour.id_tours)[0]?.roomName}</p>
                         <div style={{ height: "500px" }}>
                           <Carousel
                             items={getPanoramaImagesForTour(tour.id_tours)}
@@ -233,7 +235,7 @@ const TourViewer = () => {
                       onClick={() => handleTourClick(tour.id_tours)}
                       className="text-xl text-white font-bold shadow-md font-title text-center bg-junia-orange rounded-3xl px-4 py-2 w-auto whitespace-nowrap inline-block mb-2 mt-2 cursor-pointer bouton-modifier"
                     >
-                      Commencer le parcours
+                      {t('startTour')}
                     </div>
                   </div>
                 </div>

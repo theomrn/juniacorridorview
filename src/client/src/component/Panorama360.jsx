@@ -1,9 +1,11 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import React, { useEffect, useRef, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import PlanImage from "./plan/PlanImage";
 
 const Panorama360 = ({ infoPopups, selectedPicture, links, onLinkClick, onPositionSelect, isLoading, disableClick, floor}) => {
+  const { t } = useTranslation('Panorama360');
   const mountRef = useRef(null);
   const rendererRef = useRef(null);
   const cameraRef = useRef(null);
@@ -250,7 +252,6 @@ const Panorama360 = ({ infoPopups, selectedPicture, links, onLinkClick, onPositi
     };
   image.crossOrigin = "anonymous";
     image.src = `http://localhost:5078/${popup.image_path}`;
-    console.log("Loading image from:", `http://localhost:5078/${popup.image_path}`);
     return popupGroup;
   };
 
