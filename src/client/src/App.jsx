@@ -7,6 +7,7 @@ import PanoramaViewer from './component/Pano';
 import AdminTour from './component/AdminTour';
 import AdminRoom from './component/AdminRoom';
 import AdminRoomDetails from './component/AdminRoomDetails';
+import AdminTranslation from './component/AdminTranslation';
 import Login from './component/Login';
 import AdminBuilding from "./component/AdminBuilding";
 import AdminUser from './component/AdminUser';
@@ -68,6 +69,7 @@ const App = () => {
         <PrivateRoute exact path="/admin/building" component={AdminBuilding} />
         <PrivateRoute exact path="/admin/user" component={AdminUser} />
         <PrivateRoute exact path="/admin/convert" component={ConvertFile} />
+        <PrivateRoute exact path="/admin/translation" component={AdminTranslation} />
         <Route exact path="/login" component={Login} />
       </Switch>
     </AppContext.Provider>

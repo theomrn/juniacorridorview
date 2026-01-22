@@ -661,6 +661,12 @@ const AdminRoom = () => {
                 Convertion fichier
             </button>
 
+                      <button
+                onClick={() => history.push('/admin/translation')}
+                className="admin-button-responsive">
+                Traduction
+            </button>
+
             <button
                 onClick={() => history.push('/admin/tour')}
                 className="admin-button-responsive">
