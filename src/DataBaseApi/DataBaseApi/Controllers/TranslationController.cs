@@ -28,16 +28,23 @@ public class TranslationController : ControllerBase
         var res = await _db.GetTranslationsByNamespaceAsync(id_language, translation_namespace);
         // Transformation de la liste en dictionnaire
         var formattedTranslations = res.ToDictionary(
-            item => $"{item.translation_key}", // La clé : "home.guidedTour"
-            item => item.text                                  // La valeur : "Tour guidé"
+            item => $"{item.translation_key}", // La clï¿½ : "home.guidedTour"
+            item => item.text                                  // La valeur : "Tour guidï¿½"
         );
 
         return Ok(formattedTranslations);
     }
 
+    [HttpGet("all/{id_language}/{translation_namespace}")]
+    public async Task<IActionResult> GetEntiereTranslationsByNamespace(int id_language, string translation_namespace)
+    {
+        var res = await _db.GetTranslationsByNamespaceAsync(id_language, translation_namespace);
+        return Ok(res);
+    }
+
     [HttpPut("update-translation")]
     public async Task<IActionResult> UpdateTranslation([FromBody] UpdateTranslationDto dto)
-    {
+    {   
         await _db.UpdateTranslationAsync(dto.id_translation, dto.text);
         return Ok();
     }
