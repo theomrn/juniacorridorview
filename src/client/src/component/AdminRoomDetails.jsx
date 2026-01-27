@@ -507,7 +507,10 @@ const AdminRoomDetails = () => {
           <FaArrowLeft /> Retour
         </button>
       </div>
+
+
       
+
       {/* à mettre dans la navbar*/}
       {/*<div className="text-2xl text-junia-purple font-title font-bold mt-4">{roomName}</div>*/}
 

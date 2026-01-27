@@ -56,4 +56,3 @@ export const getLanguagesId = async () => {
         throw error; // Re-throwing allows i18n.ts to handle the failure.
     }
 };
-

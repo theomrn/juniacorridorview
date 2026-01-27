@@ -78,4 +78,25 @@ public class TranslationController : ControllerBase
         var res = await _db.GetLanguagesAsync();
         return Ok(res);
     }
+
+    [HttpPost("create-language")]
+    public async Task<IActionResult> CreateLanguage([FromBody] CreateLanguageDto dto)
+    {
+        var id = await _db.InsertLanguageAsync(dto.name_language);
+        return Ok(new { id });
+    }
+
+    [HttpPut("update-language")]
+    public async Task<IActionResult> UpdateLanguage([FromBody] UpdateLanguageDto dto)
+    {
+        await _db.UpdateLanguageAsync(dto.id_language, dto.name_language);
+        return Ok();
+    }
+
+    [HttpDelete("delete-language/{id}")]
+    public async Task<IActionResult> DeleteLanguage(int id)
+    {
+        await _db.DeleteLanguageAsync(id);
+        return Ok();
+    }
 }
