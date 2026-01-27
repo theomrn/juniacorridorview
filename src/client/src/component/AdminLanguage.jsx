@@ -121,7 +121,7 @@ export default function AdminLanguage() {
     <div className="admin-language-container">
       <div className="admin-language-back-button" style={{position: "fixed", left: "20px", top: "80px", zIndex: 40}}>
         <button
-          onClick={() => history.push('/admin/room')}
+          onClick={() => history.push('/admin/translation')}
           className="button-type font-title font-bold flex items-center gap-2"
           style={{ backgroundColor: '#f06b42', color: 'white' }}
         >
