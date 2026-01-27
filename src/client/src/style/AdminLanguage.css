@@ -2,8 +2,6 @@
   padding: 2rem;
   max-width: 900px;
   margin: 0 auto;
-  background-color: #f7f1fd;
-  min-height: calc(100vh - 90px);
 }
 
 .admin-language-header {

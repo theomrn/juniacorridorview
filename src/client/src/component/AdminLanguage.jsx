@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import { createLanguage, updateLanguage, deleteLanguage } from "../api/AxiosLanguage";
 import { getLanguages } from "../api/AxiosTranslation";
-import { FaChevronDown, FaChevronUp, FaPen, FaTrash, FaPlus } from "react-icons/fa";
+import { FaChevronDown, FaChevronUp, FaPen, FaTrash, FaPlus, FaArrowLeft } from "react-icons/fa";
 import { toast } from "sonner";
 import '../style/AdminLanguage.css';
 
 export default function AdminLanguage() {
+  const history = useHistory();
   const [languages, setLanguages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
@@ -117,10 +119,16 @@ export default function AdminLanguage() {
 
   return (
     <div className="admin-language-container">
+      <div className="admin-language-back-button" style={{position: "fixed", left: "20px", top: "80px", zIndex: 40}}>
+        <button
+          onClick={() => history.push('/admin/room')}
+          className="button-type font-title font-bold flex items-center gap-2"
+          style={{ backgroundColor: '#f06b42', color: 'white' }}
+        >
+          <FaArrowLeft /> Retour
+        </button>
+      </div>
       <div className="admin-language-header">
-        <h1 className="font-title font-bold text-4xl" style={{ color: '#3c2c53' }}>
-          Gestion des Langues
-        </h1>
         <button
           onClick={() => setShowNewLanguageForm(!showNewLanguageForm)}
           className="button-type font-title font-bold flex items-center gap-2"
