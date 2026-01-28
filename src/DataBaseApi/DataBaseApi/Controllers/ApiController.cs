@@ -241,7 +241,7 @@ public class ApiController : ControllerBase
     {
         try
         {
-            var res = await _db.UpdateRoomVisibilityAsync(dto.IdRooms, dto.Hidden);
+            var res = await _db.UpdateRoomVisibilityAsync(dto.id_rooms, dto.Hidden);
             return Ok(new { updated = res });
         }
         catch (Exception ex)
@@ -402,7 +402,7 @@ public class ApiController : ControllerBase
     [HttpPost("update-tour-visibility")]
     public async Task<IActionResult> UpdateTourVisibility([FromBody] UpdateVisibilityTourDto dto)
     {
-        await _db.UpdateTourVisibilityAsync(dto.IdTours, dto.Hidden);
+        await _db.UpdateTourVisibilityAsync(dto.id_tours, dto.Hidden);
         return Ok();
     }
 

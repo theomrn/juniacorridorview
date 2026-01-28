@@ -119,11 +119,12 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
           })
         );
 
-        roomsData = roomsData.filter(r => r.hidden !== 1);
+        roomsData = roomsData.filter(r => r.hidden !== true);
         setVisitType(`${t('guidedTour')}, Parcours ${tourId}`);
       } else {
         roomsData = await api.getRooms();
-        roomsData = roomsData.filter(r => r.hidden !== 1);
+                    console.log('Room for tour step:', roomsData);
+        roomsData = roomsData.filter(r => r.hidden !== true);
       }
 
       setRooms(roomsData);
@@ -255,7 +256,7 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
 
   // ------------------- MEMO -------------------
   const filteredRooms = useMemo(() => {
-    const visible = rooms.filter(r => r.hidden !== 1);
+    const visible = rooms.filter(r => r.hidden !== true);
     visible.sort((a, b) => a.number.localeCompare(b.number));
 
     return visitType.startsWith('Visite guidée')
