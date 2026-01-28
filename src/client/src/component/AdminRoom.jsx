@@ -655,6 +655,18 @@ const AdminRoom = () => {
               <FaPlusCircle className="admin-button-icon" /> Ajouter une salle
             </button>
 
+            
+            <button
+                onClick={() => {
+                  history.push('/admin/language');
+                  setNewRoomModalOpen(true);
+                  setPlanPlacementEditMode(false);
+                }}
+                className="admin-button-responsive"
+            >
+              Languages
+            </button>
+
             <button
                 onClick={() => history.push('/admin/convert')}
                 className="admin-button-responsive">

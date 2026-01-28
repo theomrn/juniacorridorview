@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import {getLanguages, getEntiereTranslationsByNameSpace , updateTranslation} from "../api/AxiosTranslation";
+import { FaLanguage } from "react-icons/fa";
 
 export default function AdminTranslation() {
+  const history = useHistory();
   const [selectedLanguage, setSelectedLanguage] = useState(null);
   const [languages, setLanguages] = useState([]);
   const [namespaces] = useState(['home', 'navbar', 'contact', 'navigation']);
@@ -90,7 +93,18 @@ export default function AdminTranslation() {
   };
 
   return (
-    <div className="p-6">      
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold" style={{ color: '#3c2c53' }}>Gestion des Traductions</h1>
+        <button
+          onClick={() => history.push('/admin/language')}
+          className="px-4 py-2 font-title font-bold flex items-center gap-2"
+          style={{ backgroundColor: '#f06b42', color: 'white', borderRadius: '0.5rem' }}
+        >
+          <FaLanguage /> Gérer les langues
+        </button>
+      </div>
+
       <div className="mb-6">
         <label className="block text-sm font-medium mb-2">Sélectionner la langue:</label>
         <select

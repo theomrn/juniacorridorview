@@ -67,6 +67,9 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
         setRouteName('Gestion d\'une Salle');
       break;
 
+      case '/admin/language':
+        setRouteName('Gestion des Langues');
+      break;
       default:
         setRouteName('Menu Principal');
     }
