@@ -402,7 +402,7 @@ public class ApiController : ControllerBase
     [HttpPost("update-tour-visibility")]
     public async Task<IActionResult> UpdateTourVisibility([FromBody] UpdateVisibilityTourDto dto)
     {
-        await _db.UpdateTourVisibilityAsync(dto.IdTours, dto.Hidden);
+        await _db.UpdateTourVisibilityAsync(dto.id_tours, dto.Hidden);
         return Ok();
     }
 
