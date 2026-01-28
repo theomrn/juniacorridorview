@@ -1,7 +1,8 @@
-using System.Data;
 using Dapper;
 using DataBaseApi.Controllers;
 using MySqlConnector;
+using System.Data;
+using System.Text.Json;
 
 namespace DataBaseApi.Services;
 
@@ -380,24 +381,61 @@ public class DatabaseService
 
     public async Task<int> UpdateTourStepsAsync(int id_tours, IEnumerable<dynamic> steps, string? title, string? description)
     {
-        using var conn = CreateConnection();
-        await conn.ExecuteAsync("UPDATE Tours SET title = @Title, description = @Desc WHERE id_tours = @Id", new { Title = title, Desc = description, Id = id_tours });
-        await conn.ExecuteAsync("DELETE FROM Tour_Steps WHERE id_tours = @Id", new { Id = id_tours });
-        var insertSql = "INSERT INTO Tour_Steps (id_tour_steps, id_tours, id_rooms, step_number) VALUES (@IdStep, @IdTour, @IdRoom, @Num)";
-        foreach (var s in steps)
+        var connection = (MySqlConnection)CreateConnection();
+        await connection.OpenAsync();
+        using var tran = await connection.BeginTransactionAsync();
+        try
         {
-            var idStep = s.id_tour_steps ?? Guid.NewGuid().ToString();
-            await conn.ExecuteAsync(insertSql, new { IdStep = idStep, IdTour = id_tours, IdRoom = s.id_rooms, Num = s.step_number });
+            // update tour meta
+            await connection.ExecuteAsync("UPDATE Tours SET title = @Title, description = @Desc WHERE id_tours = @Id", new { Title = title, Desc = description, Id = id_tours }, tran);
+
+            // remove existing steps
+            await connection.ExecuteAsync("DELETE FROM Tour_Steps WHERE id_tours = @Id", new { Id = id_tours }, tran);
+
+            // insert new steps
+            var insertSql = "INSERT INTO Tour_Steps (id_tours, id_rooms, step_number) VALUES (@IdTour, @IdRoom, @Num)";
+            foreach (var s in steps)
+            {
+                await InsertOneStepAsync(connection, s, insertSql, id_tours, tran);
+            }
+            await tran.CommitAsync();
+            return 1;
         }
-        return 1;
+        catch
+        {
+            try { await tran.RollbackAsync(); } catch { }
+            throw;
+        }
+    }
+
+    public async Task<int> InsertOneStepAsync(MySqlConnection connection,dynamic s,string insertSql, int id_tours, MySqlTransaction tran)
+    {
+        var elem = (JsonElement)s;
+
+        string? idStep = null;
+        if (elem.TryGetProperty("id_tour_steps", out var pStep))
+            idStep = pStep.GetString();
+
+        if (string.IsNullOrEmpty(idStep) || idStep.StartsWith("new_"))
+            idStep = Guid.NewGuid().ToString();
+
+        int idRoom = int.Parse(elem.GetProperty("id_rooms").GetString());
+        int stepNumber = elem.GetProperty("step_number").GetInt32();
+        
+        return await connection.ExecuteAsync(insertSql, new
+        {
+            //IdStep = idStep,
+            IdTour = id_tours,
+            IdRoom = idRoom,
+            Num = stepNumber
+        }, tran);
     }
 
     public async Task<int> AddTourStepAsync(int id_tours, dynamic step)
     {
         using var conn = CreateConnection();
-        var id = Guid.NewGuid().ToString();
-        var sql = "INSERT INTO Tour_Steps (id_tour_steps, id_tours, id_rooms, step_number) VALUES (@IdStep, @IdTour, @IdRoom, @Num)";
-        return await conn.ExecuteAsync(sql, new { IdStep = id, IdTour = id_tours, IdRoom = step.id_rooms, Num = step.step_number });
+        var sql = "INSERT INTO Tour_Steps (id_tours, id_rooms, step_number) VALUES (@IdTour, @IdRoom, @Num)";
+        return await conn.ExecuteAsync(sql, new { IdTour = id_tours, IdRoom = step.id_rooms, Num = step.step_number });
     }
 
     public async Task<int> CreateTourWithStepsAsync(

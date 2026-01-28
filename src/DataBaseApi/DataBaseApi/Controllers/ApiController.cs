@@ -374,14 +374,14 @@ public class ApiController : ControllerBase
     [HttpPost("update-tour-steps")]
     public async Task<IActionResult> UpdateTourSteps([FromBody] UpdateTourStepsDto dto)
     {
-        await _db.UpdateTourStepsAsync(dto.IdTours, dto.Steps, dto.Title, dto.Description);
+        await _db.UpdateTourStepsAsync(dto.id_tours, dto.Steps, dto.Title, dto.Description);
         return Ok();
     }
 
     [HttpPost("add-tour-step")]
     public async Task<IActionResult> AddTourStep([FromBody] AddTourStepDto dto)
     {
-        await _db.AddTourStepAsync(dto.IdTours, dto.Step);
+        await _db.AddTourStepAsync(dto.id_tours, dto.Step);
         return Ok();
     }
 
