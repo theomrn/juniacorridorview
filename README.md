@@ -29,7 +29,18 @@ This is a **unified monorepo project** combining:
    - Copy `src/client/src/firebaseConfig.js.example` to `src/client/src/firebaseConfig.js`
    - Add your Firebase configuration credentials
 
-3. **Start development servers**:
+3. **Initialize the database**:
+   - Create a MySQL database
+   - Run the SQL scripts in the project root:
+     - `db_script_empty.sql`: Initial database schema
+     - `translations_script.sql`: Translation setup and sample data
+   ```bash
+   mysql -u your_user -p your_database < db_script_empty.sql
+   mysql -u your_user -p your_database < translations_script.sql
+   ```
+   - Update the database connection string in the `.NET backend configuration`
+
+4. **Start development servers**:
    ```bash
    npm run dev
    ```
