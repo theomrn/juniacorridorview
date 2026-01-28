@@ -241,7 +241,7 @@ public class ApiController : ControllerBase
     {
         try
         {
-            var res = await _db.UpdateRoomVisibilityAsync(dto.IdRooms, dto.Hidden);
+            var res = await _db.UpdateRoomVisibilityAsync(dto.id_rooms, dto.Hidden);
             return Ok(new { updated = res });
         }
         catch (Exception ex)

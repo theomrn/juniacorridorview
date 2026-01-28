@@ -1,6 +1,6 @@
 
 public record IdDto(int id_pictures);
-public record UpdateVisibilityDto(int IdRooms, bool Hidden);
+public record UpdateVisibilityDto(int id_rooms, bool Hidden);
 public record UpdateVisibilityTourDto(int IdTours, bool Hidden);
 public record NameDto(string Name);
 public record UpdateBuildingDto(int IdBuildings, string Name);
