@@ -5,21 +5,25 @@ import React, {
   useState,
   useCallback,
   useMemo,
+  useContext,
 } from "react";
 import * as api from '../api/AxiosPano';
 import { getTourSteps } from '../api/AxiosTour';
+import { getVisitorTypes } from '../api/AxiosVisitorType';
 import { useTranslation } from 'react-i18next';
 import '../style/Pano.css';
 import { toast } from "sonner";
 import Panorama360 from './Panorama360';
 import Loader from "./Loader";
-import Navbar from './Navbar';
+import { AppContext } from '../App';
+import { FaUserTag } from "react-icons/fa";
 
 const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }) => {
 
   Buffer.from = Buffer.from || require('buffer').Buffer;
 
   const { t } = useTranslation('pano');
+  const { selectedVisitorType, setSelectedVisitorType } = useContext(AppContext);
 
   // ------------------- STATES -------------------
   const [images, setImages] = useState([]);
@@ -37,6 +41,10 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
   const [currentFloor, setCurrentFloor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [textLoading, setTextLoading] = useState(t('loading'));
+
+  // Visitor type state
+  const [visitorTypes, setVisitorTypes] = useState([]);
+  const [visitorTypeDropdownOpen, setVisitorTypeDropdownOpen] = useState(false);
 
   // ------------------- REFS -------------------
   const firstLoad = useRef(true);
@@ -244,6 +252,19 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
     }
   }, [fetchAllData]);
 
+  // Load visitor types
+  useEffect(() => {
+    const loadVisitorTypes = async () => {
+      try {
+        const types = await getVisitorTypes();
+        setVisitorTypes(types || []);
+      } catch (err) {
+        console.error('Error loading visitor types:', err);
+      }
+    };
+    loadVisitorTypes();
+  }, []);
+
   useEffect(() => {
     if (images.length > 0 && !isLoading.current && firstLoad.current) {
       if (!loadingImage.current) {
@@ -265,6 +286,30 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
 
   }, [rooms, tourSteps, visitType]);
 
+  // Filter InfoPopups by visitor type
+  const filteredInfoPopups = useMemo(() => {
+    const popups = infoPopups[currentImageId] || [];
+    if (!selectedVisitorType) {
+      // Show all popups (those with no visitor type restriction)
+      return popups.filter(p => !p.id_visitor_type);
+    }
+    // Show popups for selected visitor type OR those with no restriction
+    return popups.filter(p =>
+      !p.id_visitor_type || p.id_visitor_type === selectedVisitorType.id_visitor_type
+    );
+  }, [infoPopups, currentImageId, selectedVisitorType]);
+
+  // Handle visitor type change
+  const handleVisitorTypeChange = (visitorType) => {
+    setSelectedVisitorType(visitorType);
+    setVisitorTypeDropdownOpen(false);
+    if (visitorType) {
+      localStorage.setItem("selectedVisitorType", JSON.stringify(visitorType));
+    } else {
+      localStorage.removeItem("selectedVisitorType");
+    }
+  };
+
   // ------------------- RENDER -------------------
   return (
     <div>
@@ -274,6 +319,44 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
 
         {/* SIDEBAR – ROOMS LIST */}
         <div className="h-full scrollable-list flex-col w-15" id="style-2">
+          {/* Visitor Type Selector */}
+          {visitorTypes.length > 0 && (
+            <div className="visitor-type-selector p-2 mb-2">
+              <div className="relative">
+                <button
+                  onClick={() => setVisitorTypeDropdownOpen(!visitorTypeDropdownOpen)}
+                  className="w-full bg-white border-2 border-junia-orange rounded-lg p-2 flex items-center justify-between font-title font-bold text-junia-purple"
+                >
+                  <span className="flex items-center gap-2">
+                    <FaUserTag className="text-junia-orange" />
+                    {selectedVisitorType ? selectedVisitorType.name_visitor_type : t('allVisitors') || 'Tous les visiteurs'}
+                  </span>
+                  <span className="text-junia-orange">{visitorTypeDropdownOpen ? '▲' : '▼'}</span>
+                </button>
+
+                {visitorTypeDropdownOpen && (
+                  <div className="absolute top-full left-0 right-0 bg-white border-2 border-junia-orange rounded-lg mt-1 z-50 shadow-lg">
+                    <div
+                      className={`p-2 cursor-pointer hover:bg-junia-lavender font-title ${!selectedVisitorType ? 'bg-junia-lavender font-bold' : ''}`}
+                      onClick={() => handleVisitorTypeChange(null)}
+                    >
+                      {t('allVisitors') || 'Tous les visiteurs'}
+                    </div>
+                    {visitorTypes.map(vt => (
+                      <div
+                        key={vt.id_visitor_type}
+                        className={`p-2 cursor-pointer hover:bg-junia-lavender font-title ${selectedVisitorType?.id_visitor_type === vt.id_visitor_type ? 'bg-junia-lavender font-bold' : ''}`}
+                        onClick={() => handleVisitorTypeChange(vt)}
+                      >
+                        {vt.name_visitor_type}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="other-rooms-title">{t('otherRooms')}</div>
 
           {filteredRooms.map(room => (
@@ -296,7 +379,7 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
         {/* PANORAMA */}
         <div className="panorama-content">
           <Panorama360
-            infoPopups={infoPopups[currentImageId] || []}
+            infoPopups={filteredInfoPopups}
             selectedPicture={images.find(img => img.id === currentImageId) || null}
             links={links[currentImageId] || []}
             onLinkClick={handleLinkClick}

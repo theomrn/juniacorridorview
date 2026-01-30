@@ -1,6 +1,7 @@
-import React, {useEffect, useRef, useState, useCallback} from "react";
+import React, {useEffect, useRef, useState, useCallback, useContext} from "react";
 import { useHistory } from "react-router-dom";
 import * as api from '../api/AxiosTour';
+import { getVisitorTypes } from '../api/AxiosVisitorType';
 import { useTranslation } from 'react-i18next';
 import '../style/Tour.css';
 import { Buffer } from 'buffer';
@@ -8,10 +9,13 @@ import Carousel from '../reactbits/Components/Carousel/Carousel'
 import {toast} from "sonner";
 import Loader from "./Loader";
 import Masonry from 'react-masonry-css';
+import { AppContext } from '../App';
+import { FaUserTag } from "react-icons/fa";
 
 const TourViewer = () => {
   Buffer.from = Buffer.from || require('buffer').Buffer;
   const { t } = useTranslation('tour');
+  const { selectedVisitorType, setSelectedVisitorType } = useContext(AppContext);
   const [tours, setTours] = useState([]);
   const [tourSteps, setTourSteps] = useState({});
   const [rooms, setRooms] = useState({});
@@ -23,6 +27,10 @@ const TourViewer = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [textLoading, setTextLoading] = useState(t('loading'));
+
+  // Visitor type state
+  const [visitorTypes, setVisitorTypes] = useState([]);
+  const [visitorTypeDropdownOpen, setVisitorTypeDropdownOpen] = useState(false);
 
   // Define breakpoints for Masonry layout
   const breakpointColumnsObj = {
@@ -142,6 +150,8 @@ const TourViewer = () => {
   }
 
   const handleTourClick = (tourId) => {
+    // The visitor type is already stored in context and localStorage,
+    // so it will be available in the Pano component
     history.push(`/pano?tour_id=${tourId}`);
   };
 
@@ -165,6 +175,30 @@ const TourViewer = () => {
       showLoading([fetchAllTourStepsPromise], 'Chargement des parcours...', 'Chargement des parcours réussi', 'Erreur lors du chargement des parcours');
     }
   }, [tours]);
+
+  // Load visitor types
+  useEffect(() => {
+    const loadVisitorTypes = async () => {
+      try {
+        const types = await getVisitorTypes();
+        setVisitorTypes(types || []);
+      } catch (err) {
+        console.error('Error loading visitor types:', err);
+      }
+    };
+    loadVisitorTypes();
+  }, []);
+
+  // Handle visitor type change
+  const handleVisitorTypeChange = (visitorType) => {
+    setSelectedVisitorType(visitorType);
+    setVisitorTypeDropdownOpen(false);
+    if (visitorType) {
+      localStorage.setItem("selectedVisitorType", JSON.stringify(visitorType));
+    } else {
+      localStorage.removeItem("selectedVisitorType");
+    }
+  };
 
   const getPanoramaImagesForTour = (tourId) => {
     if (!tourSteps[tourId]) return [];
@@ -202,6 +236,44 @@ const TourViewer = () => {
     <div className="body-container bg-junia-lavender">
       <Loader show={isLoading} text={textLoading} />
       <div className="bg-junia-lavender p-4">
+        {/* Visitor Type Selector */}
+        {visitorTypes.length > 0 && (
+          <div className="visitor-type-selector-tour mb-4 flex justify-center">
+            <div className="relative w-64">
+              <button
+                onClick={() => setVisitorTypeDropdownOpen(!visitorTypeDropdownOpen)}
+                className="w-full bg-white border-2 border-junia-orange rounded-lg p-3 flex items-center justify-between font-title font-bold text-junia-purple shadow-md"
+              >
+                <span className="flex items-center gap-2">
+                  <FaUserTag className="text-junia-orange" />
+                  {selectedVisitorType ? selectedVisitorType.name_visitor_type : t('allVisitors') || 'Tous les visiteurs'}
+                </span>
+                <span className="text-junia-orange">{visitorTypeDropdownOpen ? '▲' : '▼'}</span>
+              </button>
+
+              {visitorTypeDropdownOpen && (
+                <div className="absolute top-full left-0 right-0 bg-white border-2 border-junia-orange rounded-lg mt-1 z-50 shadow-lg">
+                  <div
+                    className={`p-3 cursor-pointer hover:bg-junia-lavender font-title ${!selectedVisitorType ? 'bg-junia-lavender font-bold' : ''}`}
+                    onClick={() => handleVisitorTypeChange(null)}
+                  >
+                    {t('allVisitors') || 'Tous les visiteurs'}
+                  </div>
+                  {visitorTypes.map(vt => (
+                    <div
+                      key={vt.id_visitor_type}
+                      className={`p-3 cursor-pointer hover:bg-junia-lavender font-title ${selectedVisitorType?.id_visitor_type === vt.id_visitor_type ? 'bg-junia-lavender font-bold' : ''}`}
+                      onClick={() => handleVisitorTypeChange(vt)}
+                    >
+                      {vt.name_visitor_type}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {!isLoading && (
           <Masonry
             breakpointCols={breakpointColumnsObj}
