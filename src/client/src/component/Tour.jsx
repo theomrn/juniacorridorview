@@ -15,7 +15,7 @@ import { FaUserTag } from "react-icons/fa";
 const TourViewer = () => {
   Buffer.from = Buffer.from || require('buffer').Buffer;
   const { t } = useTranslation('tour');
-  const { selectedVisitorType, setSelectedVisitorType } = useContext(AppContext);
+  // const { selectedVisitorType, setSelectedVisitorType } = useContext(AppContext);
   const [tours, setTours] = useState([]);
   const [tourSteps, setTourSteps] = useState({});
   const [rooms, setRooms] = useState({});
@@ -29,8 +29,8 @@ const TourViewer = () => {
   const [textLoading, setTextLoading] = useState(t('loading'));
 
   // Visitor type state
-  const [visitorTypes, setVisitorTypes] = useState([]);
-  const [visitorTypeDropdownOpen, setVisitorTypeDropdownOpen] = useState(false);
+  // const [visitorTypes, setVisitorTypes] = useState([]);
+  // const [visitorTypeDropdownOpen, setVisitorTypeDropdownOpen] = useState(false);
 
   // Define breakpoints for Masonry layout
   const breakpointColumnsObj = {
@@ -177,28 +177,28 @@ const TourViewer = () => {
   }, [tours]);
 
   // Load visitor types
-  useEffect(() => {
-    const loadVisitorTypes = async () => {
-      try {
-        const types = await getVisitorTypes();
-        setVisitorTypes(types || []);
-      } catch (err) {
-        console.error('Error loading visitor types:', err);
-      }
-    };
-    loadVisitorTypes();
-  }, []);
+  // useEffect(() => {
+  //   const loadVisitorTypes = async () => {
+  //     try {
+  //       const types = await getVisitorTypes();
+  //       setVisitorTypes(types || []);
+  //     } catch (err) {
+  //       console.error('Error loading visitor types:', err);
+  //     }
+  //   };
+  //   loadVisitorTypes();
+  // }, []);
 
   // Handle visitor type change
-  const handleVisitorTypeChange = (visitorType) => {
-    setSelectedVisitorType(visitorType);
-    setVisitorTypeDropdownOpen(false);
-    if (visitorType) {
-      localStorage.setItem("selectedVisitorType", JSON.stringify(visitorType));
-    } else {
-      localStorage.removeItem("selectedVisitorType");
-    }
-  };
+  // const handleVisitorTypeChange = (visitorType) => {
+  //   setSelectedVisitorType(visitorType);
+  //   setVisitorTypeDropdownOpen(false);
+  //   if (visitorType) {
+  //     localStorage.setItem("selectedVisitorType", JSON.stringify(visitorType));
+  //   } else {
+  //     localStorage.removeItem("selectedVisitorType");
+  //   }
+  // };
 
   const getPanoramaImagesForTour = (tourId) => {
     if (!tourSteps[tourId]) return [];
@@ -237,7 +237,7 @@ const TourViewer = () => {
       <Loader show={isLoading} text={textLoading} />
       <div className="bg-junia-lavender p-4">
         {/* Visitor Type Selector */}
-        {visitorTypes.length > 0 && (
+        {/* {visitorTypes.length > 0 && (
           <div className="visitor-type-selector-tour mb-4 flex justify-center">
             <div className="relative w-64">
               <button
@@ -272,7 +272,7 @@ const TourViewer = () => {
               )}
             </div>
           </div>
-        )}
+        )} */}
 
         {!isLoading && (
           <Masonry
