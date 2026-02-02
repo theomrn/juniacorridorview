@@ -316,7 +316,7 @@ public class ApiController : ControllerBase
     [HttpPost("retrieveInfoPopUpByIdPicture")]
     public async Task<IActionResult> RetrieveInfoPopUpByIdPicture([FromBody] IdDto dto)
     {
-        var res = await _db.RetrieveInfoPopUpByIdPictureAsync(dto.id_pictures);
+        var res = await _db.RetrieveInfoPopUpByIdPictureAsync(dto.id_pictures, dto.id_languages);
         return Ok(res);
     }
 

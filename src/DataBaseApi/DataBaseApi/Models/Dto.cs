@@ -1,5 +1,5 @@
 
-public record IdDto(int id_pictures);
+public record IdDto(int id_pictures, int? id_languages = null);
 public record UpdateVisibilityDto(int id_rooms, bool Hidden);
 public record UpdateVisibilityTourDto(int id_tours, bool Hidden);
 public record NameDto(string Name);

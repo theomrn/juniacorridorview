@@ -22,7 +22,7 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
 
   Buffer.from = Buffer.from || require('buffer').Buffer;
 
-  const { t } = useTranslation('pano');
+  const { t, i18n } = useTranslation('pano');
   const { selectedVisitorType, setSelectedVisitorType } = useContext(AppContext);
 
   // ------------------- STATES -------------------
@@ -203,7 +203,7 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
     cleanUrlParams();
     if (currentImageId !== id) setCurrentImageId(id);
 
-    const popupsPromise = api.getInfoPopup(id);
+    const popupsPromise = api.getInfoPopup(id, i18n.language);
     const linksPromise = api.getLinks(id);
 
     const roomIdPromise = api.getRoomIdByPictureId(id).then((roomId) => {
@@ -274,6 +274,15 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
       firstLoad.current = false;
     }
   }, [images]);
+
+  // Re-fetch popups when language changes
+  useEffect(() => {
+    if (currentImageId) {
+      api.getInfoPopup(currentImageId, i18n.language).then(p =>
+        setInfoPopups(prev => ({ ...prev, [currentImageId]: p }))
+      );
+    }
+  }, [i18n.language]);
 
   // ------------------- MEMO -------------------
   const filteredRooms = useMemo(() => {

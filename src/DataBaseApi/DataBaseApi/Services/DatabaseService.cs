@@ -270,12 +270,12 @@ public class DatabaseService
         return await conn.ExecuteAsync(sql, new { Id = id_info_popup, Lang = id_languages, Title = title, Text = text, VisitorType = id_visitor_type });
     }
 
-    public async Task<IEnumerable<dynamic>> RetrieveInfoPopUpByIdPictureAsync(int id_pictures)
+    public async Task<IEnumerable<dynamic>> RetrieveInfoPopUpByIdPictureAsync(int id_pictures, int? id_languages = null)
     {
         using var conn = CreateConnection();
 
         var sql = @"
-            SELECT 
+            SELECT
                 ip.id_info_popup,
                 ip.id_pictures,
                 ip.position_x,
@@ -289,8 +289,13 @@ public class DatabaseService
             FROM Info_Popup ip
             LEFT JOIN Info_popup_translation ipt
                 ON ip.id_info_popup = ipt.id_info_popup
-            WHERE ip.id_pictures = @Id;
-        ";
+            WHERE ip.id_pictures = @Id";
+
+        if (id_languages.HasValue)
+        {
+            sql += " AND (ipt.id_languages = @Lang OR ipt.id_languages IS NULL)";
+            return await conn.QueryAsync(sql, new { Id = id_pictures, Lang = id_languages.Value });
+        }
 
         return await conn.QueryAsync(sql, new { Id = id_pictures });
     }
