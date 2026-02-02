@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { getLanguages, getEntiereTranslationsByNameSpace, updateTranslation } from "../api/AxiosTranslation";
-import { FaLanguage, FaChevronDown, FaChevronUp, FaSave } from "react-icons/fa";
+import { FaLanguage, FaChevronDown, FaChevronUp, FaSave, FaArrowLeft } from "react-icons/fa";
 import { toast } from "sonner";
 import '../style/AdminTranslation.css';
 
@@ -113,6 +113,15 @@ export default function AdminTranslation() {
 
   return (
     <div className="admin-translation-container">
+      <div style={{ position: "fixed", left: "20px", top: "80px", zIndex: 40 }}>
+        <button
+          onClick={() => history.push('/admin/room')}
+          className="button-type font-title font-bold"
+          style={{ backgroundColor: '#f06b42', color: 'white' }}
+        >
+          <FaArrowLeft /> Retour
+        </button>
+      </div>
       <div className="admin-translation-header">
         <button
           onClick={() => history.push('/admin/language')}
