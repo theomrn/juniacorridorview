@@ -287,7 +287,7 @@ public class DatabaseService
                 ipt.text,
                 ipt.id_visitor_type
             FROM Info_Popup ip
-            INNER JOIN Info_popup_translation ipt 
+            LEFT JOIN Info_popup_translation ipt
                 ON ip.id_info_popup = ipt.id_info_popup
             WHERE ip.id_pictures = @Id;
         ";

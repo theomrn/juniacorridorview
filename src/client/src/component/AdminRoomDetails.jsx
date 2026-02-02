@@ -212,15 +212,15 @@ const AdminRoomDetails = () => {
   };
 
   const filteredInfoPopups = infoPopups.filter(popup =>
-    popup.title.toLowerCase().includes(searchTerm.toLowerCase())
+    (popup.title || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredLinks = links.filter(link =>
     link.id_pictures_destination.toString().includes(searchLinkTerm)
   );
 
-  const displayedInfoPopups = showAllInfospots 
-    ? allInfoPopups.filter(popup => popup.title.toLowerCase().includes(searchTerm.toLowerCase()))
+  const displayedInfoPopups = showAllInfospots
+    ? allInfoPopups.filter(popup => (popup.title || '').toLowerCase().includes(searchTerm.toLowerCase()))
     : filteredInfoPopups;
 
   const displayedLinks = showAllLinks 
