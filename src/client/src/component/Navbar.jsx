@@ -26,14 +26,14 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
   useEffect(() => {
     switch (location.pathname) {
       case '/':
-        setRouteName('Accueil');
+        setRouteName(t('home'));
         break;
       case '/pano':
         // Correction ici : afficher "numéro de la salle - nom de la salle"
         const safeImageName = selectedImageName || '';
         const safeRoomNumber = currentRoomNumber || '';
         if(safeImageName === '' || safeRoomNumber === '') {
-          setRouteName('Immersion');
+          setRouteName(t('immersion'));
         }
         else {
           setRouteName(safeRoomNumber + ' - ' + safeImageName);
@@ -43,37 +43,36 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
         setRouteName(t('guidedTour'));
         break;
       case '/admin':
-        setRouteName('Administrateur');
+        setRouteName(t('admin'));
         break;
       case '/admin/tour':
-        setRouteName('Gestion des Parcours');
+        setRouteName(t('adminTour'));
         break;
       case '/admin/room':
-        setRouteName('Gestion des Salles');
+        setRouteName(t('adminRoom'));
         break;
       case '/admin/building':
-        setRouteName('Gestion des Bâtiments');
+        setRouteName(t('adminBuilding'));
         break;
       case '/admin/user':
-        setRouteName('Gestion des Administrateurs');
+        setRouteName(t('adminUser'));
         break;
       case '/admin/convert':
-        setRouteName('Conversion AVIF');
-      break;
-      case "/admin/translation":
-        setRouteName('Gestion des Traductions');
-      break;
+        setRouteName(t('adminConvert'));
+        break;
+      case '/admin/translation':
+        setRouteName(t('adminTranslation'));
+        break;
       case location.pathname.match(/^\/admin\/room\/\d+$/)?.input:
-        setRouteName('Gestion d\'une Salle');
-      break;
-
+        setRouteName(t('adminRoomDetail'));
+        break;
       case '/admin/language':
-        setRouteName('Gestion des Langues');
-      break;
-      default:
-        setRouteName('Menu Principal');
-    }
-  }, [location, selectedImageName, currentRoomNumber]);
+        setRouteName(t('adminLanguage'));
+        break;
+    default:
+      setRouteName(t('mainMenu'));
+  }
+  }, [location, selectedImageName, currentRoomNumber, t]);
 
   useEffect(() => {
     const fetchUserEmail = () => {
