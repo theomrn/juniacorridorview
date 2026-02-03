@@ -1,9 +1,11 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import React, { useEffect, useRef, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import PlanImage from "./plan/PlanImage";
 
 const Panorama360 = ({ infoPopups, selectedPicture, links, onLinkClick, onPositionSelect, isLoading, disableClick, floor}) => {
+  const { t } = useTranslation('Panorama360');
   const mountRef = useRef(null);
   const rendererRef = useRef(null);
   const cameraRef = useRef(null);
@@ -131,7 +133,11 @@ const Panorama360 = ({ infoPopups, selectedPicture, links, onLinkClick, onPositi
         const imgY = titleYStart + titleHeight + 10; // Add padding after title
 
         // Image (optional)
-        if (popup.image) {
+        if (popup.image_path) {
+
+          const image = new Image(); // Créer un nouvel objet Image
+          image.crossOrigin = "anonymous";
+          image.src = `http://localhost:5078/${popup.image_path}`;
           // Draw image
           context.drawImage(image, imgX, imgY, imageWidth, imageHeight);
 
@@ -221,7 +227,10 @@ const Panorama360 = ({ infoPopups, selectedPicture, links, onLinkClick, onPositi
 
         // Draw image if available
         const imgX = (canvasWidth - imageWidth) / 2;
-        if (popup.image) {
+        if (popup.image_path) {
+                    const image = new Image(); // Créer un nouvel objet Image
+                    image.crossOrigin = "anonymous";
+          image.src = `http://localhost:5078/${popup.image_path}`;
           context.drawImage(image, imgX, imgY, imageWidth, imageHeight);
           context.strokeStyle = '#3c2c53';
           context.lineWidth = 5;
@@ -241,9 +250,8 @@ const Panorama360 = ({ infoPopups, selectedPicture, links, onLinkClick, onPositi
       mesh.position.set(0, 50, 0);
       popupGroup.add(mesh);
     };
-
-    image.src = URL.createObjectURL(new Blob([new Uint8Array(popup.image.data)], { type: 'image/png' }));
-
+  image.crossOrigin = "anonymous";
+    image.src = `http://localhost:5078/${popup.image_path}`;
     return popupGroup;
   };
 
@@ -322,7 +330,7 @@ const Panorama360 = ({ infoPopups, selectedPicture, links, onLinkClick, onPositi
     const geometry = new THREE.SphereGeometry(500, 32, 16);
     geometry.scale(-1, 1, 1);
     const textureLoader = new THREE.TextureLoader();
-    const texture = textureLoader.load(selectedPicture);
+    const texture = textureLoader.load(selectedPicture.imageUrl);
     texture.colorSpace = THREE.SRGBColorSpace;
     const material = new THREE.MeshBasicMaterial({ 
       map: texture
@@ -540,7 +548,7 @@ const Panorama360 = ({ infoPopups, selectedPicture, links, onLinkClick, onPositi
             maxHeight: "15vh",
             maxWidth: "15vw"
           }}>
-            <PlanImage image={floor.plan} altText={"plan"} pinX={floor.plan_x} pinY={floor.plan_y} />
+            <PlanImage image={floor.plan_path} altText={"plan"} pinX={floor.plan_x} pinY={floor.plan_y} />
           </div>
       )}
       {/*<img

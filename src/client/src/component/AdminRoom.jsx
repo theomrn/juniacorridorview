@@ -373,8 +373,8 @@ const AdminRoom = () => {
       // formData.append('floor', newRoomData.floor);
 
       formData.append('id_floors', newRoomData.floorId);
-      formData.append('plan_x',Number(newRoomData.plan_x).toFixed(2)).replace('.', ','); 
-      formData.append('plan_y', Number(newRoomData.plan_y).toFixed(2).replace('.', ','));    //}
+      formData.append('plan_x',newRoomData.plan_x); 
+      formData.append('plan_y', newRoomData.plan_y);    //}
     
     // Add preview image to form data
     if (newRoomData.previewImage) {
@@ -382,9 +382,9 @@ const AdminRoom = () => {
     }
 
     // Add images to form data
-    // newRoomData.images.forEach(image => {
-    //   formData.append('images', image);
-    // });
+    newRoomData.images.forEach(image => {
+      formData.append('images', image);
+    });
 
     try {
       const createRoomPromise = api.createRoom(formData);
@@ -654,7 +654,31 @@ const AdminRoom = () => {
             >
               <FaPlusCircle className="admin-button-icon" /> Ajouter une salle
             </button>
+
             
+            <button
+                onClick={() => {
+                  history.push('/admin/language');
+                  setNewRoomModalOpen(true);
+                  setPlanPlacementEditMode(false);
+                }}
+                className="admin-button-responsive"
+            >
+              Languages
+            </button>
+
+            <button
+                onClick={() => history.push('/admin/convert')}
+                className="admin-button-responsive">
+                Convertion fichier
+            </button>
+
+                      <button
+                onClick={() => history.push('/admin/translation')}
+                className="admin-button-responsive">
+                Traduction
+            </button>
+
             <button
                 onClick={() => history.push('/admin/tour')}
                 className="admin-button-responsive">

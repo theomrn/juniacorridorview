@@ -465,6 +465,7 @@ const AdminTour = () => {
     
     // Create images array with placeholders for missing images
     const images = tourSteps[tourId].map(step => { 
+      // console.log('Getting panorama for step:', step);
       return { 
         src: panoramaUrls[step.id_rooms] || 'https://via.placeholder.com/800x600?text=No+Image+Available', 
         alt: `Panorama of ${step.room_name}`, 

@@ -26,8 +26,8 @@ const getPicturesByRoomId = async (id_rooms) => {
 
 const getImage = async (id) => {
   try {
-    const response = await axios.get(`/api/fetch/${id}`, { responseType: 'blob' });
-    const imageUrl = URL.createObjectURL(response.data);
+    const response = await axios.get(`/api/fetch/${id}`);
+    const imageUrl = `http://localhost:5078/${response.data}`;
     return imageUrl;
   } catch (error) {
     console.error('Error fetching image:', error);
@@ -65,6 +65,11 @@ const insertInfoPopUp = async (formData) => {
 
 const insertLink = async (data) => {
   try {
+    console.log(data.posX);
+        console.log(data.posY);
+        console.log(data.posZ);
+    console.log(data.selectedPictureId);
+    console.log(data.id_pictures_destination);
       await axios.post('/api/insertLink', data);
   } catch (error) {
       console.error('Error inserting link:', error);
@@ -85,11 +90,10 @@ const createRoom = async (formData) => {
   try {
     const response = await axios.post('/api/add-room', formData);
     const id_rooms = response.data.id_rooms;
-
-    console.log('Created room with ID:', id_rooms);
     
     
     const imageUploadPromises = formData.getAll('images').map((image) => {
+      // console.log(image);
       const imageFormData = new FormData();
       imageFormData.append('id_rooms', id_rooms);
       imageFormData.append('pic', image);
@@ -134,7 +138,7 @@ const createBuilding = async (buildingData) => {
 
 const updateRoom = async (formData) => {
     try {
-        const response = await axios.post('/api/update-room', formData);
+        const response = await axios.put('/api/update-room', formData);
         const id_rooms = formData.get('id_rooms');
 
         // Create a picture for each uploaded image
@@ -190,7 +194,6 @@ const updateRoomVisibility = async (id_rooms, hidden) => {
 const getRoomPreview = async (id_rooms) => {
   try {
     const response = await axios.get(`/api/room-preview/${id_rooms}`, { 
-      responseType: 'blob',
       validateStatus: status => {
         // Consider both 200 and 404 as valid responses
         return status === 200 || status === 404;
@@ -199,7 +202,7 @@ const getRoomPreview = async (id_rooms) => {
     
     // If we got a successful response with image data
     if (response.status === 200) { 
-      const imageUrl = URL.createObjectURL(response.data);
+      const imageUrl = `http://localhost:5078/${response.data}`;
       return imageUrl;
     }
     
@@ -216,7 +219,7 @@ const getRoomPreview = async (id_rooms) => {
 
 const updateInfospot = async (formData) => {
     try {
-        await axios.post('/api/update-infospot', formData);
+        await axios.put('/api/update-infospot', formData);
     } catch (error) {
         console.error('Error updating infospot:', error);
     }
@@ -224,7 +227,7 @@ const updateInfospot = async (formData) => {
 
 const updateLink = async (formData) => {
     try {
-        await axios.post('/api/update-link', formData);
+        await axios.put('/api/update-link', formData);
     } catch (error) {
         console.error('Error updating link:', error);
     }
@@ -244,7 +247,54 @@ const deleteInfospot = async (id_infospots) => {
     } catch (error) {
         console.error('Error deleting infospot:', error);
     }
+};
 
+// Get InfoPopup by ID (base info)
+const getInfospotById = async (id_info_popup) => {
+    try {
+        const response = await axios.get(`/api/infospot/${id_info_popup}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching infospot:', error);
+        return null;
+    }
+};
+
+// Get all translations for a specific InfoPopup
+const getInfospotTranslations = async (id_info_popup) => {
+    try {
+        const response = await axios.get(`/api/infospot/${id_info_popup}/translations`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching infospot translations:', error);
+        return [];
+    }
+};
+
+// Add a translation to an existing InfoPopup
+const addInfospotTranslation = async (id_info_popup, title, text, id_languages, id_visitor_type) => {
+    try {
+        const response = await axios.post(`/api/infospot/${id_info_popup}/translations`, {
+            Title: title,
+            Text: text,
+            IdLanguages: id_languages,
+            IdVisitorType: id_visitor_type || null
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error adding infospot translation:', error);
+        throw error;
+    }
+};
+
+// Delete a specific translation
+const deleteInfospotTranslation = async (id_info_popup, id_languages) => {
+    try {
+        await axios.delete(`/api/infospot/${id_info_popup}/translations/${id_languages}`);
+    } catch (error) {
+        console.error('Error deleting infospot translation:', error);
+        throw error;
+    }
 };
 
 const getFloors = async () => {
@@ -292,5 +342,9 @@ export {
   deleteLink,
   deleteInfospot,
   getFloors,
-  uploadFile
+  uploadFile,
+  getInfospotById,
+  getInfospotTranslations,
+  addInfospotTranslation,
+  deleteInfospotTranslation
 };

@@ -6,6 +6,19 @@
 /src/client/src/firebaseConfig.js
 /src/server/yp-2425-10-firebase-adminsdk-fbsvc-7dfe32071b.json
 
-/src/server/Pictures/*
-
+/src/server_old/*
 *.vscode/
+*appsettings*.json
+/src/DataBaseApi/.vs/*
+/src/DataBaseApi/DataBaseApi/bin/*
+/src/DataBaseApi/DataBaseApi/obj/*
+src/DataBaseApi/DataBaseApi/wwwroot/images/*
+src/DataBaseApi/DataBaseApi/wwwroot/previews/*
+/src/DataBaseApi/DataBaseApi/DataBaseApi.csproj.user
+/src/DataBaseApi/appsettings.json
+/src/DataBaseApi/DataBaseApi/appsettings.json
+.vs/*
+
+# Claude Code
+.claude/
+CLAUDE.md

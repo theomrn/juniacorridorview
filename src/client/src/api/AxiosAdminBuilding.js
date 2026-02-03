@@ -12,7 +12,6 @@ axios.defaults.baseURL = 'http://localhost:5078';
 const getBuildings = async () => {
     try {
         const response = await axios.get('/api/buildings');
-        console.log('AxiosAdminBuilding - getBuildings - response.data:', response.data);
         return response.data;
     } catch (error) {
         console.error('Error fetching buildings', error);
@@ -23,8 +22,7 @@ const getBuildings = async () => {
 const getFloors = async () => {
     try {
         const response = await axios.get('/api/floors');
-        console.log('AxiosAdminBuilding - getFloors - response.data:', response.data);
-        return response.data;
+                return response.data;
     } catch (error) {
         console.error('Error fetching floors', error);
         return [];

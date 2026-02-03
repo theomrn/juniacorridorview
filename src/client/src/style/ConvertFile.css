@@ -1,0 +1,137 @@
+/* Page container */
+.convert-file-page {
+  background-color: var(--color-junia-salmon);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+/* Card */
+.convert-file-card {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 1.5rem;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Page Title */
+.convert-file-title {
+  font-family: var(--font-title);
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+/* File input */
+.convert-file-input {
+  padding: 0.5rem;
+  font-family: var(--font-texts);
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+}
+
+/* Boutons convert */
+.convert-file-button,
+.convert-file-back {
+  padding: 0.5rem 1.25rem;
+  font-family: var(--font-title);
+  font-weight: bold;
+  background-color: var(--color-junia-orange);
+  color: white;
+  border: none;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.convert-file-button:hover,
+.convert-file-back:hover {
+  background-color: #e85c30;
+}
+
+.convert-file-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Result section */
+.convert-file-result {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Preview image */
+.convert-file-preview {
+  max-height: 250px;
+  border-radius: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Download button */
+.convert-file-download {
+  background-color: var(--color-junia-orange);
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+  font-family: var(--font-title);
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.convert-file-download:hover {
+  background-color: #e85c30;
+}
+
+/* Loader style */
+.loader {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.loader-text {
+  font-family: var(--font-title);
+  font-weight: bold;
+  color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 500px) {
+  .convert-file-card {
+    padding: 1.5rem;
+  }
+
+  .convert-file-button,
+  .convert-file-back {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .convert-file-title {
+    font-size: 1.1rem;
+  }
+}
