@@ -12,6 +12,8 @@ import { FaPen, FaTrash, FaPlusCircle  } from "react-icons/fa"; // Add FaPlus im
 import { ImLocation2 } from "react-icons/im";
 import { MdOutlineFileUpload } from "react-icons/md";
 import ConfirmDialog from "./dialogs/ConfirmDialog";
+import { useTranslation } from 'react-i18next';
+import { getLanguages } from '../api/AxiosTranslation';
 
 const customSelectStyles = {
   control: (provided, state) => ({
@@ -107,6 +109,7 @@ const AdminRoom = () => {
   const [confirmTitle, setConfirmTitle] = useState("");
   const [confirmMessage, setConfirmMessage] = useState("");
   const [roomToDelete, setRoomToDelete] = useState(null);
+  const { t, i18n } = useTranslation('room');
 
   const showLoading = (promises, textLoading, textSuccess, textError) => {
     setIsLoading(true);
@@ -566,7 +569,7 @@ const AdminRoom = () => {
           <div className="flex gap-4 items-center ">
             <input
             type="text"
-            placeholder="Rechercher une salle..."
+            placeholder={t('Findroom')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full p-2  research-input bg-white rounded-full" />
@@ -577,7 +580,7 @@ const AdminRoom = () => {
             options={ buildings.map(building => ({ value: building.name, label: building.name })).sort((a, b) => a.value.localeCompare(b.value))}
             className="basic-multi-select"
             classNamePrefix="select"
-            placeholder="Bâtiment"
+            placeholder={t('building')}
             isDisabled={buildings.length === 0}
             isSearchable
             menuPlacement="auto"
@@ -593,7 +596,7 @@ const AdminRoom = () => {
             className="basic-multi-select"
             styles={customSelectStyles}
             classNamePrefix="select"
-            placeholder="Étage"
+            placeholder={t('floor')}
             isSearchable
             menuPlacement="auto"
             menuPosition="fixed"
@@ -606,7 +609,7 @@ const AdminRoom = () => {
             options={getUniqueOptions('name')}
             className="basic-multi-select"
             classNamePrefix="select"
-            placeholder="Nom"
+            placeholder={t('name')}
             isSearchable
             styles={customSelectStyles}
             menuPlacement="auto"
@@ -620,7 +623,7 @@ const AdminRoom = () => {
             options={getUniqueOptions('number')}
             className="basic-multi-select flex"
             classNamePrefix="select"
-            placeholder="Numéro"
+            placeholder={t('Number')}
             isSearchable
             styles={customSelectStyles}
             menuPlacement="auto"
@@ -652,8 +655,26 @@ const AdminRoom = () => {
                 }}
                 className="admin-button-responsive"
             >
-              <FaPlusCircle className="admin-button-icon" /> Ajouter une salle
-            </button> 
+              <FaPlusCircle className="admin-button-icon" /> {t('addroom')}
+            </button>
+
+            
+            <button
+                onClick={() => {
+                  history.push('/admin/language');
+                  setNewRoomModalOpen(true);
+                  setPlanPlacementEditMode(false);
+                }}
+                className="admin-button-responsive"
+            >
+              {t('languages')}
+            </button>
+
+            <button
+                onClick={() => history.push('/admin/convert')}
+                className="admin-button-responsive">
+                {t('fileconversion')}
+            </button>
 
                       <button
                 onClick={() => history.push('/admin/translation')}
@@ -664,13 +685,13 @@ const AdminRoom = () => {
             <button
                 onClick={() => history.push('/admin/tour')}
                 className="admin-button-responsive">
-                Parcours
+                {t('course')}
             </button>
             
             <button
                 onClick={() => history.push('/admin/building')}
                 className="admin-button-responsive">
-                Bâtiments
+                {t('buildings')}
             </button>
           </div>
         </div>
