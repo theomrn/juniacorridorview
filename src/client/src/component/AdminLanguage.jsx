@@ -18,7 +18,7 @@ export default function AdminLanguage() {
     name_language: ''
   });
   const [showNewLanguageForm, setShowNewLanguageForm] = useState(false);
-  const { t, i18n } = useTranslation('language');
+  const { t } = useTranslation('adminLanguage');
 
   useEffect(() => {
     fetchLanguages();
@@ -87,7 +87,7 @@ export default function AdminLanguage() {
   };
 
   const handleDelete = async (id_language, name) => {
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer la langue "${name}"?`)) {
+    if (window.confirm(`${t('confirmdelete')} "${name}"?`)) {
       try {
         await deleteLanguage(id_language);
         toast.success(t('succesdelete'));
@@ -150,7 +150,7 @@ export default function AdminLanguage() {
                 type="text"
                 value={newLanguageName}
                 onChange={(e) => setNewLanguageName(e.target.value)}
-                placeholder="Ex: Français"
+                placeholder={t('languagePlaceholder')}
                 className="form-input"
               />
             </div>
