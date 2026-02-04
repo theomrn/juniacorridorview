@@ -14,8 +14,10 @@ import {ImLocation2} from "react-icons/im";
 import {MdOutlineFileUpload} from "react-icons/md";
 import ModalAddEditImage from "./room_details/ModalAddEditImage";
 import ConfirmDialog from "./dialogs/ConfirmDialog";
+import { useTranslation } from 'react-i18next';
 
 const AdminRoomDetails = () => {
+  const { t } = useTranslation('adminRoomDetails');
   const { id } = useParams();
   const [pictures, setPictures] = useState([]);
   const [selectedPicture, setSelectedPicture] = useState('');
@@ -53,7 +55,7 @@ const AdminRoomDetails = () => {
   const [imageToUpdate, setImageToUpdate] = useState(null);
 
   const [loading, setLoading] = useState(true);
-  const [textLoading, setTextLoading] = useState("Chargement des données...");
+  const [textLoading, setTextLoading] = useState("");
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmTitle, setConfirmTitle] = useState("");
@@ -171,7 +173,7 @@ const AdminRoomDetails = () => {
   useEffect(() => {
     if (!dataFetchedRef.current) {
       const fetchAllDataPromise = fetchAllData();
-      showLoading([fetchAllDataPromise], 'Chargement des détails de la pièce...', 'Chargement des détails réussi', 'Erreur lors du chargement des détails');
+      showLoading([fetchAllDataPromise], t('loadingRoomDetails'), t('roomDetailsLoaded'), t('errorLoadingDetails'));
       fetchAllDataPromise.then(() => {
         setIsLoading(false);
         firstLoad.current = false;
@@ -185,7 +187,7 @@ const AdminRoomDetails = () => {
     const getInfoPopupPromise = getInfoPopup(pictureId);
     const getLinksPromise = getLinks(pictureId);
     if(!firstLoad.current) {
-      showLoading([getInfoPopupPromise, getLinksPromise], 'Chargement des détails de la pièce...', 'Chargement des détails réussi', 'Erreur lors du chargement des détails');
+      showLoading([getInfoPopupPromise, getLinksPromise], t('loadingRoomDetails'), t('roomDetailsLoaded'), t('errorLoadingDetails'));
     }
     Promise.all([getInfoPopupPromise,getLinksPromise]).then(() => {
     setSelectedPicture(picture);
@@ -231,7 +233,7 @@ const AdminRoomDetails = () => {
     event.preventDefault();
     const formData = new FormData(event.target);
     if (formData.get('pic').size === 0) {
-        alert('Veuillez sélectionner une image pour l\'infobulle');
+        alert(t('pleaseSelectInfospotImage'));
         return;
     }
 
@@ -254,7 +256,7 @@ const AdminRoomDetails = () => {
       setAllInfoPopups(allImageInfoPopups.flat());
     });
 
-    showLoading([insertPromise, updatedInfoPopupsPromise], 'Ajout de l\'infobulle...', 'Infobulle ajoutée avec succès', 'Erreur lors de l\'ajout de l\'infobulle');
+    showLoading([insertPromise, updatedInfoPopupsPromise], t('addingInfospot'), t('infospotAddedSuccess'), t('errorAddingInfospot'));
 
     setNewInfospotModalOpen(false);
     setDisableBackgroundClick(false);
@@ -275,7 +277,7 @@ const AdminRoomDetails = () => {
         setAllLinks(allImageLinks.flat());
     });
 
-    showLoading([insertPromise, updateLinksPromise], 'Ajout du lien...', 'Lien ajouté avec succès', 'Erreur lors de l\'ajout du lien');
+    showLoading([insertPromise, updateLinksPromise], t('addingLink'), t('linkAddedSuccess'), t('errorAddingLink'));
 
     setNewLinkModalOpen(false);
     setDisableBackgroundClick(false);
@@ -410,8 +412,8 @@ const AdminRoomDetails = () => {
     event.stopPropagation();
     event.preventDefault();
     setInfospotToDelete(id);
-    setConfirmTitle("Suppression d'infobulle");
-    setConfirmMessage("Etes-vous sûr de vouloir supprimer cette infobulle ? Cette action est irréversible.");
+    setConfirmTitle(t('deleteInfospotTitle'));
+    setConfirmMessage(t('deleteInfospotConfirm'));
     setShowConfirm(true);
   }
 
@@ -424,7 +426,7 @@ const AdminRoomDetails = () => {
         const updatedAllInfoPopups = allInfoPopups.filter(popup => popup.id_info_popup !== infospotToDelete);
         setAllInfoPopups(updatedAllInfoPopups);
         setInfospotToDelete(null);
-        toast.success('Infobulle supprimée');
+        toast.success(t('infospotDeleted'));
       });
     } catch (error) {
       console.error('Error deleting infopopup:', error);
@@ -472,7 +474,7 @@ const AdminRoomDetails = () => {
       setAllInfoPopups(allImageInfoPopups.flat());
     });
 
-    showLoading([updatePromise, updatedInfoPopupsPromise], 'Mise à jour de l\'infobulle...', 'Infobulle mise à jour avec succès', 'Erreur lors de la mise à jour de l\'infobulle');
+    showLoading([updatePromise, updatedInfoPopupsPromise], t('updatingInfospot'), t('infospotUpdatedSuccess'), t('errorUpdatingInfospot'));
 
     setNewInfospotModalOpen(false);
     setDisableBackgroundClick(false);
@@ -483,8 +485,8 @@ const AdminRoomDetails = () => {
     event.stopPropagation();
     event.preventDefault();
     setLinkToDelete(id);
-    setConfirmTitle("Suppression de lien");
-    setConfirmMessage("Etes-vous sûr de vouloir supprimer ce lien ? Cette action est irréversible.");
+    setConfirmTitle(t('deleteLinkTitle'));
+    setConfirmMessage(t('deleteLinkConfirm'));
     setShowConfirm(true);
   }
 
@@ -497,7 +499,7 @@ const AdminRoomDetails = () => {
         const updatedAllLinks = allLinks.filter(link => link.id_links !== linkToDelete);
         setAllLinks(updatedAllLinks);
         setLinkToDelete(null);
-        toast.success('Lien supprimé');
+        toast.success(t('linkDeleted'));
       });
     } catch (error) {
       console.error('Error deleting link:', error);
@@ -531,7 +533,7 @@ const AdminRoomDetails = () => {
         setAllLinks(allImageLinks.flat());
     });
 
-    showLoading([insertPromise, updatedLinksPromise], 'Mise à jour du lien...', 'Lien mis à jour avec succès', 'Erreur lors de la mise à jour du lien');
+    showLoading([insertPromise, updatedLinksPromise], t('updatingLink'), t('linkUpdatedSuccess'), t('errorUpdatingLink'));
 
     setNewLinkModalOpen(false);
     setDisableBackgroundClick(false);
@@ -545,8 +547,8 @@ const AdminRoomDetails = () => {
 
   const handleDeletePicture = async (id) => {
     setImageToDelete(id);
-    setConfirmTitle("Suppression d'image");
-    setConfirmMessage("Etes-vous sûr de vouloir supprimer cette image ? Cette action est irréversible.");
+    setConfirmTitle(t('deleteImageTitle'));
+    setConfirmMessage(t('deleteImageConfirm'));
     setShowConfirm(true);
   }
 
@@ -556,19 +558,19 @@ const AdminRoomDetails = () => {
       setImageToDelete(null);
       await fetchAllData();
     });
-    showLoading([deletePromise, updatedPicturesPromise], 'Suppression de l\'image...', 'Image supprimée avec succès', 'Erreur lors de la suppression de l\'image');
+    showLoading([deletePromise, updatedPicturesPromise], t('deletingImage'), t('imageDeletedSuccess'), t('errorDeletingImage'));
   }
 
   const reloadAfterAddEditImage = async (type) => {
     if (type === 'add') {
       const reloadPromise = fetchAllData();
       setAddImageModalOpen(false);
-      showLoading([reloadPromise], 'Ajout de l\'image...', 'Image ajoutée avec succès', 'Erreur lors de l\'ajout de l\'image');
+      showLoading([reloadPromise], t('addingImage'), t('imageAddedSuccess'), t('errorAddingImage'));
     } else if (type === 'edit') {
       const reloadPromise =  fetchAllData();
       setImageToUpdate(null);
       setAddImageModalOpen(false);
-      showLoading([reloadPromise], 'Mise à jour de l\'image...', 'Image mise à jour avec succès', 'Erreur lors de la mise à jour de l\'image');
+      showLoading([reloadPromise], t('updatingImage'), t('imageUpdatedSuccess'), t('errorUpdatingImage'));
     }
   };
 
@@ -703,7 +705,7 @@ const AdminRoomDetails = () => {
         <button
             onClick={() => history.push('/admin/room')}
             className="px-4 py-2 button-type font-title font-bold flex items-center gap-2">
-          <FaArrowLeft /> Retour
+          <FaArrowLeft /> {t('back')}
         </button>
       </div>
 
@@ -727,7 +729,7 @@ const AdminRoomDetails = () => {
                           setAddImageModalOpen(true)
                           setImageToUpdate(null);
                         }} className="button-type font-title font-bold text-2xl p-2">
-                          Ajouter une image 360°
+                          {t('addImage360')}
                         </button>
             </div>
           {pictures.map(picture => (
@@ -782,9 +784,9 @@ const AdminRoomDetails = () => {
           {/* Zone de recherche d'infospots en haut des 2/3 gauche */}
           <div className="info-spot-research-zone w-full mb-4">
             <div className="flex gap-4 items-center w-full mb-4">
-              <div className="text-white text-4xl bg-junia-purple px-4 py-1 font-title font-bold rounded-full">Infobulles</div>
+              <div className="text-white text-4xl bg-junia-purple px-4 py-1 font-title font-bold rounded-full">{t('infospots')}</div>
               <div className="button-type font-bold font-title text-xl px-4 py-2">
-                <button onClick={handleModalInfopopup} className="flex items-center gap-2"><FaPlusCircle /> Nouvelle infobulle</button>
+                <button onClick={handleModalInfopopup} className="flex items-center gap-2"><FaPlusCircle /> {t('newInfospot')}</button>
               </div>
               
             </div>
@@ -792,7 +794,7 @@ const AdminRoomDetails = () => {
               <div className="flex gap-4">
                   <input
                     type="text"
-                    placeholder="Rechercher par titre ..."
+                    placeholder={t('searchByTitle')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full p-2 bg-white research-input-IS research-input-orange-text rounded-full" />
@@ -800,7 +802,7 @@ const AdminRoomDetails = () => {
                   <button 
                     onClick={() => setShowAllInfospots(!showAllInfospots)} 
                     className="button-type all-IS-button font-title font-bold px-4 py-2 ">
-                    {showAllInfospots ? "Toutes les infobulles" : "Infobulles de l'image affichée"}
+                    {showAllInfospots ? t('allInfospots') : t('currentImageInfospots')}
                   </button>
               </div>
 
@@ -816,78 +818,26 @@ const AdminRoomDetails = () => {
           >
             {groupedDisplayedInfoPopups.map((popup) => (
               <div key={popup.id_info_popup} className="one-info-spot flex flex-col gap-2">
-                {/* Header with ID and image */}
-                <div className="flex justify-between items-center">
-                  <div className="font-bold font-title text-lg text-junia-purple">
-                    InfoPopup #{popup.id_info_popup}
-                  </div>
-                  <div className="font-title text-sm text-junia-orange">
-                    Panorama: {popup.id_pictures}
-                  </div>
+                <div className="font-bold font-title text-2xl"> 
+                  <span className="text-junia-purple"> {t('title')} : </span>
+                  <span className="text-junia-orange">{popup.title}</span>
                 </div>
-
-                {/* Image */}
-                {popup.image_path && (
-                  <div className="flex justify-center">
-                    <img
-                      src={`http://localhost:5078/${popup.image_path}`}
-                      alt={`Aperçu`}
-                      className="max-h-24 rounded"
-                    />
-                  </div>
-                )}
-
-                {/* Translations section */}
-                <div className="bg-gray-50 rounded p-2">
-                  <div className="flex items-center gap-2 mb-2">
-                    <FaGlobe className="text-junia-purple" />
-                    <span className="font-bold font-title text-junia-purple">
-                      Traductions ({popup.translations.length})
-                    </span>
-                  </div>
-
-                  {popup.translations.length === 0 ? (
-                    <div className="text-gray-500 text-sm italic">Aucune traduction</div>
-                  ) : (
-                    <div className="space-y-2">
-                      {popup.translations.map((trans, idx) => (
-                        <div key={idx} className="bg-white p-2 rounded border-l-4 border-junia-orange">
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <div className="text-xs text-gray-500 mb-1">
-                                {getLanguageName(trans.id_languages)}
-                                {trans.id_visitor_type && ` | ${getVisitorTypeName(trans.id_visitor_type)}`}
-                              </div>
-                              <div className="font-bold text-junia-orange">{trans.title}</div>
-                              <div className="text-sm text-gray-700 line-clamp-2">{trans.text}</div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                <div className="font-bold font-title text-2xl text-junia-purple">{t('description')} :</div>
+                <div className="font-texts text-md text-junia-orange text-justify">{popup.text}</div>
+                <div className="font-bold font-title text-2xl text-junia-purple">
+                  <span className="text-junia-purple"> {t('panoramaId')} : </span>
+                  <span className="text-junia-orange">{popup.id_pictures}</span>
+                </div>
+                <div className="flex justify-center ">
+                  {popup.image_path && (
+                    <div className="max-h-30">
+                      <img src={`http://localhost:5078/${popup.image_path}`} alt={`Aperçu de ${popup.title}`}/>
                     </div>
                   )}
                 </div>
-
-                {/* Actions */}
-                <div className="flex w-full gap-2 flex-wrap">
-                  <button
-                    onClick={() => handleOpenTranslationModal(popup)}
-                    className="button-type p-2 font-title font-bold flex items-center gap-2 flex-1"
-                  >
-                    <FaLanguage /> Traductions
-                  </button>
-                  <button
-                    onClick={(event) => handleEditInfoPopup(event, {...popup, ...popup.translations[0]})}
-                    className="button-type p-2 font-title font-bold flex items-center gap-2"
-                  >
-                    <FaPen />
-                  </button>
-                  <button
-                    onClick={(event) => handleDeleteInfoPopup(event, popup.id_info_popup)}
-                    className="button-type2 p-2 font-title font-bold flex items-center gap-2"
-                  >
-                    <FaTrash />
-                  </button>
+                <div className="flex w-full justify-between ">
+                  <button onClick={(event) => handleEditInfoPopup(event, popup)} className="button-type p-2 font-title font-bold flex items-center gap-2"><FaPen /> {t('modify')}</button>
+                  <button onClick={(event) => handleDeleteInfoPopup(event, popup.id_info_popup)} className="button-type2 p-2 font-title font-bold flex items-center gap-2"><FaTrash /> {t('delete')}</button>
                 </div>
               </div>
             ))}
@@ -898,9 +848,9 @@ const AdminRoomDetails = () => {
         <div className=" flex flex-col gap-2 w-1/3">
           <div className="links-research-zone w-full mb-4">
             <div className="flex gap-4 items-center w-full mb-4">
-              <div className="text-white text-4xl bg-junia-purple px-4 py-1 font-title font-bold rounded-full">Liens</div>
+              <div className="text-white text-4xl bg-junia-purple px-4 py-1 font-title font-bold rounded-full">{t('links')}</div>
               <div className="button-type font-bold font-title text-xl px-4 py-2">
-                <button onClick={handleModalLink} className="flex items-center gap-2"><FaPlusCircle /> Nouveau lien</button>
+                <button onClick={handleModalLink} className="flex items-center gap-2"><FaPlusCircle /> {t('newLink')}</button>
               </div>
             </div>
 
@@ -908,7 +858,7 @@ const AdminRoomDetails = () => {
               <div className="flex gap-4">
                 <input
                   type="text"
-                  placeholder="Recherche par ID de destination"
+                  placeholder={t('searchByDestinationId')}
                   value={searchLinkTerm}
                   onChange={(e) => setSearchLinkTerm(e.target.value)}
                   className="w-full p-2 bg-white research-input-L research-input-orange-text rounded-full"/>
@@ -916,7 +866,7 @@ const AdminRoomDetails = () => {
                 <button 
                   onClick={() => setShowAllLinks(!showAllLinks)}
                   className="button-type all-IS-button font-title font-bold px-4 py-2">
-                  {showAllLinks ? "Tous les liens" : "Liens de l'image affichée"}
+                  {showAllLinks ? t('allLinks') : t('currentImageLinks')}
                 </button>
               </div>
 
@@ -941,8 +891,8 @@ const AdminRoomDetails = () => {
                 <img src={pictures.find(pic => pic.id_pictures === link.id_pictures_destination)?.imageUrl} alt={`Destination ${link.id_pictures_destination}`} className="max-w-[100px] max-h-[100px]" />
               </div>
               <div className="flex w-full justify-between px-2">
-                <button onClick={(event) => handleEditLink(event, link)} className="button-type p-2 font-title font-bold flex items-center gap-2"><FaPen /> Modifier</button>
-                <button onClick={(event) => handleDeleteLink(event, link.id_links)} className="button-type2 p-2 font-title font-bold flex items-center gap-2"><FaTrash /> Supprimer</button>
+                <button onClick={(event) => handleEditLink(event, link)} className="button-type p-2 font-title font-bold flex items-center gap-2"><FaPen /> {t('modify')}</button>
+                <button onClick={(event) => handleDeleteLink(event, link.id_links)} className="button-type2 p-2 font-title font-bold flex items-center gap-2"><FaTrash /> {t('delete')}</button>
               </div>
             </div>
           ))}
@@ -957,7 +907,7 @@ const AdminRoomDetails = () => {
             {/* En-tête fixe */}
             <div className="modal-header">
               <div className="text-2xl font-bold text-junia-purple font-title text-center flex-grow">
-                {editInfospotMod ? 'Modifier l\'infobulle' : 'Ajouter une nouvelle infobulle'}
+                {editInfospotMod ? t('editInfospot') : t('addNewInfospot')}
               </div>
               <button 
                 className="modal-close-button" 
@@ -999,7 +949,7 @@ const AdminRoomDetails = () => {
                           onChange={(e) => {
                           const file = e.target.files[0];
                           if (!file.type.startsWith("image/")) {
-                            alert("Veuillez sélectionner un fichier image valide.");
+                            alert(t('selectValidImage'));
                             e.target.value = ""; // Clear the input
                             }
                           }
@@ -1012,9 +962,9 @@ const AdminRoomDetails = () => {
                   <div className="position-inputs-container flex-col">
                     {/* Labels en haut */}
                     <div className="flex w-full justify-between mb-1">
-                      <label className="text-junia-purple font-bold text-center w-1/3">Coordonnée X :</label>
-                      <label className="text-junia-purple font-bold text-center w-1/3">Coordonnée Y :</label>
-                      <label className="text-junia-purple font-bold text-center w-1/3">Coordonnée Z :</label>
+                      <label className="text-junia-purple font-bold text-center w-1/3">{t('coordinateX')} :</label>
+                      <label className="text-junia-purple font-bold text-center w-1/3">{t('coordinateY')} :</label>
+                      <label className="text-junia-purple font-bold text-center w-1/3">{t('coordinateZ')} :</label>
                     </div>
                     {/* Inputs en bas */}
                     <div className="flex w-full justify-between">
@@ -1056,35 +1006,34 @@ const AdminRoomDetails = () => {
                       type="button" 
                       onClick={(event) => handleSelectPositionClick(event)} 
                       className="button-type font-bold font-title text-xl px-4 py-2 flex items-center gap-2">
-                      <ImLocation2 /> Positionner
+                      <ImLocation2 /> {t('position')}
                     </button>
                     <button 
                       type="submit" 
                       className="button-type font-bold font-title text-xl px-4 py-2 flex items-center gap-2">
-                      {editInfospotMod ? <><FaPen /> Modifier</> : "Ajouter"}
+                      {editInfospotMod ? <><FaPen /> {t('modify')}</> : t('add')}
                     </button>
                   </div>
                 </div>
 
                 {/* Right column - pas de justify-between ici */}
                 <div className="flex flex-col h-full">
-                  <input
-                    type="text"
-                    name="title"
-                    placeholder="Titre"
-                    required
-                    defaultValue={editInfospotMod ? infospotToEdit.title : ''}
-                    maxLength="45"
-                    className="p-2 rounded orange-border mb-2"
+                  <input 
+                    type="text" 
+                    name="title" 
+                    placeholder={t('titlePlaceholder')} 
+                    required 
+                    defaultValue={editInfospotMod ? infospotToEdit.title : ''} 
+                    maxLength="45" 
+                    className="p-2 rounded orange-border mb-2" 
                   />
-                  <textarea
-                    name="text"
-                    placeholder="Texte"
-                    required
-                    defaultValue={editInfospotMod ? infospotToEdit.text : ''}
-                    maxLength="300"
-                    className="p-2 rounded resize-none orange-border mb-2"
-                    style={{ minHeight: '80px' }}
+                  <textarea 
+                    name="text" 
+                    placeholder={t('textPlaceholder')} 
+                    required 
+                    defaultValue={editInfospotMod ? infospotToEdit.text : ''} 
+                    maxLength="300" 
+                    className="p-2 rounded resize-none orange-border flex-grow" 
                   />
 
                   {/* Language and Visitor Type selectors */}
@@ -1133,7 +1082,7 @@ const AdminRoomDetails = () => {
             {/* En-tête fixe */}
             <div className="modal-header">
               <div className="text-2xl font-bold text-junia-purple font-title text-center flex-grow">
-                {editLinkMod ? 'Modifier le lien' : 'Ajouter un nouveau lien'}
+                {editLinkMod ? t('editLink') : t('addNewLink')}
               </div>
               <button 
                 className="modal-close-button" 
@@ -1164,11 +1113,11 @@ const AdminRoomDetails = () => {
                 {/* Left column */}
                 <div className="flex flex-col gap-4 justify-between h-full">
                   <div>
-                    <label className="font-title font-bold text-center w-full text-junia-purple mb-2 block">Id de l'image de destination</label>
-                    <input 
-                      type="text" 
-                      name="id_pictures_destination" 
-                      placeholder="ID de destination" 
+                    <label className="font-title font-bold text-center w-full text-junia-purple mb-2 block">{t('destinationImageId')}</label>
+                    <input
+                      type="text"
+                      name="id_pictures_destination"
+                      placeholder={t('destinationIdPlaceholder')} 
                       required 
                       defaultValue={editLinkMod ? linkToEdit.id_pictures_destination : ''} 
                       className="p-2 rounded orange-border w-full" 
@@ -1177,9 +1126,9 @@ const AdminRoomDetails = () => {
                   <div className="position-inputs-container flex-col">
                     {/* Labels en haut */}
                     <div className="flex w-full justify-between mb-1">
-                      <label className="text-junia-purple font-bold text-center w-1/3">Coordonnée X :</label>
-                      <label className="text-junia-purple font-bold text-center w-1/3">Coordonnée Y :</label>
-                      <label className="text-junia-purple font-bold text-center w-1/3">Coordonnée Z :</label>
+                      <label className="text-junia-purple font-bold text-center w-1/3">{t('coordinateX')} :</label>
+                      <label className="text-junia-purple font-bold text-center w-1/3">{t('coordinateY')} :</label>
+                      <label className="text-junia-purple font-bold text-center w-1/3">{t('coordinateZ')} :</label>
                     </div>
                     {/* Inputs en bas */}
                     <div className="flex w-full justify-between">
@@ -1221,12 +1170,12 @@ const AdminRoomDetails = () => {
                       type="button" 
                       onClick={(event) => handleSelectPositionClick(event)} 
                       className="button-type font-bold font-title text-xl px-4 py-2 flex items-center gap-2">
-                      <ImLocation2 /> Positionner
+                      <ImLocation2 /> {t('position')}
                     </button>
                     <button 
                       type="submit" 
                       className="button-type font-bold font-title text-xl px-4 py-2 flex items-center gap-2">
-                      {editLinkMod ? <><FaPen /> Modifier</> : "Ajouter"}
+                      {editLinkMod ? <><FaPen /> {t('modify')}</> : t('add')}
                     </button>
                   </div>
                 </div>

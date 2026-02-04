@@ -19,6 +19,7 @@ import Loader from "./Loader";
 import Select from 'react-select';
 import {FaArrowLeft, FaTrash, FaPlusCircle} from "react-icons/fa";
 import ConfirmDialog from "./dialogs/ConfirmDialog";
+import { useTranslation } from 'react-i18next';
 
 // Custom styles for React Select
 const customSelectStyles = {
@@ -87,6 +88,7 @@ const SortableItem = ({ id, children }) => {
 
 
 const AdminTour = () => {
+  const { t } = useTranslation('adminTour');
   const [tours, setTours] = useState([]);
   const [tourSteps, setTourSteps] = useState({});
   const [editTourModalOpen, setEditTourModalOpen] = useState(false);
@@ -105,7 +107,7 @@ const AdminTour = () => {
   const history = useHistory();
 
   const [isLoading, setIsLoading] = useState(true);
-  const [textLoading, setTextLoading] = useState("Chargement des données...");
+  const [textLoading, setTextLoading] = useState("");
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmTitle, setConfirmTitle] = useState("");
@@ -183,7 +185,7 @@ const AdminTour = () => {
       return roomsData;
     } catch (error) {
       console.error("Error fetching rooms:", error);
-      toast.error("Impossible de charger les salles. Certaines fonctionnalités peuvent être limitées.");
+      toast.error(t('errorLoadingRooms'));
       return [];
     }
   };
@@ -196,7 +198,7 @@ const AdminTour = () => {
       return floorsData;
     } catch (error) {
       console.error("Error fetching floors:", error);
-      toast.error("Impossible de charger les étages.");
+      toast.error(t('errorLoadingFloors'));
       return [];
     }
   };
@@ -233,12 +235,12 @@ const AdminTour = () => {
       setPanoramaUrls(allPanoramaUrls);
     } catch (error) {
       console.error('Error fetching data:', error);
-      toast.error("Erreur lors du chargement des données");
+      toast.error(t('errorLoadingData'));
     }
   };
 
   const fetchData = useCallback(async () => {
-    showLoading([fetchAllData()], 'Chargement...', 'Chargement des données réussi', 'Erreur lors du chargement des données');
+    showLoading([fetchAllData()], t('loading'), t('dataLoadedSuccess'), t('errorLoadingData'));
   }, []);
 
   useEffect(() => {
@@ -255,7 +257,7 @@ const AdminTour = () => {
     setEditModeNewSteps([]); // Reset edit mode new steps
     if (!tourSteps[tour.id_tours]) {
         const stepsDataPromise = tourApi.getTourSteps(tour.id_tours);
-        showLoading([stepsDataPromise], 'Modification du parcours...', 'Parcours modifié avec succès', 'La modification du parcours a échoué');
+        showLoading([stepsDataPromise], t('modifyingTour'), t('tourModifiedSuccess'), t('errorModifyingTour'));
         stepsDataPromise.then(stepsData => {
           setTourSteps(prevSteps => ({
             ...prevSteps,
@@ -283,7 +285,7 @@ const AdminTour = () => {
     const updateTourStepsPromise = tourApi.updateTourSteps({ id_tours: selectedTour.id_tours, steps, title, description });
     setNewStepCount(0);
     const fetchUpdatedTourPromise = updateTourStepsPromise.then(() => fetchUpdatedTour(selectedTour.id_tours));
-    showLoading([updateTourStepsPromise, fetchUpdatedTourPromise], 'Modification du parcours...', 'Parcours modifié avec succès', 'La modification du parcours a échoué');
+    showLoading([updateTourStepsPromise, fetchUpdatedTourPromise], t('modifyingTour'), t('tourModifiedSuccess'), t('errorModifyingTour'));
     fetchUpdatedTourPromise.then(() => {
       setEditTourModalOpen(false);
       fetchUpdatedTour(selectedTour.id_tours);
@@ -292,15 +294,15 @@ const AdminTour = () => {
 
   const handleDeleteTour = (tourId) => {
     setTourToDelete(tourId);
-    setConfirmTitle("Suppression du parcours");
-    setConfirmMessage("Êtes-vous sûr de vouloir supprimer ce parcours ? Cette action est irréversible.");
+    setConfirmTitle(t('deleteTourTitle'));
+    setConfirmMessage(t('deleteTourConfirm'));
     setShowConfirm(true);
   };
 
   const confirmDeleteTour = () => {
     const deleteTourPromise = tourApi.deleteTour(tourToDelete);
     const fetchUpdatedToursPromise = deleteTourPromise.then(() => fetchToursInfo());
-    showLoading([deleteTourPromise, fetchUpdatedToursPromise], 'Suppression du parcours...', 'Parcours supprimé avec succès', 'La suppression du parcours a échoué');
+    showLoading([deleteTourPromise, fetchUpdatedToursPromise], t('deletingTour'), t('tourDeletedSuccess'), t('errorDeletingTour'));
     fetchUpdatedToursPromise.then(({ toursData, steps }) => {
       setTours(toursData);
       setTourSteps(steps);
@@ -406,7 +408,7 @@ const AdminTour = () => {
     data.steps = newTourSteps;
     const createTourPromise = tourApi.createTour(data);
     const fetchUpdatedToursPromise = createTourPromise.then(() => fetchToursInfo());
-    showLoading([createTourPromise, fetchUpdatedToursPromise], 'Ajout du parcours...', 'Parcours ajouté avec succès', 'L\'ajout du parcours a échoué');
+    showLoading([createTourPromise, fetchUpdatedToursPromise], t('addingTour'), t('tourAddedSuccess'), t('errorAddingTour'));
     fetchUpdatedToursPromise.then(({ toursData, steps }) => {
       setTours(toursData);
       setTourSteps(steps);
@@ -424,10 +426,10 @@ const AdminTour = () => {
       setTours((prevTours) =>
           prevTours.map(t => t.id_tours === updatedTour.id_tours ? updatedTour : t)
       );
-      toast.success(`Parcours ${updatedTour.hidden ? 'caché' : 'visible'} avec succès`);
+      toast.success(updatedTour.hidden ? t('tourHidden') : t('tourVisible'));
     } catch (error) {
       console.error('Error updating tour visibility:', error);
-      toast.error('Erreur lors de la mise à jour de la visibilité du parcours');
+      toast.error(t('errorUpdatingVisibility'));
     }
   }
 
@@ -536,15 +538,15 @@ const AdminTour = () => {
     700: 1
   };
 
-  const [placeholderText, setPlaceholderText] = useState("Rechercher un parcours...");
+  const [placeholderText, setPlaceholderText] = useState("");
 
   // Hook pour détecter la taille de l'écran et ajuster le placeholder
   useEffect(() => {
     const updatePlaceholder = () => {
       if (window.innerWidth < 768) {
-        setPlaceholderText("Rechercher...");
+        setPlaceholderText(t('searchShort'));
       } else {
-        setPlaceholderText("Rechercher un parcours...");
+        setPlaceholderText(t('searchTour'));
       }
     };
 
@@ -568,7 +570,7 @@ const AdminTour = () => {
           <button
               onClick={() => history.push('/admin/room')}
               className="px-4 py-2 button-type font-title font-bold flex items-center gap-2">
-            <FaArrowLeft /> Retour
+            <FaArrowLeft /> {t('back')}
           </button>
         </div>
         <div className="my-4 flex justify-center">
@@ -580,11 +582,11 @@ const AdminTour = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input-adaptive"
             />
-            <button 
-              onClick={openNewTourModal} 
+            <button
+              onClick={openNewTourModal}
               className="button-add-tour-adaptive flex items-center gap-2"
             >
-              <FaPlusCircle /> Ajouter un parcours
+              <FaPlusCircle /> {t('addTour')}
             </button>
           </div>
         </div>
@@ -596,9 +598,9 @@ const AdminTour = () => {
           >
             {filteredTours.map(tour => (
               <div key={tour.id_tours} className="purpleborder text-justify bg-white border-5 border-junia-orange p-2 rounded-3xl flex flex-col mb-10">
-                <div className="font-title font-bold text-junia-orange text-3xl text-center">Parcours : {tour.title}</div>
+                <div className="font-title font-bold text-junia-orange text-3xl text-center">{t('tour')} : {tour.title}</div>
                 <div className="font-texts">
-                  <p  className="font-texts font-bold text-junia-black text-2xl">Description</p>
+                  <p  className="font-texts font-bold text-junia-black text-2xl">{t('description')}</p>
                   {tour.description}
                 </div>
                 <div
@@ -607,7 +609,7 @@ const AdminTour = () => {
                       event.stopPropagation();  // Prevent click from bubbling up to the parent div
                     }}
                 >
-                  <div className="font-texts font-bold text-junia-black text-2xl">Visibilité</div>
+                  <div className="font-texts font-bold text-junia-black text-2xl">{t('visibility')}</div>
                   <label className="toggle-switch mx-4">
                     <input
                         type="checkbox"
@@ -625,9 +627,9 @@ const AdminTour = () => {
                 {tourSteps[tour.id_tours] ? (
                   tourSteps[tour.id_tours].length > 0 ? (
                     <div className="mt-4" style={{ height: "500px" }}>
-                      <p  className="font-texts font-bold text-junia-black text-2xl">Étapes</p>
+                      <p  className="font-texts font-bold text-junia-black text-2xl">{t('steps')}</p>
                       <p className="font-texts font-bold text-center text-junia-violet">
-                        Salle : {currentRoomName[tour.id_tours] || (getPanoramaImagesForTour(tour.id_tours)[0]?.roomName || 'Aucune salle disponible')}
+                        {t('room')} : {currentRoomName[tour.id_tours] || (getPanoramaImagesForTour(tour.id_tours)[0]?.roomName || t('noRoomAvailable'))}
                       </p>
                       <div style={{ height: "450px" }}>
                         <Carousel
@@ -644,29 +646,29 @@ const AdminTour = () => {
                       
                       {getPanoramaImagesForTour(tour.id_tours).every(img => img.isPlaceholder) && (
                         <p className="text-amber-500 mt-2 text-center text-sm">
-                          Attention: Ce parcours n'a pas d'images panoramiques.
+                          {t('noPanoramicImages')}
                         </p>
                       )}
                     </div>
                   ) : (
-                    <p className="text-center my-4 text-junia-purple">Aucune étape disponible pour ce parcours</p>
+                    <p className="text-center my-4 text-junia-purple">{t('noStepsAvailable')}</p>
                   )
                 ) : (
-                  <p className="text-center my-4 text-junia-purple">Chargement des étapes...</p>
+                  <p className="text-center my-4 text-junia-purple">{t('loadingSteps')}</p>
                 )}
                 
                 <div className="flex flex-col items-center justify-center gap-4 margin-top-8 mb-4">
-                  <div 
-                    onClick={() => handleEditTour(tour)} 
+                  <div
+                    onClick={() => handleEditTour(tour)}
                     className="text-white font-bold shadow-md font-title text-center bg-junia-orange rounded-3xl p-2 w-1/3 max-w-max inline-block cursor-pointer bouton-modifier"
                   >
-                    Modifier
+                    {t('modify')}
                   </div>
-                  <div 
-                    onClick={() => handleDeleteTour(tour.id_tours)} 
+                  <div
+                    onClick={() => handleDeleteTour(tour.id_tours)}
                     className="text-white font-bold shadow-md font-title text-center bg-junia-purple rounded-3xl p-2 w-1/3 max-w-max inline-block cursor-pointer bouton-ajouter"
                   >
-                    Supprimer
+                    {t('delete')}
                   </div>
                 </div>
               </div>
@@ -678,12 +680,12 @@ const AdminTour = () => {
           <div className="modal">
             <div className="modal-content">
               <div className="flex justify-between items-center pb-4">
-                <div className="text-3xl font-bold font-title text-center">Ajouter un nouveau parcours</div>
+                <div className="text-3xl font-bold font-title text-center">{t('addNewTour')}</div>
                 <span className="close items-center" onClick={() => {setNewTourModalOpen(false); setNewTourSteps([]); setNewStepCount(0); setEditModeNewSteps([])}}>&times;</span>
               </div>
               <form onSubmit={handleNewTour}>
-                <input type="text" name="title" placeholder="Titre du Parcours" className="font-texts" required />
-                <textarea name="description" placeholder="Description du Parcours" className="font-texts" required></textarea>
+                <input type="text" name="title" placeholder={t('tourTitlePlaceholder')} className="font-texts" required />
+                <textarea name="description" placeholder={t('tourDescriptionPlaceholder')} className="font-texts" required></textarea>
                 <DndContext onDragEnd={onDragEnd} modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}>
                   <SortableContext items={newTourSteps.map(step => step.id)} strategy={verticalListSortingStrategy}>
                     <div className="space-y-3">
@@ -693,7 +695,7 @@ const AdminTour = () => {
                             <input type="hidden" name={`steps[${index}][id]`} value={step.id} />
                             <input type="hidden" name={`steps[${index}][id_rooms]`} value={step.id_rooms} />
                             <span className="drag-icon ">☰</span>
-                            <h4 className="font-title font-bold text-lg whitespace-nowrap flex-grow mr-2">Étape {index + 1}</h4>
+                            <h4 className="font-title font-bold text-lg whitespace-nowrap flex-grow mr-2">{t('step')} {index + 1}</h4>
                             <div className="w-full" onPointerDown={(e) => e.stopPropagation()}>
                               <input 
                                 type="hidden" 
@@ -705,10 +707,10 @@ const AdminTour = () => {
                                 onChange={(selectedOption) => handleNewTourStepChange(index, 'id_rooms', selectedOption)}
                                 value={roomOptions.flatMap(group => group.options || []).find(option => option.value === step.id_rooms) || null}
                                 isDisabled={rooms.length === 0}
-                                placeholder="Sélectionner une salle"
+                                placeholder={t('selectRoom')}
                                 styles={customSelectStyles}
                                 className="w-full font-texts shadow-md rounded-lg max-w-full"
-                                noOptionsMessage={() => "Aucune salle disponible"}
+                                noOptionsMessage={() => t('noRoomAvailable')}
                                 required
                                 isSearchable
                                 menuPlacement="auto"
@@ -733,8 +735,8 @@ const AdminTour = () => {
                     </div>
                   </SortableContext>
                 </DndContext>
-                <button type="button" onClick={handleAddNewTourStep} disabled={rooms.length === 0} className="bouton-ajouter font-texts shadow-md ">Ajouter une étape</button>
-                <button type="submit" disabled={rooms.length === 0 || newTourSteps.length === 0} className="bg-junia-orange disabled:bg-junia-orange disabled:opacity-50 bouton-modifier font-texts shadow-md">Confirmer l'ajout du parcours</button>
+                <button type="button" onClick={handleAddNewTourStep} disabled={rooms.length === 0} className="bouton-ajouter font-texts shadow-md ">{t('addStep')}</button>
+                <button type="submit" disabled={rooms.length === 0 || newTourSteps.length === 0} className="bg-junia-orange disabled:bg-junia-orange disabled:opacity-50 bouton-modifier font-texts shadow-md">{t('confirmAddTour')}</button>
               </form>
             </div>
           </div>
@@ -744,20 +746,20 @@ const AdminTour = () => {
           <div className="modal">
             <div className="modal-content">
               <div className="flex justify-between items-center pb-4">
-                <div className="text-3xl font-bold font-title text-center">Modifier un parcours</div>
+                <div className="text-3xl font-bold font-title text-center">{t('editTour')}</div>
                 <span className="close items-center" onClick={() => {setEditTourModalOpen(false); setNewTourSteps([]); setNewStepCount(0); setEditModeNewSteps([])}}>&times;</span>
               </div>
               <form onSubmit={handleEditTourSubmit}>
                   <input type="hidden" name="id_tours" value={selectedTour.id_tours} />
-                  <input type="text" name="title" defaultValue={selectedTour.title} placeholder="Titre du Parcours" className="font-texts" required />
-                  <textarea name="description" defaultValue={selectedTour.description} placeholder="Description du Parcours" className="font-texts" required></textarea>
+                  <input type="text" name="title" defaultValue={selectedTour.title} placeholder={t('tourTitlePlaceholder')} className="font-texts" required />
+                  <textarea name="description" defaultValue={selectedTour.description} placeholder={t('tourDescriptionPlaceholder')} className="font-texts" required></textarea>
                   <DndContext onDragEnd={onDragEnd} modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}>
                     <SortableContext items={tourSteps[selectedTour.id_tours]?.map(step => step.id_tour_steps)} strategy={verticalListSortingStrategy}>
                       {tourSteps[selectedTour.id_tours]?.map((step, index) => (
                         <SortableItem  key={`step-${step.id_tour_steps}`} id={step.id_tour_steps}>
                           <div className="draggable-step font-title flex items-center justify-between w-full">
                             <span className="drag-icon">☰</span>
-                            <h4 className="font-title font-bold text-lg">Étape {index + 1}</h4>
+                            <h4 className="font-title font-bold text-lg">{t('step')} {index + 1}</h4>
                             <input type="hidden" name={`steps[${index}][id_tour_steps]`} value={step.id_tour_steps} />
                             <input 
                               type="hidden" 
@@ -774,8 +776,8 @@ const AdminTour = () => {
                                 }}
                                 styles={customSelectStyles}
                                 className="w-full font-texts"
-                                placeholder="Sélectionner une salle"
-                                noOptionsMessage={() => "Aucune salle disponible"}
+                                placeholder={t('selectRoom')}
+                                noOptionsMessage={() => t('noRoomAvailable')}
                                 required
                                 isSearchable
                                 menuPlacement="auto"
@@ -804,7 +806,7 @@ const AdminTour = () => {
                           <SortableItem key={`new_${index}`} id={`new-step-${index}`}>
                             <div className="draggable-step font-title flex items-center justify-between w-full">
                               <span className="drag-icon">☰</span>
-                              <h4 className="font-title font-bold text-lg">Nouvelle étape {newStepIndex + 1}</h4>
+                              <h4 className="font-title font-bold text-lg">{t('newStep')} {newStepIndex + 1}</h4>
                               <input type="hidden" name={`steps[${newStepIndex}][id_tour_steps]`} value={`new_${index}`} />
                               <input 
                                 type="hidden" 
@@ -818,8 +820,8 @@ const AdminTour = () => {
                                   onChange={(selectedOption) => handleEditModeNewStepChange(index, selectedOption)}
                                   styles={customSelectStyles}
                                   className="w-full font-texts"
-                                  placeholder="Sélectionner une salle"
-                                  noOptionsMessage={() => "Aucune salle disponible"}
+                                  placeholder={t('selectRoom')}
+                                  noOptionsMessage={() => t('noRoomAvailable')}
                                   required
                                   isSearchable
                                   menuPlacement="auto"
@@ -844,8 +846,8 @@ const AdminTour = () => {
                       })}
                     </SortableContext>
                   </DndContext>
-                  <button type="button" onClick={handleAddStep} className="bouton-ajouter font-texts shadow-md">Ajouter une étape</button>
-                  <button type="submit" className="bouton-modifier font-texts shadow-md bg-junia-orange">Modifier le parcours</button>
+                  <button type="button" onClick={handleAddStep} className="bouton-ajouter font-texts shadow-md">{t('addStep')}</button>
+                  <button type="submit" className="bouton-modifier font-texts shadow-md bg-junia-orange">{t('modifyTour')}</button>
               </form>
             </div>
           </div>
