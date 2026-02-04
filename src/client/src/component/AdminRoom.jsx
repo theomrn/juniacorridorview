@@ -653,30 +653,12 @@ const AdminRoom = () => {
                 className="admin-button-responsive"
             >
               <FaPlusCircle className="admin-button-icon" /> Ajouter une salle
-            </button>
-
-            
-            <button
-                onClick={() => {
-                  history.push('/admin/language');
-                  setNewRoomModalOpen(true);
-                  setPlanPlacementEditMode(false);
-                }}
-                className="admin-button-responsive"
-            >
-              Languages
-            </button>
-
-            <button
-                onClick={() => history.push('/admin/convert')}
-                className="admin-button-responsive">
-                Convertion fichier
-            </button>
+            </button> 
 
                       <button
                 onClick={() => history.push('/admin/translation')}
                 className="admin-button-responsive">
-                Traduction
+                Gestion & traductions
             </button>
 
             <button

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { getLanguages, getEntiereTranslationsByNameSpace, updateTranslation } from "../api/AxiosTranslation";
-import { FaLanguage, FaChevronDown, FaChevronUp, FaSave, FaArrowLeft } from "react-icons/fa";
+import { FaLanguage, FaChevronDown, FaChevronUp, FaSave, FaArrowLeft, FaUsers } from "react-icons/fa";
 import { toast } from "sonner";
 import '../style/AdminTranslation.css';
 
@@ -129,6 +129,13 @@ export default function AdminTranslation() {
           style={{ backgroundColor: '#f06b42', color: 'white' }}
         >
           <FaLanguage /> Gérer les langues
+        </button>
+        <button
+          onClick={() => history.push('/admin/visitor')}
+          className="button-type font-title font-bold"
+          style={{ backgroundColor: '#f06b42', color: 'white' }}
+        >
+          <FaUsers /> Types de visiteurs
         </button>
       </div>
 
