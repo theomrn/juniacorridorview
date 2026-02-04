@@ -4,8 +4,10 @@ import { getLanguages, getEntiereTranslationsByNameSpace, updateTranslation } fr
 import { FaLanguage, FaChevronDown, FaChevronUp, FaSave, FaArrowLeft } from "react-icons/fa";
 import { toast } from "sonner";
 import '../style/AdminTranslation.css';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminTranslation() {
+  const { t } = useTranslation('adminTranslation');
   const history = useHistory();
   const [selectedLanguage, setSelectedLanguage] = useState(null);
   const [languages, setLanguages] = useState([]);
@@ -26,7 +28,7 @@ export default function AdminTranslation() {
         }
       } catch (error) {
         console.error('Erreur lors du chargement des langues:', error);
-        toast.error('Erreur lors du chargement des langues');
+        toast.error(t('errorLoadingLanguages'));
       }
     };
     fetchLanguages();
@@ -63,7 +65,7 @@ export default function AdminTranslation() {
         setTranslationIds(idsData);
       } catch (error) {
         console.error('Erreur lors du chargement des traductions:', error);
-        toast.error('Erreur lors du chargement des traductions');
+        toast.error(t('errorLoadingTranslations'));
       } finally {
         setLoading(false);
       }
@@ -98,10 +100,10 @@ export default function AdminTranslation() {
           await updateTranslation(id, value);
         }
       }
-      toast.success(`Namespace "${namespace}" sauvegardé avec succès !`);
+      toast.success(t('namespaceSavedSuccess', { namespace }));
     } catch (error) {
       console.error(`Erreur lors de la sauvegarde du namespace "${namespace}":`, error);
-      toast.error(`Erreur lors de la sauvegarde du namespace "${namespace}"`);
+      toast.error(t('errorSavingNamespace', { namespace }));
     } finally {
       setSavingNamespace(null);
     }
@@ -119,7 +121,7 @@ export default function AdminTranslation() {
           className="button-type font-title font-bold"
           style={{ backgroundColor: '#f06b42', color: 'white' }}
         >
-          <FaArrowLeft /> Retour
+          <FaArrowLeft /> {t('back')}
         </button>
       </div>
       <div className="admin-translation-header">
@@ -128,12 +130,12 @@ export default function AdminTranslation() {
           className="button-type font-title font-bold"
           style={{ backgroundColor: '#f06b42', color: 'white' }}
         >
-          <FaLanguage /> Gérer les langues
+          <FaLanguage /> {t('manageLanguages')}
         </button>
       </div>
 
       <div className="language-selector">
-        <label className="font-title font-semibold">Sélectionner la langue :</label>
+        <label className="font-title font-semibold">{t('selectLanguage')} :</label>
         <select
           value={selectedLanguage || ''}
           onChange={(e) => setSelectedLanguage(e.target.value)}
@@ -150,7 +152,7 @@ export default function AdminTranslation() {
       {loading ? (
         <div className="translation-loader">
           <div className="spinner"></div>
-          <span className="font-texts">Chargement des traductions...</span>
+          <span className="font-texts">{t('loadingTranslations')}</span>
         </div>
       ) : (
         <div className="admin-translation-list">
@@ -169,7 +171,7 @@ export default function AdminTranslation() {
                       {namespace}
                     </span>
                     <span className="namespace-count font-texts">
-                      {translationCount} traduction{translationCount > 1 ? 's' : ''}
+                      {translationCount} {translationCount > 1 ? t('translations') : t('translation')}
                     </span>
                   </div>
                   <span className="chevron-icon">
@@ -186,8 +188,8 @@ export default function AdminTranslation() {
                     <table className="translation-table">
                       <thead>
                         <tr>
-                          <th className="font-title" style={{ width: '35%' }}>Clé</th>
-                          <th className="font-title">Valeur</th>
+                          <th className="font-title" style={{ width: '35%' }}>{t('key')}</th>
+                          <th className="font-title">{t('value')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -202,7 +204,7 @@ export default function AdminTranslation() {
                                 value={value}
                                 onChange={(e) => handleTranslationChange(namespace, key, e.target.value)}
                                 className="translation-input font-texts"
-                                placeholder="Entrer le texte"
+                                placeholder={t('enterText')}
                               />
                             </td>
                           </tr>
@@ -217,7 +219,7 @@ export default function AdminTranslation() {
                         className="save-button font-title font-bold"
                       >
                         <FaSave />
-                        {savingNamespace === namespace ? 'Sauvegarde...' : 'Sauvegarder'}
+                        {savingNamespace === namespace ? t('saving') : t('save')}
                       </button>
                     </div>
                   </div>

@@ -6,7 +6,8 @@ import { createUser, getAllUsers, resetPassword, deleteUser } from "../api/Axios
 import { FaTrash, FaPen, FaPlus } from "react-icons/fa";
 import ConfirmDialog from "./dialogs/ConfirmDialog";
 import { toast } from 'sonner';
-import '../style/AdminUser.css'; // Assurez-vous que le CSS est importé
+import '../style/AdminUser.css';
+import { useTranslation } from 'react-i18next';
 
 const generatePassword = () => {
   const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -23,6 +24,7 @@ const generatePassword = () => {
 };
 
 const AdminUser = () => {
+  const { t } = useTranslation('adminUser');
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newEmail, setNewEmail] = useState("");
@@ -52,7 +54,7 @@ const AdminUser = () => {
     setResetLink("");
     try {
       const res = await createUser(newEmail, newPassword);
-      setMessage("Administrateur créé !");
+      setMessage(t('adminCreated'));
       setResetLink(res.resetLink);
       // Ne vide pas les champs ici, attend la fermeture de la modal
       setLoading(true);
@@ -63,7 +65,7 @@ const AdminUser = () => {
       setMessage(
         err?.response?.data?.error ||
         err?.message ||
-        "Erreur lors de la création."
+        t('errorCreating')
       );
     }
   };
@@ -86,7 +88,7 @@ const AdminUser = () => {
       setMessage(
         err?.response?.data?.error ||
         err?.message ||
-        "Erreur lors de la génération du lien de réinitialisation."
+        t('errorGeneratingResetLink')
       );
     }
   };
@@ -101,12 +103,12 @@ const AdminUser = () => {
       setUsers(users => users.filter(u => u.uid !== confirmDelete.uid));
       setConfirmDelete({ open: false, email: "", uid: "" });
       setResetModal({ open: false, email: "", link: "" });
-      toast.success("Administrateur supprimé avec succès !");
+      toast.success(t('adminDeletedSuccess'));
     } catch (err) {
       setMessage(
         err?.response?.data?.error ||
         err?.message ||
-        "Erreur lors de la suppression de l'administrateur."
+        t('errorDeletingAdmin')
       );
       setConfirmDelete({ open: false, email: "", uid: "" });
     }
@@ -122,19 +124,19 @@ const AdminUser = () => {
               <div className="flex flex-row items-start gap-8">
                 <div className="flex flex-col flex-grow">
                   <div className="flex flex-row justify-between items-center mb-8 ml-4 mt-2">
-                    <div className="text-3xl font-title text-junia-purple font-bold">Liste des administrateurs</div>
+                    <div className="text-3xl font-title text-junia-purple font-bold">{t('adminList')}</div>
                     <button
                       className="bg-junia-orange hover:bg-junia-purple text-white p-2 rounded-full font-title text-lg shadow-lg hover:shadow-xl transform mr-4 mt-2 cursor-pointer flex flex-row items-center gap-2"
                       onClick={() => setShowModal(true)}
                     >
-                      <FaPlus/> Nouvel administrateur
+                      <FaPlus/> {t('newAdmin')}
                     </button>
                   </div>
                   {/* Barre de recherche */}
                   <div className="mb-6 ml-4 mr-4 pt-2">
                     <input
                       type="text"
-                      placeholder="Rechercher un administrateur par email..."
+                      placeholder={t('searchAdminPlaceholder')}
                       value={search}
                       onChange={e => setSearch(e.target.value)}
                       className="w-full px-4 py-3 border-2 border-junia-orange rounded-full font-texts focus:outline-none focus:border-junia-purple transition-colors text-junia-orange placeholder-junia-orange"
@@ -147,14 +149,14 @@ const AdminUser = () => {
                   )}
                   <div className="overflow-x-auto rounded-xl m-4">
                     {loading ? (
-                      <div className="text-center py-12 text-xl text-junia-purple font-title">Chargement...</div>
+                      <div className="text-center py-12 text-xl text-junia-purple font-title">{t('loading')}</div>
                     ) : (
                       <table className="w-full bg-white rounded-xl overflow-hidden">
                         <thead className="p-4 rounded-t-xl">
                           <tr className="bg-junia-purple text-white">
                             <th className="px-4 py-4 font-title text-lg text-center">Email</th>
                             <th className="px-4 py-4 font-title text-lg text-center">UID</th>
-                            <th className="py-4 font-title text-lg text-center">Actions</th>
+                            <th className="py-4 font-title text-lg text-center">{t('actions')}</th>
                           </tr>
                         </thead>
                         <tbody className="rounded-b-xl">
@@ -172,7 +174,7 @@ const AdminUser = () => {
                                     style={{ width: 'fit-content' }}
                                   >
                                     <FaPen className="text-base" />
-                                    Réinitialiser le mot de passe
+                                    {t('resetPassword')}
                                   </button>
                                   <button
                                     className="bg-junia-purple hover:bg-red-800 transition-colors text-white px-4 py-2 rounded-full font-title text-sm flex items-center gap-2 group cursor-pointer"
@@ -180,7 +182,7 @@ const AdminUser = () => {
                                     style={{ width: 'fit-content' }}
                                   >
                                     <FaTrash className="text-base" />
-                                    Supprimer le compte
+                                    {t('deleteAccount')}
                                   </button>
                                 </td>
                               </tr>
@@ -218,7 +220,7 @@ const AdminUser = () => {
               maxWidth: '32rem'
             }}>
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-title text-junia-purple">Créer un administrateur</h2>
+                <h2 className="text-2xl font-title text-junia-purple">{t('createAdmin')}</h2>
                 <button
                   className="text-gray-400 hover:text-junia-purple text-3xl leading-none cursor-pointer transition-colors"
                   onClick={() => {
@@ -242,11 +244,11 @@ const AdminUser = () => {
               )}
               <form onSubmit={handleCreateUser}>
                 <div className="form-group">
-                  <label className="block text-sm font-title text-junia-purple mb-2">Email de l'administrateur</label>
+                  <label className="block text-sm font-title text-junia-purple mb-2">{t('adminEmail')}</label>
                   <input
                     type="email"
                     required
-                    placeholder="Entrez l'email du nouvel administrateur"
+                    placeholder={t('enterAdminEmail')}
                     value={newEmail}
                     onChange={e => setNewEmail(e.target.value)}
                     className={`w-full px-4 py-3 border-2 border-junia-purple rounded-lg font-texts focus:outline-none focus:border-junia-orange transition-colors ${!!message ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -254,12 +256,12 @@ const AdminUser = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label className="block text-sm font-title text-junia-purple mb-2">Mot de passe temporaire</label>
+                  <label className="block text-sm font-title text-junia-purple mb-2">{t('temporaryPassword')}</label>
                   <div className="flex gap-2 items-center">
                     <input
                       type="text"
                       required
-                      placeholder="Générez ou saisissez un mot de passe"
+                      placeholder={t('generateOrEnterPassword')}
                       value={newPassword}
                       onChange={e => setNewPassword(e.target.value)}
                       className={`flex-1 px-4 py-3 border-2 border-junia-purple rounded-lg font-texts focus:outline-none focus:border-junia-orange transition-colors ${!!message ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -269,30 +271,30 @@ const AdminUser = () => {
                       type="button"
                       className={`px-4 py-3 bg-junia-purple rounded-lg font-title whitespace-nowrap transition-colors ${!!message ? 'bg-gray-400 cursor-not-allowed' : 'bg-junia-orange hover:bg-junia-purple text-white'}`}
                       onClick={!!message ? undefined : handleGeneratePassword}
-                      title="Générer un mot de passe sécurisé"
+                      title={t('generateSecurePassword')}
                     >
-                      Générer
+                      {t('generate')}
                     </button>
                   </div>
                   {copied && (
                     <div className="mt-2 text-green-600 text-sm font-semibold flex items-center">
-                      ✓ Mot de passe copié dans le presse-papiers !
+                      ✓ {t('passwordCopied')}
                     </div>
                   )}
                 </div>
                 {resetLink && (
                   <div className="form-group">
-                    <label className="block text-sm font-title text-junia-purple mb-2">Lien de création du mot de passe</label>
+                    <label className="block text-sm font-title text-junia-purple mb-2">{t('passwordCreationLink')}</label>
                     <div className="p-3 bg-blue-50 border border-junia-orange rounded-lg">
                       <p className="text-sm text-blue-700 mb-2">
-                        Envoyez ce lien à l'administrateur pour qu'il puisse définir son mot de passe :
+                        {t('sendLinkToAdmin')}
                         <a
                           href={resetLink}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-600 underline text-sm break-all hover:text-blue-800 transition-colors pl-2"
                         >
-                          Lien
+                          {t('link')}
                         </a>
                       </p>
                     </div>
@@ -310,14 +312,14 @@ const AdminUser = () => {
                     }}
                     className="bg-junia-orange flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-full font-title text-lg hover:bg-gray-50 transition-colors"
                   >
-                    {message ? "Fermer la modal" : "Annuler"}
+                    {message ? t('closeModal') : t('cancel')}
                   </button>
                   {!message && (
-                    <button 
-                      type="submit" 
+                    <button
+                      type="submit"
                       className="flex-1 bg-junia-purple hover:bg-junia-orange transition-colors text-white px-6 py-3 rounded-full font-title text-lg shadow-lg"
                     >
-                      Créer l'administrateur
+                      {t('createAdminBtn')}
                     </button>
                   )}
                 </div>
@@ -350,7 +352,7 @@ const AdminUser = () => {
             }}>
               <div className="flex justify-between items-center mb-6">
                 <div className="text-2xl font-bold text-center font-title text-junia-purple">
-                  Lien de réinitialisation du mot de passe pour {resetModal.email}
+                  {t('resetLinkFor')} {resetModal.email}
                 </div>
                 <button
                   className="text-gray-400 hover:text-junia-purple text-3xl leading-none cursor-pointer transition-colors"
@@ -363,15 +365,15 @@ const AdminUser = () => {
               </div>
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-700 mb-2">
-                  Envoyez ce lien à l'administrateur pour qu'il puisse définir son mot de passe :
-                
+                  {t('sendLinkToAdmin')}
+
                 <a
                   href={resetModal.link}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 underline text-sm break-all hover:text-blue-800 transition-colors pl-2"
                 >
-                  Lien
+                  {t('link')}
                 </a>
                 </p>
               </div>
@@ -380,13 +382,13 @@ const AdminUser = () => {
                   className="px-6 py-3 bg-junia-purple hover:bg-junia-orange transition-colors text-white rounded-full font-title text-lg shadow-lg"
                   onClick={() => setResetModal({ open: false, email: "", link: "" })}
                 >
-                  Fermer
+                  {t('close')}
                 </button>
               </div>
             </div>
           </div>
         )}
-        <ConfirmDialog open={confirmDelete.open} onClose={() => setConfirmDelete({ open: false, email: "", uid: "" })} title={"Confirmer la suppression"} message={"Êtes-vous sûr de vouloir supprimer " + confirmDelete.email + " ? Cette action est irréversible."} confirmText={"Supprimer définitivement"} onConfirm={confirmDeleteUser} />
+        <ConfirmDialog open={confirmDelete.open} onClose={() => setConfirmDelete({ open: false, email: "", uid: "" })} title={t('confirmDeletion')} message={t('confirmDeleteMessage', { email: confirmDelete.email })} confirmText={t('deletePermanently')} onConfirm={confirmDeleteUser} />
       </div>
     </div>
   );
