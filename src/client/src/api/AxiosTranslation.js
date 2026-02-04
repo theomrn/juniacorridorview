@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const getLanguages = async () => {
     try {
-        const response = await axios.get('api/translations/languages');
+        const response = await axios.get('/api/translations/languages');
         return response.data;
     } catch (error) {
         console.error('Error fetching languages', error);

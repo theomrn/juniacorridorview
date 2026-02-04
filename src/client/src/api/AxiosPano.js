@@ -24,9 +24,13 @@ const getTables = async () => {
     }
 }
 
-const getInfoPopup = async (imageId) => {
+const getInfoPopup = async (imageId, languageId = null) => {
     try {
-        const response = await axios.post('/api/retrieveInfoPopUpByIdPicture', { id_pictures: imageId });
+        const payload = { id_pictures: imageId };
+        if (languageId !== null) {
+            payload.id_languages = parseInt(languageId, 10);
+        }
+        const response = await axios.post('/api/retrieveInfoPopUpByIdPicture', payload);
         return response.data;
     } catch (error) {
         if (axios.isCancel(error)) {

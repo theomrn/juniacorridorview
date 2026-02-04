@@ -1,5 +1,5 @@
 
-public record IdDto(int id_pictures);
+public record IdDto(int id_pictures, int? id_languages = null);
 public record UpdateVisibilityDto(int id_rooms, bool Hidden);
 public record UpdateVisibilityTourDto(int id_tours, bool Hidden);
 public record NameDto(string Name);
@@ -26,3 +26,5 @@ public record InsertTranslationDto(int id_language,string translation_namespace,
 public record CreateLanguageDto(string name_language);
 
 public record UpdateLanguageDto(string name_language, int id_language);
+
+public record AddTranslationDto(string Title, string Text, int IdLanguages, int? IdVisitorType);

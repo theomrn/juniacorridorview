@@ -1,6 +1,7 @@
-import React, {useEffect, useRef, useState, useCallback} from "react";
+import React, {useEffect, useRef, useState, useCallback, useContext} from "react";
 import { useHistory } from "react-router-dom";
 import * as api from '../api/AxiosTour';
+import { getVisitorTypes } from '../api/AxiosVisitorType';
 import { useTranslation } from 'react-i18next';
 import '../style/Tour.css';
 import { Buffer } from 'buffer';
@@ -8,6 +9,8 @@ import Carousel from '../reactbits/Components/Carousel/Carousel'
 import {toast} from "sonner";
 import Loader from "./Loader";
 import Masonry from 'react-masonry-css';
+import { AppContext } from '../App';
+import { FaUserTag } from "react-icons/fa";
 
 const TourViewer = () => {
   Buffer.from = Buffer.from || require('buffer').Buffer;
@@ -142,6 +145,8 @@ const TourViewer = () => {
   }
 
   const handleTourClick = (tourId) => {
+    // The visitor type is already stored in context and localStorage,
+    // so it will be available in the Pano component
     history.push(`/pano?tour_id=${tourId}`);
   };
 
@@ -165,6 +170,7 @@ const TourViewer = () => {
       showLoading([fetchAllTourStepsPromise], 'Chargement des parcours...', 'Chargement des parcours réussi', 'Erreur lors du chargement des parcours');
     }
   }, [tours]);
+
 
   const getPanoramaImagesForTour = (tourId) => {
     if (!tourSteps[tourId]) return [];
@@ -202,6 +208,8 @@ const TourViewer = () => {
     <div className="body-container bg-junia-lavender">
       <Loader show={isLoading} text={textLoading} />
       <div className="bg-junia-lavender p-4">
+
+
         {!isLoading && (
           <Masonry
             breakpointCols={breakpointColumnsObj}

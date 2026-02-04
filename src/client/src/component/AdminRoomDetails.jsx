@@ -1,13 +1,15 @@
 import React, { useEffect, useState, useRef } from "react";
 import {useHistory, useParams} from "react-router-dom";
 import * as api from '../api/AxiosAdminRoom';
+import { getLanguages } from '../api/AxiosTranslation';
+import { getVisitorTypes } from '../api/AxiosVisitorType';
 import Panorama360 from './Panorama360';
 import { Buffer } from 'buffer';
 import { toast } from "sonner";
 import Loader from "./Loader";
 import Masonry from 'react-masonry-css';
 import '../style/AdminRoomDetails.css';
-import {FaArrowLeft, FaPen, FaTrash, FaPlusCircle} from "react-icons/fa";
+import {FaArrowLeft, FaPen, FaTrash, FaPlusCircle, FaLanguage, FaGlobe} from "react-icons/fa";
 import {ImLocation2} from "react-icons/im";
 import {MdOutlineFileUpload} from "react-icons/md";
 import ModalAddEditImage from "./room_details/ModalAddEditImage";
@@ -60,7 +62,45 @@ const AdminRoomDetails = () => {
   const [infospotToDelete, setInfospotToDelete] = useState(null);
   const [linkToDelete, setLinkToDelete] = useState(null);
 
+  // Languages and visitor types for InfoPopup form
+  const [languages, setLanguages] = useState([]);
+  const [visitorTypes, setVisitorTypes] = useState([]);
+  const [selectedLanguage, setSelectedLanguage] = useState('');
+  const [selectedVisitorType, setSelectedVisitorType] = useState('');
+
+  // Translation modal state
+  const [translationModalOpen, setTranslationModalOpen] = useState(false);
+  const [infospotForTranslation, setInfospotForTranslation] = useState(null);
+  const [infospotTranslations, setInfospotTranslations] = useState([]);
+  const [newTranslationTitle, setNewTranslationTitle] = useState('');
+  const [newTranslationText, setNewTranslationText] = useState('');
+
   const history = useHistory();
+
+  // Group InfoPopups by their ID to show translations together
+  const groupInfoPopupsById = (popups) => {
+    const grouped = {};
+    popups.forEach(popup => {
+      if (!grouped[popup.id_info_popup]) {
+        grouped[popup.id_info_popup] = {
+          id_info_popup: popup.id_info_popup,
+          id_pictures: popup.id_pictures,
+          position_x: popup.position_x,
+          position_y: popup.position_y,
+          position_z: popup.position_z,
+          image_path: popup.image_path,
+          translations: []
+        };
+      }
+      grouped[popup.id_info_popup].translations.push({
+        id_languages: popup.id_languages,
+        title: popup.title,
+        text: popup.text,
+        id_visitor_type: popup.id_visitor_type
+      });
+    });
+    return Object.values(grouped);
+  };
 
   const showLoading = (promises, textLoading, textSuccess, textError) => {
     setLoading(true);
@@ -105,6 +145,24 @@ const AdminRoomDetails = () => {
         picturesData.map(async (pic) => await api.getLinks(pic.id_pictures))
       );
       setAllLinks(allLinks.flat());
+
+      // Fetch languages and visitor types for InfoPopup form
+      try {
+        const languagesData = await getLanguages();
+        setLanguages(languagesData || []);
+        if (languagesData && languagesData.length > 0) {
+          setSelectedLanguage(languagesData[0].id_language);
+        }
+      } catch (err) {
+        console.error('Error fetching languages:', err);
+      }
+
+      try {
+        const visitorTypesData = await getVisitorTypes();
+        setVisitorTypes(visitorTypesData || []);
+      } catch (err) {
+        console.error('Error fetching visitor types:', err);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -154,15 +212,15 @@ const AdminRoomDetails = () => {
   };
 
   const filteredInfoPopups = infoPopups.filter(popup =>
-    popup.title.toLowerCase().includes(searchTerm.toLowerCase())
+    (popup.title || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredLinks = links.filter(link =>
     link.id_pictures_destination.toString().includes(searchLinkTerm)
   );
 
-  const displayedInfoPopups = showAllInfospots 
-    ? allInfoPopups.filter(popup => popup.title.toLowerCase().includes(searchTerm.toLowerCase()))
+  const displayedInfoPopups = showAllInfospots
+    ? allInfoPopups.filter(popup => (popup.title || '').toLowerCase().includes(searchTerm.toLowerCase()))
     : filteredInfoPopups;
 
   const displayedLinks = showAllLinks 
@@ -175,6 +233,14 @@ const AdminRoomDetails = () => {
     if (formData.get('pic').size === 0) {
         alert('Veuillez sélectionner une image pour l\'infobulle');
         return;
+    }
+
+    // Add language and visitor type to form data
+    if (selectedLanguage) {
+      formData.append('id_languages', selectedLanguage);
+    }
+    if (selectedVisitorType) {
+      formData.append('id_visitor_type', selectedVisitorType);
     }
 
     const insertPromise = api.insertInfoPopUp(formData);
@@ -229,6 +295,11 @@ const AdminRoomDetails = () => {
     setPosX(null);
     setPosY(null);
     setPosZ(null);
+    // Reset language and visitor type selections
+    if (languages.length > 0) {
+      setSelectedLanguage(languages[0].id_language);
+    }
+    setSelectedVisitorType('');
 
     if (pictures.length > 0) {
       const firstPicture = pictures[0];
@@ -367,6 +438,9 @@ const AdminRoomDetails = () => {
     setPosX(popup.position_x);
     setPosY(popup.position_y);
     setPosZ(popup.position_z);
+    // Pre-fill language and visitor type from popup data
+    setSelectedLanguage(popup.id_languages || (languages.length > 0 ? languages[0].id_language : ''));
+    setSelectedVisitorType(popup.id_visitor_type || '');
     const image = pictures.find(pic => pic.id_pictures === popup.id_pictures);
     handleModalPictureClick(image, popup.id_pictures);
     setNewInfospotModalOpen(true);
@@ -379,6 +453,14 @@ const AdminRoomDetails = () => {
         formData.delete('pic');
     }
     formData.append('id_info_popup', infospotToEdit.id_info_popup);
+
+    // Add language and visitor type to form data
+    if (selectedLanguage) {
+      formData.append('id_languages', selectedLanguage);
+    }
+    if (selectedVisitorType) {
+      formData.append('id_visitor_type', selectedVisitorType);
+    }
 
     const updatePromise = api.updateInfospot(formData);
 
@@ -495,6 +577,123 @@ const AdminRoomDetails = () => {
     1075: 1,  // Passe à une seule colonne pour les écrans <= 1075px
     700: 1,
   };
+
+  // Open translation modal for an existing InfoPopup
+  const handleOpenTranslationModal = async (infoPopup) => {
+    setInfospotForTranslation(infoPopup);
+    setTranslationModalOpen(true);
+    setNewTranslationTitle('');
+    setNewTranslationText('');
+    if (languages.length > 0) {
+      setSelectedLanguage(languages[0].id_language);
+    }
+    setSelectedVisitorType('');
+
+    // Load existing translations
+    try {
+      const translations = await api.getInfospotTranslations(infoPopup.id_info_popup);
+      setInfospotTranslations(translations || []);
+    } catch (err) {
+      console.error('Error loading translations:', err);
+      setInfospotTranslations([]);
+    }
+  };
+
+  // Close translation modal
+  const closeTranslationModal = () => {
+    setTranslationModalOpen(false);
+    setInfospotForTranslation(null);
+    setInfospotTranslations([]);
+    setNewTranslationTitle('');
+    setNewTranslationText('');
+  };
+
+  // Add a new translation to an existing InfoPopup
+  const handleAddTranslation = async (e) => {
+    e.preventDefault();
+    if (!infospotForTranslation || !selectedLanguage || !newTranslationTitle || !newTranslationText) {
+      toast.error('Veuillez remplir tous les champs');
+      return;
+    }
+
+    // Check if translation for this language already exists
+    const existingTranslation = infospotTranslations.find(t => t.id_languages === parseInt(selectedLanguage));
+    if (existingTranslation) {
+      toast.error('Une traduction pour cette langue existe déjà. Supprimez-la d\'abord pour la remplacer.');
+      return;
+    }
+
+    try {
+      await api.addInfospotTranslation(
+        infospotForTranslation.id_info_popup,
+        newTranslationTitle,
+        newTranslationText,
+        parseInt(selectedLanguage),
+        selectedVisitorType ? parseInt(selectedVisitorType) : null
+      );
+      toast.success('Traduction ajoutée avec succès');
+
+      // Reload translations
+      const translations = await api.getInfospotTranslations(infospotForTranslation.id_info_popup);
+      setInfospotTranslations(translations || []);
+
+      // Reload all infopopups
+      const allImageInfoPopups = await Promise.all(
+        pictures.map(async (pic) => await api.getInfoPopup(pic.id_pictures))
+      );
+      setAllInfoPopups(allImageInfoPopups.flat());
+      await getInfoPopup(selectedPictureId);
+
+      // Reset form
+      setNewTranslationTitle('');
+      setNewTranslationText('');
+    } catch (err) {
+      console.error('Error adding translation:', err);
+      toast.error('Erreur lors de l\'ajout de la traduction');
+    }
+  };
+
+  // Delete a translation
+  const handleDeleteTranslation = async (id_languages) => {
+    if (!infospotForTranslation) return;
+
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette traduction ?')) return;
+
+    try {
+      await api.deleteInfospotTranslation(infospotForTranslation.id_info_popup, id_languages);
+      toast.success('Traduction supprimée');
+
+      // Reload translations
+      const translations = await api.getInfospotTranslations(infospotForTranslation.id_info_popup);
+      setInfospotTranslations(translations || []);
+
+      // Reload all infopopups
+      const allImageInfoPopups = await Promise.all(
+        pictures.map(async (pic) => await api.getInfoPopup(pic.id_pictures))
+      );
+      setAllInfoPopups(allImageInfoPopups.flat());
+      await getInfoPopup(selectedPictureId);
+    } catch (err) {
+      console.error('Error deleting translation:', err);
+      toast.error('Erreur lors de la suppression de la traduction');
+    }
+  };
+
+  // Get language name by ID
+  const getLanguageName = (id_languages) => {
+    const lang = languages.find(l => l.id_language === id_languages);
+    return lang ? lang.name_language : `Langue ${id_languages}`;
+  };
+
+  // Get visitor type name by ID
+  const getVisitorTypeName = (id_visitor_type) => {
+    if (!id_visitor_type) return 'Tous';
+    const vt = visitorTypes.find(v => v.id_visitor_type === id_visitor_type);
+    return vt ? vt.name_visitor_type : `Type ${id_visitor_type}`;
+  };
+
+  // Group displayed infopopups
+  const groupedDisplayedInfoPopups = groupInfoPopupsById(displayedInfoPopups);
 
   return (
     <div className="admin-room-details-page">
@@ -615,28 +814,80 @@ const AdminRoomDetails = () => {
             className="my-masonry-grid"
             columnClassName="my-masonry-grid_column"
           >
-            {displayedInfoPopups.map((popup) => (
+            {groupedDisplayedInfoPopups.map((popup) => (
               <div key={popup.id_info_popup} className="one-info-spot flex flex-col gap-2">
-                <div className="font-bold font-title text-2xl"> 
-                  <span className="text-junia-purple"> Titre : </span>
-                  <span className="text-junia-orange">{popup.title}</span>
+                {/* Header with ID and image */}
+                <div className="flex justify-between items-center">
+                  <div className="font-bold font-title text-lg text-junia-purple">
+                    InfoPopup #{popup.id_info_popup}
+                  </div>
+                  <div className="font-title text-sm text-junia-orange">
+                    Panorama: {popup.id_pictures}
+                  </div>
                 </div>
-                <div className="font-bold font-title text-2xl text-junia-purple">Description :</div>
-                <div className="font-texts text-md text-junia-orange text-justify">{popup.text}</div>
-                <div className="font-bold font-title text-2xl text-junia-purple">
-                  <span className="text-junia-purple"> ID du panorama : </span>
-                  <span className="text-junia-orange">{popup.id_pictures}</span>
-                </div>
-                <div className="flex justify-center ">
-                  {popup.image_path && (
-                    <div className="max-h-30">
-                      <img src={`http://localhost:5078/${popup.image_path}`} alt={`Aperçu de ${popup.title}`}/>
+
+                {/* Image */}
+                {popup.image_path && (
+                  <div className="flex justify-center">
+                    <img
+                      src={`http://localhost:5078/${popup.image_path}`}
+                      alt={`Aperçu`}
+                      className="max-h-24 rounded"
+                    />
+                  </div>
+                )}
+
+                {/* Translations section */}
+                <div className="bg-gray-50 rounded p-2">
+                  <div className="flex items-center gap-2 mb-2">
+                    <FaGlobe className="text-junia-purple" />
+                    <span className="font-bold font-title text-junia-purple">
+                      Traductions ({popup.translations.length})
+                    </span>
+                  </div>
+
+                  {popup.translations.length === 0 ? (
+                    <div className="text-gray-500 text-sm italic">Aucune traduction</div>
+                  ) : (
+                    <div className="space-y-2">
+                      {popup.translations.map((trans, idx) => (
+                        <div key={idx} className="bg-white p-2 rounded border-l-4 border-junia-orange">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="text-xs text-gray-500 mb-1">
+                                {getLanguageName(trans.id_languages)}
+                                {trans.id_visitor_type && ` | ${getVisitorTypeName(trans.id_visitor_type)}`}
+                              </div>
+                              <div className="font-bold text-junia-orange">{trans.title}</div>
+                              <div className="text-sm text-gray-700 line-clamp-2">{trans.text}</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
-                <div className="flex w-full justify-between ">
-                  <button onClick={(event) => handleEditInfoPopup(event, popup)} className="button-type p-2 font-title font-bold flex items-center gap-2"><FaPen /> Modifier</button>
-                  <button onClick={(event) => handleDeleteInfoPopup(event, popup.id_info_popup)} className="button-type2 p-2 font-title font-bold flex items-center gap-2"><FaTrash /> Supprimer</button>
+
+                {/* Actions */}
+                <div className="flex w-full gap-2 flex-wrap">
+                  <button
+                    onClick={() => handleOpenTranslationModal(popup)}
+                    className="button-type p-2 font-title font-bold flex items-center gap-2 flex-1"
+                  >
+                    <FaLanguage /> Traductions
+                  </button>
+                  <button
+                    onClick={(event) => handleEditInfoPopup(event, {...popup, ...popup.translations[0]})}
+                    className="button-type p-2 font-title font-bold flex items-center gap-2"
+                  >
+                    <FaPen />
+                  </button>
+                  <button
+                    onClick={(event) => handleDeleteInfoPopup(event, popup.id_info_popup)}
+                    className="button-type2 p-2 font-title font-bold flex items-center gap-2"
+                  >
+                    <FaTrash />
+                  </button>
                 </div>
               </div>
             ))}
@@ -817,23 +1068,58 @@ const AdminRoomDetails = () => {
 
                 {/* Right column - pas de justify-between ici */}
                 <div className="flex flex-col h-full">
-                  <input 
-                    type="text" 
-                    name="title" 
-                    placeholder="Titre" 
-                    required 
-                    defaultValue={editInfospotMod ? infospotToEdit.title : ''} 
-                    maxLength="45" 
-                    className="p-2 rounded orange-border mb-2" 
+                  <input
+                    type="text"
+                    name="title"
+                    placeholder="Titre"
+                    required
+                    defaultValue={editInfospotMod ? infospotToEdit.title : ''}
+                    maxLength="45"
+                    className="p-2 rounded orange-border mb-2"
                   />
-                  <textarea 
-                    name="text" 
-                    placeholder="Texte" 
-                    required 
-                    defaultValue={editInfospotMod ? infospotToEdit.text : ''} 
-                    maxLength="300" 
-                    className="p-2 rounded resize-none orange-border flex-grow" 
+                  <textarea
+                    name="text"
+                    placeholder="Texte"
+                    required
+                    defaultValue={editInfospotMod ? infospotToEdit.text : ''}
+                    maxLength="300"
+                    className="p-2 rounded resize-none orange-border mb-2"
+                    style={{ minHeight: '80px' }}
                   />
+
+                  {/* Language and Visitor Type selectors */}
+                  <div className="flex gap-2 mt-2">
+                    <div className="flex-1">
+                      <label className="text-junia-purple font-bold text-sm mb-1 block">Langue :</label>
+                      <select
+                        value={selectedLanguage}
+                        onChange={(e) => setSelectedLanguage(e.target.value)}
+                        className="w-full p-2 rounded orange-border"
+                        required
+                      >
+                        {languages.map((lang) => (
+                          <option key={lang.id_language} value={lang.id_language}>
+                            {lang.name_language}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex-1">
+                      <label className="text-junia-purple font-bold text-sm mb-1 block">Type de visiteur :</label>
+                      <select
+                        value={selectedVisitorType}
+                        onChange={(e) => setSelectedVisitorType(e.target.value)}
+                        className="w-full p-2 rounded orange-border"
+                      >
+                        <option value="">Tous les visiteurs</option>
+                        {visitorTypes.map((vt) => (
+                          <option key={vt.id_visitor_type} value={vt.id_visitor_type}>
+                            {vt.name_visitor_type}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
                 </div>
               </form>
             </div>
@@ -974,6 +1260,161 @@ const AdminRoomDetails = () => {
       <ModalAddEditImage isOpen={addImageModalOpen} toggle={
         () => setAddImageModalOpen(!addImageModalOpen)
       } id_rooms={id} imageToUpdate={imageToUpdate} reload={reloadAfterAddEditImage} />
+
+      {/* Translation Modal */}
+      {translationModalOpen && infospotForTranslation && (
+        <div className="fixed inset-0 flex justify-center items-center modal-background z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="modal-header flex justify-between items-center p-4 border-b">
+              <div className="text-2xl font-bold text-junia-purple font-title">
+                Gérer les traductions - InfoPopup #{infospotForTranslation.id_info_popup}
+              </div>
+              <button
+                className="text-3xl text-gray-500 hover:text-gray-700"
+                onClick={closeTranslationModal}
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-4">
+              {/* Existing translations */}
+              <div className="mb-6">
+                <h3 className="font-bold font-title text-junia-purple mb-3 flex items-center gap-2">
+                  <FaGlobe /> Traductions existantes ({infospotTranslations.length})
+                </h3>
+
+                {infospotTranslations.length === 0 ? (
+                  <div className="text-gray-500 italic p-4 bg-gray-50 rounded">
+                    Aucune traduction pour cette infobulle. Ajoutez-en une ci-dessous.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {infospotTranslations.map((trans) => (
+                      <div key={trans.id_languages} className="bg-gray-50 p-3 rounded-lg border-l-4 border-junia-orange">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="bg-junia-purple text-white text-xs px-2 py-1 rounded">
+                                {trans.name_language || getLanguageName(trans.id_languages)}
+                              </span>
+                              {trans.id_visitor_type && (
+                                <span className="bg-junia-orange text-white text-xs px-2 py-1 rounded">
+                                  {trans.name_visitor_type || getVisitorTypeName(trans.id_visitor_type)}
+                                </span>
+                              )}
+                            </div>
+                            <div className="font-bold text-junia-orange text-lg">{trans.title}</div>
+                            <div className="text-gray-700 text-sm mt-1">{trans.text}</div>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteTranslation(trans.id_languages)}
+                            className="ml-2 p-2 text-red-500 hover:bg-red-100 rounded"
+                            title="Supprimer cette traduction"
+                          >
+                            <FaTrash />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Add new translation form */}
+              <div className="border-t pt-4">
+                <h3 className="font-bold font-title text-junia-purple mb-3 flex items-center gap-2">
+                  <FaPlusCircle /> Ajouter une traduction
+                </h3>
+
+                <form onSubmit={handleAddTranslation} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-junia-purple font-bold text-sm mb-1 block">Langue :</label>
+                      <select
+                        value={selectedLanguage}
+                        onChange={(e) => setSelectedLanguage(e.target.value)}
+                        className="w-full p-2 rounded orange-border"
+                        required
+                      >
+                        {languages.map((lang) => (
+                          <option
+                            key={lang.id_language}
+                            value={lang.id_language}
+                            disabled={infospotTranslations.some(t => t.id_languages === lang.id_language)}
+                          >
+                            {lang.name_language}
+                            {infospotTranslations.some(t => t.id_languages === lang.id_language) && ' (déjà traduit)'}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-junia-purple font-bold text-sm mb-1 block">Type de visiteur :</label>
+                      <select
+                        value={selectedVisitorType}
+                        onChange={(e) => setSelectedVisitorType(e.target.value)}
+                        className="w-full p-2 rounded orange-border"
+                      >
+                        <option value="">Tous les visiteurs</option>
+                        {visitorTypes.map((vt) => (
+                          <option key={vt.id_visitor_type} value={vt.id_visitor_type}>
+                            {vt.name_visitor_type}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-junia-purple font-bold text-sm mb-1 block">Titre :</label>
+                    <input
+                      type="text"
+                      value={newTranslationTitle}
+                      onChange={(e) => setNewTranslationTitle(e.target.value)}
+                      placeholder="Titre de la traduction"
+                      className="w-full p-2 rounded orange-border"
+                      maxLength="45"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-junia-purple font-bold text-sm mb-1 block">Texte :</label>
+                    <textarea
+                      value={newTranslationText}
+                      onChange={(e) => setNewTranslationText(e.target.value)}
+                      placeholder="Contenu de la traduction"
+                      className="w-full p-2 rounded orange-border resize-none"
+                      rows="4"
+                      maxLength="300"
+                      required
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={closeTranslationModal}
+                      className="px-4 py-2 bg-gray-300 text-gray-700 rounded font-title font-bold"
+                    >
+                      Fermer
+                    </button>
+                    <button
+                      type="submit"
+                      className="button-type px-4 py-2 font-title font-bold flex items-center gap-2"
+                    >
+                      <FaPlusCircle /> Ajouter la traduction
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ConfirmDialog open={showConfirm} onClose={() => setShowConfirm(false)} title={confirmTitle} message={confirmMessage} onConfirm={async () => {
         if (imageToDelete) {

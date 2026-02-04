@@ -316,22 +316,29 @@ public class ApiController : ControllerBase
     [HttpPost("retrieveInfoPopUpByIdPicture")]
     public async Task<IActionResult> RetrieveInfoPopUpByIdPicture([FromBody] IdDto dto)
     {
-        var res = await _db.RetrieveInfoPopUpByIdPictureAsync(dto.id_pictures);
+        var res = await _db.RetrieveInfoPopUpByIdPictureAsync(dto.id_pictures, dto.id_languages);
         return Ok(res);
     }
 
     [HttpPost("insertInfoPopUp")]
     [RequestSizeLimit(50_000_000)]
-    public async Task<IActionResult> InsertInfoPopUp([FromForm] int id_pictures, [FromForm] string posX, [FromForm] string posY, [FromForm] string posZ)
+    public async Task<IActionResult> InsertInfoPopUp([FromForm] int id_pictures, [FromForm] string posX, [FromForm] string posY, [FromForm] string posZ, [FromForm] string? title, [FromForm] string? text, [FromForm] int? id_languages, [FromForm] int? id_visitor_type)
     {
         var file = Request.Form.Files.FirstOrDefault();
-        var res = await _db.InsertInfoPopUpAsync(id_pictures, double.Parse(posX.Replace(".",",")), double.Parse(posY.Replace(".", ",")), double.Parse(posZ.Replace(".", ",")), file);
-        return Ok(new { inserted = res });
+        var infoPopupId = await _db.InsertInfoPopUpAsync(id_pictures, double.Parse(posX.Replace(".",",")), double.Parse(posY.Replace(".", ",")), double.Parse(posZ.Replace(".", ",")), file);
+
+        // Create translation if title and text are provided
+        if (!string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(text) && id_languages.HasValue)
+        {
+            await _db.InsertInfoPopUpTranslationAsync(infoPopupId, text, title, id_languages.Value, id_visitor_type);
+        }
+
+        return Ok(new { inserted = infoPopupId, id_info_popup = infoPopupId });
     }
 
     [HttpPut("update-infospot")]
     [RequestSizeLimit(50_000_000)]
-    public async Task<IActionResult> UpdateInfospot([FromForm] int id_info_popup, [FromForm] int id_pictures, [FromForm] double posX, [FromForm] double posY, [FromForm] double posZ, [FromForm] string text, [FromForm] string title, [FromForm] string id_languages, [FromForm] string id_visitor_type)
+    public async Task<IActionResult> UpdateInfospot([FromForm] int id_info_popup, [FromForm] int id_pictures, [FromForm] double posX, [FromForm] double posY, [FromForm] double posZ, [FromForm] string text, [FromForm] string title, [FromForm] int? id_languages, [FromForm] int? id_visitor_type)
     {
         var file = Request.Form.Files.FirstOrDefault();
         var res = await _db.UpdateInfospotAsync(id_info_popup, id_pictures, posX, posY, posZ, text, title, file, id_languages, id_visitor_type);
@@ -351,6 +358,42 @@ public class ApiController : ControllerBase
         var res = await _db.GetPlansToDelete(id);
 
         return Ok(res);
+    }
+
+    // Get InfoPopup by ID (base info only)
+    [HttpGet("infospot/{id}")]
+    public async Task<IActionResult> GetInfoPopupById(int id)
+    {
+        var res = await _db.GetInfoPopUpByIdAsync(id);
+        if (res == null) return NotFound();
+        return Ok(res);
+    }
+
+    // Get all translations for a specific InfoPopup
+    [HttpGet("infospot/{id}/translations")]
+    public async Task<IActionResult> GetInfoPopupTranslations(int id)
+    {
+        var res = await _db.GetInfoPopUpTranslationsAsync(id);
+        return Ok(res);
+    }
+
+    // Add a translation to an existing InfoPopup
+    [HttpPost("infospot/{id}/translations")]
+    public async Task<IActionResult> AddInfoPopupTranslation(int id, [FromBody] AddTranslationDto dto)
+    {
+        var infoPopup = await _db.GetInfoPopUpByIdAsync(id);
+        if (infoPopup == null) return NotFound("InfoPopup not found");
+
+        var res = await _db.InsertInfoPopUpTranslationAsync(id, dto.Text, dto.Title, dto.IdLanguages, dto.IdVisitorType);
+        return Ok(new { inserted = res });
+    }
+
+    // Delete a specific translation
+    [HttpDelete("infospot/{id}/translations/{idLanguages}")]
+    public async Task<IActionResult> DeleteInfoPopupTranslation(int id, int idLanguages)
+    {
+        var res = await _db.DeleteInfoPopUpTranslationAsync(id, idLanguages);
+        return Ok(new { deleted = res });
     }
 
     #endregion

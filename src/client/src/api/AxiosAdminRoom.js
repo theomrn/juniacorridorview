@@ -219,7 +219,7 @@ const getRoomPreview = async (id_rooms) => {
 
 const updateInfospot = async (formData) => {
     try {
-        await axios.post('/api/update-infospot', formData);
+        await axios.put('/api/update-infospot', formData);
     } catch (error) {
         console.error('Error updating infospot:', error);
     }
@@ -247,7 +247,54 @@ const deleteInfospot = async (id_infospots) => {
     } catch (error) {
         console.error('Error deleting infospot:', error);
     }
+};
 
+// Get InfoPopup by ID (base info)
+const getInfospotById = async (id_info_popup) => {
+    try {
+        const response = await axios.get(`/api/infospot/${id_info_popup}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching infospot:', error);
+        return null;
+    }
+};
+
+// Get all translations for a specific InfoPopup
+const getInfospotTranslations = async (id_info_popup) => {
+    try {
+        const response = await axios.get(`/api/infospot/${id_info_popup}/translations`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching infospot translations:', error);
+        return [];
+    }
+};
+
+// Add a translation to an existing InfoPopup
+const addInfospotTranslation = async (id_info_popup, title, text, id_languages, id_visitor_type) => {
+    try {
+        const response = await axios.post(`/api/infospot/${id_info_popup}/translations`, {
+            Title: title,
+            Text: text,
+            IdLanguages: id_languages,
+            IdVisitorType: id_visitor_type || null
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error adding infospot translation:', error);
+        throw error;
+    }
+};
+
+// Delete a specific translation
+const deleteInfospotTranslation = async (id_info_popup, id_languages) => {
+    try {
+        await axios.delete(`/api/infospot/${id_info_popup}/translations/${id_languages}`);
+    } catch (error) {
+        console.error('Error deleting infospot translation:', error);
+        throw error;
+    }
 };
 
 const getFloors = async () => {
@@ -295,5 +342,9 @@ export {
   deleteLink,
   deleteInfospot,
   getFloors,
-  uploadFile
+  uploadFile,
+  getInfospotById,
+  getInfospotTranslations,
+  addInfospotTranslation,
+  deleteInfospotTranslation
 };

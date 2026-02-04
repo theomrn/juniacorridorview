@@ -70,6 +70,9 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
       case '/admin/language':
         setRouteName('Gestion des Langues');
       break;
+      case '/admin/visitor-type':
+        setRouteName('Gestion des Types de Visiteurs');
+      break;
       default:
         setRouteName('Menu Principal');
     }
@@ -118,7 +121,6 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
     setCurrentLanguage(id_language);
     i18n.changeLanguage(String(id_language));
   };
-
 
   const toggleModal = () => {
     setIsModalOpen((prev) => !prev);

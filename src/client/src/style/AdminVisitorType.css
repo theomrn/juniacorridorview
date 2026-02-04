@@ -1,0 +1,115 @@
+.admin-visitor-type-container {
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.admin-visitor-type-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.admin-visitor-type-header h1 {
+  margin: 0;
+}
+
+/* Formulaire d'ajout rapide */
+.admin-visitor-type-new-form {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(60, 44, 83, 0.1);
+  border-left: 4px solid #f06b42;
+}
+
+/* Liste des types de visiteurs déroulants */
+.admin-visitor-type-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.visitor-type-item {
+  background: white;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(60, 44, 83, 0.1);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.visitor-type-item:hover {
+  border-color: #f06b42;
+  box-shadow: 0 4px 12px rgba(60, 44, 83, 0.15);
+}
+
+.visitor-type-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  background-color: #f9f9f9;
+  transition: background-color 0.3s ease;
+  user-select: none;
+}
+
+.visitor-type-header:hover {
+  background-color: #f0f0f0;
+}
+
+.visitor-type-info {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  flex: 1;
+}
+
+.visitor-type-name {
+  font-size: 1.1rem;
+  color: #3c2c53;
+  min-width: 150px;
+}
+
+.visitor-type-content {
+  padding: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+  background-color: #fafafa;
+}
+
+.visitor-type-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-visitor-type-container {
+    padding: 1rem;
+  }
+
+  .admin-visitor-type-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .admin-visitor-type-header h1 {
+    width: 100%;
+  }
+
+  .visitor-type-info {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .visitor-type-header {
+    padding: 0.75rem;
+  }
+}
