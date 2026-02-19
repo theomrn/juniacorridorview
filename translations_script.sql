@@ -111,6 +111,9 @@ VALUES
 (@id_language,'adminRoom','roomEnabled','La salle a été activée'),
 (@id_language,'adminRoom','roomDisabled','La salle a été désactivée'),
 (@id_language,'adminRoom','errorChangingVisibility','Erreur lors du changement de visibilité de la salle'),
+(@id_language,'adminRoom','placeRoomOnPlanDescription','Veuillez placer la salle sur le plan du bâtiment'),
+(@id_language,'adminRoom','floorPlanAlt','Plan de l''étage'),
+(@id_language,'adminRoom','close','Fermer'),
 
 (@id_language,'adminLanguage','addlanguage','Ajouter une langue'),
 (@id_language,'adminLanguage','namelanguage','Nom de la langue'),
@@ -456,6 +459,9 @@ VALUES
 (@id_language,'adminRoom','roomEnabled','Room has been enabled'),
 (@id_language,'adminRoom','roomDisabled','Room has been disabled'),
 (@id_language,'adminRoom','errorChangingVisibility','Error changing room visibility'),
+(@id_language,'adminRoom','placeRoomOnPlanDescription','Please place the room on the building plan'),
+(@id_language,'adminRoom','floorPlanAlt','Floor plan'),
+(@id_language,'adminRoom','close','Close'),
 
 (@id_language,'adminLanguage','addlanguage','Add language'),
 (@id_language,'adminLanguage','namelanguage','Name language'),

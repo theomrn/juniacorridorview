@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 import {Buffer} from "buffer";
 import PlanImage from "./PlanImage";
 import {FaMapMarkerAlt} from "react-icons/fa";
+import { useTranslation } from 'react-i18next';
 
 const ModalPlanPlacement = ({
     isOpen,
@@ -13,6 +14,7 @@ const ModalPlanPlacement = ({
     editMode,
     floor
 }) => {
+    const { t } = useTranslation('adminRoom');
     const [showPlanPlacement, setShowPlanPlacement] = useState(false);
     const imageRef = useRef(null);
 
@@ -66,15 +68,15 @@ const ModalPlanPlacement = ({
                 <div className="modal">
                     <div className="modal-content">
                         <div className="flex justify-between items-center pb-2">
-                            <div className="text-3xl font-bold font-title text-center">Placer sur le plan</div>
+                            <div className="text-3xl font-bold font-title text-center">{t('placeOnPlan')}</div>
                             <span className="close items-center" onClick={toggle}>&times;</span>
                         </div>
                         <div className="text-lg text-center">
-                            Veuillez placer la salle sur le plan du bâtiment
+                            {t('placeRoomOnPlanDescription')}
                         </div>
                         <div style={{maxHeight: "60vh", display: "flex", justifyContent: "center"}}>
                             <div className="relative inline-block cursor-pointer" onClick={handleImageClick}>
-                                <img ref={imageRef} src={`http://localhost:5078/${floor.plan_path}`} alt="Plan de l'étage" style={{ maxHeight: "60vh", height: "auto", width: "auto", display: "block" }} />
+                                <img ref={imageRef} src={`http://localhost:5078/${floor.plan_path}`} alt={t('floorPlanAlt')} style={{ maxHeight: "60vh", height: "auto", width: "auto", display: "block" }} />
                                 {pinPosition && pinPosition.x && pinPosition.y && (
                                     <div className="absolute top-0 left-0" style={{ left: `${pinPosition.x * 100}%`, top: `${pinPosition.y * 100}%`, transform: "translate(-50%, -100%)" }}>
                                         <FaMapMarkerAlt color={"red"} className="text-red-500 text-2xl" />
@@ -87,7 +89,7 @@ const ModalPlanPlacement = ({
                             className="mt-4 p-2 button-type"
                             onClick={toggle}
                         >
-                            Fermer
+                            {t('close')}
                         </button>
                     </div>
                 </div>
