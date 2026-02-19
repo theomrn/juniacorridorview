@@ -679,7 +679,7 @@ const AdminRoom = () => {
                       <button
                 onClick={() => history.push('/admin/translation')}
                 className="admin-button-responsive">
-                Gestion & traductions
+                {t('translationManagement')}
             </button>
 
             <button
