@@ -137,7 +137,7 @@ export default function AdminTranslation() {
           className="button-type font-title font-bold"
           style={{ backgroundColor: '#f06b42', color: 'white' }}
         >
-          <FaUsers /> Types de visiteurs
+          <FaUsers /> {t('visitorTypes')}
         </button>
       </div>
 

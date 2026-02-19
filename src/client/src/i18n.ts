@@ -25,7 +25,7 @@ export async function initI18n() {
       lng: languages[0],
       fallbackLng: languages[0],
 
-      ns: ['common', 'home', 'login', 'navbar', 'adminUser', 'adminTour', 'adminRoom', 'adminBuilding', 'pano', 'tour', 'adminRoomDetails'],
+      ns: ['common', 'home', 'login', 'navbar', 'adminUser', 'adminTour', 'adminRoom', 'adminBuilding', 'pano', 'tour', 'adminRoomDetails', 'adminTranslation', 'adminLanguage', 'adminVisitor'],
       defaultNS: 'common',
 
       backend: {
