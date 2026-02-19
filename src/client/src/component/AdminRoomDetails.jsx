@@ -835,9 +835,30 @@ const AdminRoomDetails = () => {
                     </div>
                   )}
                 </div>
-                <div className="flex w-full justify-between ">
+                {/* <div className="flex w-full justify-between ">
                   <button onClick={(event) => handleEditInfoPopup(event, popup)} className="button-type p-2 font-title font-bold flex items-center gap-2"><FaPen /> {t('modify')}</button>
                   <button onClick={(event) => handleDeleteInfoPopup(event, popup.id_info_popup)} className="button-type2 p-2 font-title font-bold flex items-center gap-2"><FaTrash /> {t('delete')}</button>
+                </div>
+              </div> */}
+               <div className="flex w-full gap-2 flex-wrap">
+                  <button
+                    onClick={() => handleOpenTranslationModal(popup)}
+                    className="button-type p-2 font-title font-bold flex items-center gap-2 flex-1"
+                  >
+                    <FaLanguage /> Traductions
+                  </button>
+                  <button
+                    onClick={(event) => handleEditInfoPopup(event, {...popup, ...popup.translations[0]})}
+                    className="button-type p-2 font-title font-bold flex items-center gap-2"
+                  >
+                    <FaPen />
+                  </button>
+                  <button
+                    onClick={(event) => handleDeleteInfoPopup(event, popup.id_info_popup)}
+                    className="button-type2 p-2 font-title font-bold flex items-center gap-2"
+                  >
+                    <FaTrash />
+                  </button>
                 </div>
               </div>
             ))}
