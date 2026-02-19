@@ -320,7 +320,7 @@ const AdminRoomDetails = () => {
       linksPromise.then((links) => {
         setModalLinks(links);
       });
-      showLoading([infospotsPromise, linksPromise], 'Chargement des détails de la pièce...', 'Chargement des détails réussi', 'Erreur lors du chargement des détails');
+      showLoading([infospotsPromise, linksPromise], t('loadingRoomDetails'), t('roomDetailsLoaded'), t('errorLoadingDetails'));
       Promise.all([infospotsPromise, linksPromise]).then(() => {
         setIsLoadingModal(false);
       });
@@ -360,7 +360,7 @@ const AdminRoomDetails = () => {
       linksPromise.then((links) => {
         setModalLinks(links);
       });
-        showLoading([infospotsPromise, linksPromise], 'Chargement des détails de la pièce...', 'Chargement des détails réussi', 'Erreur lors du chargement des détails');
+        showLoading([infospotsPromise, linksPromise], t('loadingRoomDetails'), t('roomDetailsLoaded'), t('errorLoadingDetails'));
       Promise.all([infospotsPromise, linksPromise]).then(() => {
         setIsLoadingModal(false);
       });
@@ -614,14 +614,14 @@ const AdminRoomDetails = () => {
   const handleAddTranslation = async (e) => {
     e.preventDefault();
     if (!infospotForTranslation || !selectedLanguage || !newTranslationTitle || !newTranslationText) {
-      toast.error('Veuillez remplir tous les champs');
+      toast.error(t('fillAllFields'));
       return;
     }
 
     // Check if translation for this language already exists
     const existingTranslation = infospotTranslations.find(t => t.id_languages === parseInt(selectedLanguage));
     if (existingTranslation) {
-      toast.error('Une traduction pour cette langue existe déjà. Supprimez-la d\'abord pour la remplacer.');
+      toast.error(t('translationAlreadyExists'));
       return;
     }
 
@@ -633,7 +633,7 @@ const AdminRoomDetails = () => {
         parseInt(selectedLanguage),
         selectedVisitorType ? parseInt(selectedVisitorType) : null
       );
-      toast.success('Traduction ajoutée avec succès');
+      toast.success(t('translationAddedSuccess'));
 
       // Reload translations
       const translations = await api.getInfospotTranslations(infospotForTranslation.id_info_popup);
@@ -651,7 +651,7 @@ const AdminRoomDetails = () => {
       setNewTranslationText('');
     } catch (err) {
       console.error('Error adding translation:', err);
-      toast.error('Erreur lors de l\'ajout de la traduction');
+      toast.error(t('errorAddingTranslation'));
     }
   };
 
@@ -659,11 +659,11 @@ const AdminRoomDetails = () => {
   const handleDeleteTranslation = async (id_languages) => {
     if (!infospotForTranslation) return;
 
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette traduction ?')) return;
+    if (!window.confirm(t('confirmDeleteTranslation'))) return;
 
     try {
       await api.deleteInfospotTranslation(infospotForTranslation.id_info_popup, id_languages);
-      toast.success('Traduction supprimée');
+      toast.success(t('translationDeleted'));
 
       // Reload translations
       const translations = await api.getInfospotTranslations(infospotForTranslation.id_info_popup);
@@ -677,21 +677,21 @@ const AdminRoomDetails = () => {
       await getInfoPopup(selectedPictureId);
     } catch (err) {
       console.error('Error deleting translation:', err);
-      toast.error('Erreur lors de la suppression de la traduction');
+      toast.error(t('errorDeletingTranslation'));
     }
   };
 
   // Get language name by ID
   const getLanguageName = (id_languages) => {
     const lang = languages.find(l => l.id_language === id_languages);
-    return lang ? lang.name_language : `Langue ${id_languages}`;
+    return lang ? lang.name_language : `${t('languageLabel')} ${id_languages}`;
   };
 
   // Get visitor type name by ID
   const getVisitorTypeName = (id_visitor_type) => {
-    if (!id_visitor_type) return 'Tous';
+    if (!id_visitor_type) return t('allVisitorsShort');
     const vt = visitorTypes.find(v => v.id_visitor_type === id_visitor_type);
-    return vt ? vt.name_visitor_type : `Type ${id_visitor_type}`;
+    return vt ? vt.name_visitor_type : `${t('typeFallback')} ${id_visitor_type}`;
   };
 
   // Group displayed infopopups
@@ -883,7 +883,7 @@ const AdminRoomDetails = () => {
                   <div className="font-bold font-title text-2xl text-junia-orange pl-2"> {link.id_links}</div>
                 </div>
                 <div className="flex">
-                  <div className="font-title text-2xl text-junia-purple">Destination ID : </div>
+                  <div className="font-title text-2xl text-junia-purple">{t('destinationId')} : </div>
                   <div className="font-title text-2xl text-junia-orange pl-2">{link.id_pictures_destination}</div>
                 </div>
               </div>
@@ -941,7 +941,7 @@ const AdminRoomDetails = () => {
                     <div className="file-input-junia">
                       <div className="flex items-center bg-white">
                         <MdOutlineFileUpload className="text-junia-orange text-xl m-2" />
-                        <input 
+                        <input
                           type="file"
                           accept="image/*"
                           name="pic"
@@ -950,7 +950,7 @@ const AdminRoomDetails = () => {
                           const file = e.target.files[0];
                           if (!file.type.startsWith("image/")) {
                             alert(t('selectValidImage'));
-                            e.target.value = ""; // Clear the input
+                            e.target.value = "";
                             }
                           }
                         }
@@ -1039,7 +1039,7 @@ const AdminRoomDetails = () => {
                   {/* Language and Visitor Type selectors */}
                   <div className="flex gap-2 mt-2">
                     <div className="flex-1">
-                      <label className="text-junia-purple font-bold text-sm mb-1 block">Langue :</label>
+                      <label className="text-junia-purple font-bold text-sm mb-1 block">{t('languageLabel')} :</label>
                       <select
                         value={selectedLanguage}
                         onChange={(e) => setSelectedLanguage(e.target.value)}
@@ -1054,13 +1054,13 @@ const AdminRoomDetails = () => {
                       </select>
                     </div>
                     <div className="flex-1">
-                      <label className="text-junia-purple font-bold text-sm mb-1 block">Type de visiteur :</label>
+                      <label className="text-junia-purple font-bold text-sm mb-1 block">{t('visitorTypeLabel')} :</label>
                       <select
                         value={selectedVisitorType}
                         onChange={(e) => setSelectedVisitorType(e.target.value)}
                         className="w-full p-2 rounded orange-border"
                       >
-                        <option value="">Tous les visiteurs</option>
+                        <option value="">{t('allVisitors')}</option>
                         {visitorTypes.map((vt) => (
                           <option key={vt.id_visitor_type} value={vt.id_visitor_type}>
                             {vt.name_visitor_type}
@@ -1217,7 +1217,7 @@ const AdminRoomDetails = () => {
             {/* Header */}
             <div className="modal-header flex justify-between items-center p-4 border-b">
               <div className="text-2xl font-bold text-junia-purple font-title">
-                Gérer les traductions - InfoPopup #{infospotForTranslation.id_info_popup}
+                {t('manageTranslations')} - InfoPopup #{infospotForTranslation.id_info_popup}
               </div>
               <button
                 className="text-3xl text-gray-500 hover:text-gray-700"
@@ -1232,12 +1232,12 @@ const AdminRoomDetails = () => {
               {/* Existing translations */}
               <div className="mb-6">
                 <h3 className="font-bold font-title text-junia-purple mb-3 flex items-center gap-2">
-                  <FaGlobe /> Traductions existantes ({infospotTranslations.length})
+                  <FaGlobe /> {t('existingTranslations')} ({infospotTranslations.length})
                 </h3>
 
                 {infospotTranslations.length === 0 ? (
                   <div className="text-gray-500 italic p-4 bg-gray-50 rounded">
-                    Aucune traduction pour cette infobulle. Ajoutez-en une ci-dessous.
+                    {t('noTranslationFound')}
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -1261,7 +1261,7 @@ const AdminRoomDetails = () => {
                           <button
                             onClick={() => handleDeleteTranslation(trans.id_languages)}
                             className="ml-2 p-2 text-red-500 hover:bg-red-100 rounded"
-                            title="Supprimer cette traduction"
+                            title={t('deleteTranslationTooltip')}
                           >
                             <FaTrash />
                           </button>
@@ -1275,13 +1275,13 @@ const AdminRoomDetails = () => {
               {/* Add new translation form */}
               <div className="border-t pt-4">
                 <h3 className="font-bold font-title text-junia-purple mb-3 flex items-center gap-2">
-                  <FaPlusCircle /> Ajouter une traduction
+                  <FaPlusCircle /> {t('addTranslationSection')}
                 </h3>
 
                 <form onSubmit={handleAddTranslation} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-junia-purple font-bold text-sm mb-1 block">Langue :</label>
+                      <label className="text-junia-purple font-bold text-sm mb-1 block">{t('languageLabel')} :</label>
                       <select
                         value={selectedLanguage}
                         onChange={(e) => setSelectedLanguage(e.target.value)}
@@ -1292,22 +1292,22 @@ const AdminRoomDetails = () => {
                           <option
                             key={lang.id_language}
                             value={lang.id_language}
-                            disabled={infospotTranslations.some(t => t.id_languages === lang.id_language)}
+                            disabled={infospotTranslations.some(tr => tr.id_languages === lang.id_language)}
                           >
                             {lang.name_language}
-                            {infospotTranslations.some(t => t.id_languages === lang.id_language) && ' (déjà traduit)'}
+                            {infospotTranslations.some(tr => tr.id_languages === lang.id_language) && ` (${t('alreadyTranslated')})`}
                           </option>
                         ))}
                       </select>
                     </div>
                     <div>
-                      <label className="text-junia-purple font-bold text-sm mb-1 block">Type de visiteur :</label>
+                      <label className="text-junia-purple font-bold text-sm mb-1 block">{t('visitorTypeLabel')} :</label>
                       <select
                         value={selectedVisitorType}
                         onChange={(e) => setSelectedVisitorType(e.target.value)}
                         className="w-full p-2 rounded orange-border"
                       >
-                        <option value="">Tous les visiteurs</option>
+                        <option value="">{t('allVisitors')}</option>
                         {visitorTypes.map((vt) => (
                           <option key={vt.id_visitor_type} value={vt.id_visitor_type}>
                             {vt.name_visitor_type}
@@ -1318,12 +1318,12 @@ const AdminRoomDetails = () => {
                   </div>
 
                   <div>
-                    <label className="text-junia-purple font-bold text-sm mb-1 block">Titre :</label>
+                    <label className="text-junia-purple font-bold text-sm mb-1 block">{t('translationTitleLabel')} :</label>
                     <input
                       type="text"
                       value={newTranslationTitle}
                       onChange={(e) => setNewTranslationTitle(e.target.value)}
-                      placeholder="Titre de la traduction"
+                      placeholder={t('translationTitlePlaceholder')}
                       className="w-full p-2 rounded orange-border"
                       maxLength="45"
                       required
@@ -1331,11 +1331,11 @@ const AdminRoomDetails = () => {
                   </div>
 
                   <div>
-                    <label className="text-junia-purple font-bold text-sm mb-1 block">Texte :</label>
+                    <label className="text-junia-purple font-bold text-sm mb-1 block">{t('translationTextLabel')} :</label>
                     <textarea
                       value={newTranslationText}
                       onChange={(e) => setNewTranslationText(e.target.value)}
-                      placeholder="Contenu de la traduction"
+                      placeholder={t('translationTextPlaceholder')}
                       className="w-full p-2 rounded orange-border resize-none"
                       rows="4"
                       maxLength="300"
@@ -1349,13 +1349,13 @@ const AdminRoomDetails = () => {
                       onClick={closeTranslationModal}
                       className="px-4 py-2 bg-gray-300 text-gray-700 rounded font-title font-bold"
                     >
-                      Fermer
+                      {t('close')}
                     </button>
                     <button
                       type="submit"
                       className="button-type px-4 py-2 font-title font-bold flex items-center gap-2"
                     >
-                      <FaPlusCircle /> Ajouter la traduction
+                      <FaPlusCircle /> {t('addTranslationBtn')}
                     </button>
                   </div>
                 </form>
