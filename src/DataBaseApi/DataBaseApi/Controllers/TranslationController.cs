@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using DataBaseApi.Services;
 namespace DataBaseApi.Controllers;
 [ApiController]
 [Route("api/translations")]
+[Authorize]
 public class TranslationController : ControllerBase
 {
 
@@ -15,13 +17,15 @@ public class TranslationController : ControllerBase
         _logger = logger;
     }
 
-     [HttpGet("{id_languages}")]
+    [AllowAnonymous]
+    [HttpGet("{id_languages}")]
     public async Task<IActionResult> GetTranslations(int id_languages)
     {
         var res = await _db.GetTranslationsByLanguageAsync(id_languages);
         return Ok(res);
     }
 
+    [AllowAnonymous]
     [HttpGet("{id_language}/{translation_namespace}")]
     public async Task<IActionResult> GetTranslationsByNamespace(int id_language, string translation_namespace)
     {
@@ -35,6 +39,7 @@ public class TranslationController : ControllerBase
         return Ok(formattedTranslations);
     }
 
+    [AllowAnonymous]
     [HttpGet("all/{id_language}/{translation_namespace}")]
     public async Task<IActionResult> GetEntiereTranslationsByNamespace(int id_language, string translation_namespace)
     {
@@ -62,6 +67,7 @@ public class TranslationController : ControllerBase
         await _db.DeleteTranslationAsync(id);
         return Ok();
     }
+    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<List<int>>> GetLanguagesId()
     {
@@ -72,6 +78,7 @@ public class TranslationController : ControllerBase
         return Ok(ids);
     }
 
+    [AllowAnonymous]
     [HttpGet("languages")]
     public async Task<IActionResult> GetLanguages()
     {
