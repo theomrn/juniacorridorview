@@ -1,5 +1,8 @@
-import React, { useEffect, useState, createContext } from 'react';
+import React, { useEffect, useState, createContext, useContext } from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
+import firebaseConfig from './firebaseConfig';
 import Navbar from './component/Navbar';
 import Home from './component/Home';
 import TourViewer from './component/Tour';
@@ -18,10 +21,15 @@ import AdminVisitor from './component/AdminVisitor';
 import './App.css';
 import {Toaster} from "sonner";
 
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
 export const AppContext = createContext();
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
-  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+  const { isAuthenticated, authLoading } = useContext(AppContext);
+  if (authLoading) return null;
   return (
     <Route
       {...rest}
@@ -34,15 +42,20 @@ const PrivateRoute = ({ component: Component, ...rest }) => {
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
   const [selectedImageName, setSelectedImageName] = useState('');
   const [currentRoomNumber, setCurrentRoomNumber] = useState('');
   const [selectedVisitorType, setSelectedVisitorType] = useState(null);
 
   useEffect(() => {
-    // Check authentication status on app load
-    const authStatus = localStorage.getItem("isAuthenticated") === "true";
-    setIsAuthenticated(authStatus);
+    const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+      setIsAuthenticated(!!user);
+      setAuthLoading(false);
+    });
+    return unsubscribe;
+  }, []);
 
+  useEffect(() => {
     // Load visitor type from localStorage if exists
     const savedVisitorType = localStorage.getItem("selectedVisitorType");
     if (savedVisitorType) {
@@ -51,7 +64,7 @@ const App = () => {
   }, []);
 
   return (
-    <AppContext.Provider value={{ isAuthenticated, setIsAuthenticated, selectedImageName, setSelectedImageName, currentRoomNumber, setCurrentRoomNumber, selectedVisitorType, setSelectedVisitorType }}>
+    <AppContext.Provider value={{ isAuthenticated, setIsAuthenticated, authLoading, selectedImageName, setSelectedImageName, currentRoomNumber, setCurrentRoomNumber, selectedVisitorType, setSelectedVisitorType }}>
       <Toaster />
       <Navbar
         isAuthenticated={isAuthenticated}

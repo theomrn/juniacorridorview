@@ -36,8 +36,6 @@ const Login = () => {
         password
       );
 
-      // Store authentication status in localStorage
-      localStorage.setItem("isAuthenticated", true);
       setIsAuthenticated(true);
 
       history.push("/admin/room");
