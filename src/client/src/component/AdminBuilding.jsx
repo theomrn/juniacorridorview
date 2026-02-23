@@ -9,8 +9,10 @@ import ModalAddEditBuilding from "./buildings/ModalAddEditBuilding";
 import ModalAddEditFloors from "./buildings/ModalAddEditFloors";
 import {useHistory} from "react-router-dom";
 import ConfirmDialog from "./dialogs/ConfirmDialog";
+import { useTranslation } from 'react-i18next';
 
 const AdminBuilding = () => {
+    const { t } = useTranslation('adminBuilding');
     const dataFetchedRef = useRef(false);
 
     const [building, setBuilding] = useState([]);
@@ -26,7 +28,7 @@ const AdminBuilding = () => {
     const [indexesToShow, setIndexesToShow] = useState([]);
 
     const [isLoading, setIsLoading] = useState(true);
-    const [textLoading, setTextLoading] = useState("Chargement des données...");
+    const [textLoading, setTextLoading] = useState("");
 
     const [showConfirm, setShowConfirm] = useState(false);
     const [confirmTitle, setConfirmTitle] = useState("");
@@ -110,55 +112,55 @@ const AdminBuilding = () => {
 
     const handleDeleteBuilding = (id_building) => {
         setBuildingToDelete(id_building);
-        setConfirmTitle("Suppression du bâtiment");
-        setConfirmMessage("Êtes-vous sûr de vouloir supprimer ce bâtiment ? Cette action est irréversible.");
+        setConfirmTitle(t('deleteBuildingTitle'));
+        setConfirmMessage(t('deleteBuildingConfirm'));
         setShowConfirm(true);
     }
 
     const confirmDeleteBuilding = () => {
         api.deleteBuilding(buildingToDelete)
             .then(() => {
-                toast.success("Bâtiment supprimé avec succès");
+                toast.success(t('buildingDeletedSuccess'));
                 reloadBuilding();
                 setBuildingToDelete(null)
             })
             .catch((error) => {
                 console.error('Error deleting building:', error);
-                toast.error("Erreur lors de la suppression du bâtiment !");
+                toast.error(t('errorDeletingBuilding'));
             });
     }
 
     const handleDeleteFloor = (id_floor) => {
         setFloorToDelete(id_floor);
-        setConfirmTitle("Suppression du niveau");
-        setConfirmMessage("Êtes-vous sûr de vouloir supprimer ce niveau ? Cette action est irréversible.");
+        setConfirmTitle(t('deleteFloorTitle'));
+        setConfirmMessage(t('deleteFloorConfirm'));
         setShowConfirm(true);
     }
 
     const confirmDeleteFloor = () => {
         api.deleteFloor(floorToDelete)
             .then(() => {
-                toast.success("Niveau supprimé avec succès");
+                toast.success(t('floorDeletedSuccess'));
                 reloadFloor();
                 setFloorToDelete(null);
             })
             .catch((error) => {
                 console.error('Error deleting niveau:', error);
-                toast.error("Erreur lors de la suppression du niveau !");
+                toast.error(t('errorDeletingFloor'));
             });
     }
 
     const reloadBuilding = () => {
-        showLoading([fetchBuildings()], "Chargement des bâtiments...", "Bâtiments chargés avec succès", "Erreur lors du chargement des bâtiments");
+        showLoading([fetchBuildings()], t('loadingBuildings'), t('buildingsLoadedSuccess'), t('errorLoadingBuildings'));
     }
 
     const reloadFloor = () => {
-        showLoading([fetchFloors()], "Chargement des niveaux...", "Niveaux chargés avec succès", "Erreur lors du chargement des niveaux");
+        showLoading([fetchFloors()], t('loadingFloors'), t('floorsLoadedSuccess'), t('errorLoadingFloors'));
     }
 
     useEffect(() => {
         if (!dataFetchedRef.current) {
-            showLoading([fetchBuildings(), fetchFloors()], "Chargement des données...", "Données chargées avec succès", "Erreur lors du chargement des données");
+            showLoading([fetchBuildings(), fetchFloors()], t('loadingData'), t('dataLoadedSuccess'), t('errorLoadingData'));
             dataFetchedRef.current = true;
         }
     }, []);
@@ -171,36 +173,36 @@ const AdminBuilding = () => {
                     <button
                         onClick={() => history.push('/admin/room')}
                         className="px-4 py-2 button-type font-title font-bold flex items-center gap-2">
-                        <FaArrowLeft /> Retour
+                        <FaArrowLeft /> {t('back')}
                     </button>
                     <button className="px-4 py-2 button-type font-title font-bold flex flex-row gap-2 items-center hover:cursor-pointer" onClick={handleAddBuilding}>
-                        <FaPlusCircle /> Ajouter un bâtiment
+                        <FaPlusCircle /> {t('addBuilding')}
                     </button>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     {building.map((building, index) => (
                         <div key={index} className="px-1 py-2 border-2 purpleborder rounded-3xl shadow bg-white flex flex-col">
                             <div className="mx-4 mb-2 py-2 border-b flex flex-row justify-between items-center">
-                                <h4 className="font-bold font-title ">Bâtiment {building.name}</h4>
+                                <h4 className="font-bold font-title ">{t('building')} {building.name}</h4>
                                 <div className="flex flex-row gap-2 items-center">
-                                    <button className="px-3 py-1 button-type2 font-title flex flex-row gap-2 items-center hover:cursor-pointer" onClick={() => handleEditBuilding(building)}><FaPen /> Modifier</button>
-                                    <button className="px-3 py-1 button-type font-title flex flex-row gap-2 items-center hover:cursor-pointer" onClick={() => handleDeleteBuilding(building.id_buildings)}><FaTrash /> Supprimer</button>
+                                    <button className="px-3 py-1 button-type2 font-title flex flex-row gap-2 items-center hover:cursor-pointer" onClick={() => handleEditBuilding(building)}><FaPen /> {t('modify')}</button>
+                                    <button className="px-3 py-1 button-type font-title flex flex-row gap-2 items-center hover:cursor-pointer" onClick={() => handleDeleteBuilding(building.id_buildings)}><FaTrash /> {t('delete')}</button>
                                 </div>
                             </div>
                             <div className="px-3 flex flex-col gap-2 scrollable-floor" id="style-2">
                                 {getFloorsByBuilding(building.id_buildings).map((floor, index) => (
                                     <div key={index} className="px-4 py-2 orangeborder rounded-xl shadow hover:shadow-lg hover:cursor-pointer transition-shadow duration-300 bg-white select-none flex flex-col gap-2" onClick={toggleIndexToShow(floor.id_floors)}>
                                         <div  className="flex flex-row justify-between items-center">
-                                            <h5 className="font-title">Niveau {floor.name}</h5>
+                                            <h5 className="font-title">{t('floor')} {floor.name}</h5>
                                             <div className="flex flex-row gap-2 items-center">
-                                                <button className="px-3 py-1 button-type2 font-title flex flex-row gap-2 items-center hover:cursor-pointer" onClick={() => handleEditFloor(floor, building.id_buildings)}><FaPen /> Modifier</button>
-                                                <button className="px-3 py-1 button-type font-title flex flex-row gap-2 items-center hover:cursor-pointer" onClick={() => handleDeleteFloor(floor.id_floors)}><FaTrash /> Supprimer</button>
+                                                <button className="px-3 py-1 button-type2 font-title flex flex-row gap-2 items-center hover:cursor-pointer" onClick={() => handleEditFloor(floor, building.id_buildings)}><FaPen /> {t('modify')}</button>
+                                                <button className="px-3 py-1 button-type font-title flex flex-row gap-2 items-center hover:cursor-pointer" onClick={() => handleDeleteFloor(floor.id_floors)}><FaTrash /> {t('delete')}</button>
                                                 {indexesToShow.includes(floor.id_floors) ? <FaChevronUp className="ml-3" /> : <FaChevronDown className="ml-3" />}
                                             </div>
                                         </div>
                                         {indexesToShow.includes(floor.id_floors) && (
                                             <div className="flex flex-col items-center justify-center pt-2 border-t">
-                                                <h6 className="font-title">Plan de l'étage</h6>
+                                                <h6 className="font-title">{t('floorPlan')}</h6>
                                                 <div className="overflow-hidden flex items-center">
                                                     <img src={`http://localhost:5078/${floor.plan_path}`} alt={`Preview of ${floor.name}`} className="object-cover h-90% rounded-xl" />
                                                 </div>

@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import * as api from '../../api/AxiosAdminRoom';
 import {toast} from "sonner";
 import Loader from "../Loader";
+import { useTranslation } from 'react-i18next';
 
 const ModalAddEditImage = ({
     isOpen,
@@ -10,6 +11,7 @@ const ModalAddEditImage = ({
     imageToUpdate,
     reload,
 }) => {
+    const { t } = useTranslation('adminRoomDetails');
     const [showAddEditImage, setShowAddEditImage] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -43,7 +45,7 @@ const ModalAddEditImage = ({
     const handleImageSubmit = (e) => {
         e.preventDefault();
         if (!file) {
-            toast.error("Veuillez sélectionner une image");
+            toast.error(t('pleaseSelectImage'));
             return;
         }
         const formData = new FormData();
@@ -52,7 +54,7 @@ const ModalAddEditImage = ({
         if (editMode) {
             formData.append('id_pictures', imageToUpdate.id_pictures);
             setLoading(true);
-            setTextLoading("Modification de l'image...");
+            setTextLoading(t('updatingImage'));
             api.updateImage(formData)
                 .then(() => {
                     reload('edit');
@@ -61,13 +63,13 @@ const ModalAddEditImage = ({
                 })
                 .catch((error) => {
                     console.error("Erreur lors de la modification de l'image :", error);
-                    toast.error("Erreur lors de la modification de l'image");
+                    toast.error(t('errorUpdatingImage'));
                     setLoading(false);
                     setFile(null);
                 });
         } else {
             setLoading(true);
-            setTextLoading("Ajout de l'image...");
+            setTextLoading(t('addingImage'));
             api.uploadFile(formData)
                 .then(() => {
                     reload('add');
@@ -76,7 +78,7 @@ const ModalAddEditImage = ({
                 })
                 .catch((error) => {
                     console.error("Erreur lors de l'ajout de l'image :", error);
-                    toast.error("Erreur lors de l'ajout de l'image");
+                    toast.error(t('errorAddingImage'));
                     setLoading(false);
                     setFile(null);
                 });
@@ -90,12 +92,12 @@ const ModalAddEditImage = ({
                 <div className="modal">
                     <div className="modal-content">
                         <div className="flex justify-between items-center pb-4">
-                            <div className="text-3xl font-bold font-title text-center">{editMode ? "Modifier l'image 360°" : "Ajouter une nouvelle image 360°"}</div>
+                            <div className="text-3xl font-bold font-title text-center">{editMode ? t('editImage360') : t('addNewImage360')}</div>
                             <span className="close items-center" onClick={toggle}>&times;</span>
                         </div>
                         <form onSubmit={handleImageSubmit}>
                             <div className="flex items-center gap-4">
-                                <label className="block font-bold text-junia-purple w-1/3">Image :</label>
+                                <label className="block font-bold text-junia-purple w-1/3">{t('imageLabel')} :</label>
                                 <div className="w-2/3">
                                     <div className="w-full rounded-md bg-white flex items-center">
                                         <input
@@ -112,7 +114,7 @@ const ModalAddEditImage = ({
                                 type="submit"
                                 className="mt-4 p-2 bg-junia-orange hover:bg-junia-orange-dark rounded-3xl text-white font-bold shadow-md font-title text-center transition"
                             >
-                                {editMode ? "Modifier l'image" : "Ajouter l'image"}
+                                {editMode ? t('editImageBtn') : t('addImageBtn')}
                             </button>
                         </form>
                     </div>

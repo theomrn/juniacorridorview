@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getVisitorTypes, createVisitorType, updateVisitorType, deleteVisitorType } from "../api/AxiosVisitor";
 import { FaChevronDown, FaChevronUp, FaPen, FaTrash, FaPlus, FaArrowLeft } from "react-icons/fa";
 import { toast } from "sonner";
@@ -7,6 +8,7 @@ import '../style/AdminVisitor.css';
 
 export default function AdminVisitor() {
   const history = useHistory();
+  const { t } = useTranslation('adminVisitor');
   const [visitorTypes, setVisitorTypes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expandedId, setExpandedId] = useState(null);
@@ -30,7 +32,7 @@ export default function AdminVisitor() {
       console.log(visitorTypes);
     } catch (error) {
       console.error('Erreur lors du chargement des types de visiteurs:', error);
-      toast.error('Erreur lors du chargement des types de visiteurs');
+      toast.error(t('errorLoading'));
     } finally {
       setLoading(false);
     }
@@ -70,30 +72,30 @@ export default function AdminVisitor() {
 
   const handleSaveEdit = async (id_visitor_type) => {
     if (!editFormData.name.trim()) {
-      toast.error('Le nom du type de visiteur est requis');
+      toast.error(t('nameRequired'));
       return;
     }
 
     try {
       await updateVisitorType(id_visitor_type, editFormData.name);
-      toast.success('Type de visiteur mis à jour avec succès!');
+      toast.success(t('updatedSuccess'));
       fetchVisitorTypes();
       setEditingId(null);
     } catch (error) {
       console.error('Erreur:', error);
-      toast.error(`Erreur: ${error.message || 'Une erreur est survenue'}`);
+      toast.error(t('error'));
     }
   };
 
   const handleDelete = async (id_visitor_type, name) => {
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer le type de visiteur "${name}"?`)) {
+    if (window.confirm(t('confirmDelete', { name }))) {
       try {
         await deleteVisitorType(id_visitor_type);
-        toast.success('Type de visiteur supprimé avec succès!');
+        toast.success(t('deletedSuccess'));
         fetchVisitorTypes();
       } catch (error) {
         console.error('Erreur:', error);
-        toast.error(`Erreur lors de la suppression: ${error.message}`);
+        toast.error(`${t('errorDeleting')} ${error.message}`);
       }
     }
   };
@@ -102,19 +104,19 @@ export default function AdminVisitor() {
     e.preventDefault();
 
     if (!newVisitorTypeName.trim()) {
-      toast.error('Le nom du type de visiteur est requis');
+      toast.error(t('nameRequired'));
       return;
     }
 
     try {
       await createVisitorType(newVisitorTypeName);
-      toast.success('Type de visiteur créé avec succès!');
+      toast.success(t('createdSuccess'));
       setNewVisitorTypeName('');
       setShowNewVisitorTypeForm(false);
       fetchVisitorTypes();
     } catch (error) {
       console.error('Erreur:', error);
-      toast.error(`Erreur: ${error.message || 'Une erreur est survenue'}`);
+      toast.error(t('error'));
     }
   };
 
@@ -126,7 +128,7 @@ export default function AdminVisitor() {
           className="button-type font-title font-bold flex items-center gap-2"
           style={{ backgroundColor: '#f06b42', color: 'white' }}
         >
-          <FaArrowLeft /> Retour
+          <FaArrowLeft /> {t('back')}
         </button>
       </div>
       <div className="admin-visitor-header">
@@ -135,7 +137,7 @@ export default function AdminVisitor() {
           className="button-type font-title font-bold flex items-center gap-2"
           style={{ backgroundColor: '#f06b42', color: 'white' }}
         >
-          <FaPlus /> Ajouter un type de visiteur
+          <FaPlus /> {t('addVisitorType')}
         </button>
       </div>
 
@@ -143,18 +145,18 @@ export default function AdminVisitor() {
         <div className="admin-visitor-new-form">
           <form onSubmit={handleAddNewVisitorType}>
             <div className="form-group">
-              <label className="font-title font-semibold">Nom du type de visiteur</label>
+              <label className="font-title font-semibold">{t('nameLabel')}</label>
               <input
                 type="text"
                 value={newVisitorTypeName}
                 onChange={(e) => setNewVisitorTypeName(e.target.value)}
-                placeholder="Ex: Étudiant, Professeur, Visiteur..."
+                placeholder={t('namePlaceholder')}
                 className="form-input"
               />
             </div>
             <div className="form-buttons">
               <button type="submit" className="button-confirm font-title font-bold">
-                Créer
+                {t('create')}
               </button>
               <button
                 type="button"
@@ -164,7 +166,7 @@ export default function AdminVisitor() {
                 }}
                 className="button-cancel font-title font-bold"
               >
-                Annuler
+                {t('cancel')}
               </button>
             </div>
           </form>
@@ -173,11 +175,11 @@ export default function AdminVisitor() {
 
       {loading ? (
         <div style={{ textAlign: 'center', padding: '2rem', fontSize: '1.125rem' }}>
-          Chargement des types de visiteurs...
+          {t('loading')}
         </div>
       ) : visitorTypes.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
-          <p>Aucun type de visiteur trouvé. Cliquez sur "Ajouter un type de visiteur" pour en créer un.</p>
+          <p>{t('notFound')}</p>
         </div>
       ) : (
         <div className="admin-visitor-list">
@@ -209,7 +211,7 @@ export default function AdminVisitor() {
                       handleSaveEdit(visitorType.id_visitor_type);
                     }}>
                       <div className="form-group">
-                        <label className="font-title font-semibold">Nom</label>
+                        <label className="font-title font-semibold">{t('nameEditLabel')}</label>
                         <input
                           type="text"
                           name="name"
@@ -220,14 +222,14 @@ export default function AdminVisitor() {
                       </div>
                       <div className="form-buttons">
                         <button type="submit" className="button-confirm font-title font-bold">
-                          Enregistrer
+                          {t('save')}
                         </button>
                         <button
                           type="button"
                           onClick={cancelEdit}
                           className="button-cancel font-title font-bold"
                         >
-                          Annuler
+                          {t('cancel')}
                         </button>
                       </div>
                     </form>
@@ -237,13 +239,13 @@ export default function AdminVisitor() {
                         onClick={() => startEdit(visitorType)}
                         className="action-button edit-button font-title font-bold"
                       >
-                        <FaPen /> Modifier
+                        <FaPen /> {t('modify')}
                       </button>
                       <button
                         onClick={() => handleDelete(visitorType.id_visitor_type, visitorType.name_visitor_type)}
                         className="action-button delete-button font-title font-bold"
                       >
-                        <FaTrash /> Supprimer
+                        <FaTrash /> {t('delete')}
                       </button>
                     </div>
                   )}

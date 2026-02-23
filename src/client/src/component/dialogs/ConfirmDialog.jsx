@@ -1,6 +1,8 @@
 import React from "react";
+import { useTranslation } from 'react-i18next';
 
-const ConfirmDialog = ({ open, onClose, title, message, confirmText = "Confirmer", cancelText = "Annuler", onConfirm }) => {
+const ConfirmDialog = ({ open, onClose, title, message, confirmText, cancelText, onConfirm }) => {
+  const { t } = useTranslation('adminBuilding');
   return (
       <>
           {open && (
@@ -37,7 +39,7 @@ const ConfirmDialog = ({ open, onClose, title, message, confirmText = "Confirmer
                               className="px-6 py-3 bg-junia-orange rounded-full font-title text-lg shadow-lg"
                               onClick={() => { onClose(); }}
                           >
-                                {cancelText}
+                                {cancelText || t('cancel')}
                           </button>
                           <button
                               className="bg-junia-purple px-6 py-3 text-white rounded-full font-title text-lg shadow-lg"
@@ -46,7 +48,7 @@ const ConfirmDialog = ({ open, onClose, title, message, confirmText = "Confirmer
                                     onClose();
                               }}
                           >
-                                {confirmText}
+                                {confirmText || t('confirm')}
                           </button>
                       </div>
                   </div>

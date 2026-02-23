@@ -5,6 +5,7 @@ import { getLanguages } from "../api/AxiosTranslation";
 import { FaChevronDown, FaChevronUp, FaPen, FaTrash, FaPlus, FaArrowLeft } from "react-icons/fa";
 import { toast } from "sonner";
 import '../style/AdminLanguage.css';
+import { useTranslation } from 'react-i18next';
 
 export default function AdminLanguage() {
   const history = useHistory();
@@ -17,6 +18,7 @@ export default function AdminLanguage() {
     name_language: ''
   });
   const [showNewLanguageForm, setShowNewLanguageForm] = useState(false);
+  const { t } = useTranslation('adminLanguage');
 
   useEffect(() => {
     fetchLanguages();
@@ -29,7 +31,7 @@ export default function AdminLanguage() {
       setLanguages(data || []);
     } catch (error) {
       console.error('Erreur lors du chargement des langues:', error);
-      toast.error('Erreur lors du chargement des langues');
+      toast.error(t('errorloadinglanguage'));
     } finally {
       setLoading(false);
     }
@@ -69,26 +71,26 @@ export default function AdminLanguage() {
 
   const handleSaveEdit = async (id_language) => {
     if (!editFormData.name_language.trim()) {
-      toast.error('Le nom de la langue est requis');
+      toast.error(t('namerequired'));
       return;
     }
 
     try {
       await updateLanguage(id_language, editFormData.name_language);
-      toast.success('Langue mise à jour avec succès!');
+      toast.success(t('succeslanguage'));
       fetchLanguages();
       setEditingId(null);
     } catch (error) {
       console.error('Erreur:', error);
-      toast.error(`Erreur: ${error.message || 'Une erreur est survenue'}`);
+      toast.error(`Erreur: ${error.message || t('error')}`);
     }
   };
 
   const handleDelete = async (id_language, name) => {
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer la langue "${name}"?`)) {
+    if (window.confirm(`${t('confirmdelete')} "${name}"?`)) {
       try {
         await deleteLanguage(id_language);
-        toast.success('Langue supprimée avec succès!');
+        toast.success(t('succesdelete'));
         fetchLanguages();
       } catch (error) {
         console.error('Erreur:', error);
@@ -101,19 +103,19 @@ export default function AdminLanguage() {
     e.preventDefault();
     
     if (!newLanguageName.trim()) {
-      toast.error('Le nom de la langue est requis');
+      toast.error(t('namerequired'));
       return;
     }
 
     try {
       await createLanguage(newLanguageName);
-      toast.success('Langue créée avec succès!');
+      toast.success(t('createlanguage'));
       setNewLanguageName('');
       setShowNewLanguageForm(false);
       fetchLanguages();
     } catch (error) {
       console.error('Erreur:', error);
-      toast.error(`Erreur: ${error.message || 'Une erreur est survenue'}`);
+      toast.error(`Erreur: ${error.message || t('error')}`);
     }
   };
 
@@ -125,7 +127,7 @@ export default function AdminLanguage() {
           className="button-type font-title font-bold flex items-center gap-2"
           style={{ backgroundColor: '#f06b42', color: 'white' }}
         >
-          <FaArrowLeft /> Retour
+          <FaArrowLeft /> {t('return')}
         </button>
       </div>
       <div className="admin-language-header">
@@ -134,7 +136,7 @@ export default function AdminLanguage() {
           className="button-type font-title font-bold flex items-center gap-2"
           style={{ backgroundColor: '#f06b42', color: 'white' }}
         >
-          <FaPlus /> Ajouter une langue
+          <FaPlus /> {t('addlanguage')}
         </button>
       </div>
 
@@ -143,18 +145,18 @@ export default function AdminLanguage() {
         <div className="admin-language-new-form">
           <form onSubmit={handleAddNewLanguage}>
             <div className="form-group">
-              <label className="font-title font-semibold">Nom de la langue</label>
+              <label className="font-title font-semibold">{t('namelanguage')}</label>
               <input
                 type="text"
                 value={newLanguageName}
                 onChange={(e) => setNewLanguageName(e.target.value)}
-                placeholder="Ex: Français"
+                placeholder={t('languagePlaceholder')}
                 className="form-input"
               />
             </div>
             <div className="form-buttons">
               <button type="submit" className="button-confirm font-title font-bold">
-                Créer
+                {t('create')}
               </button>
               <button
                 type="button"
@@ -164,7 +166,7 @@ export default function AdminLanguage() {
                 }}
                 className="button-cancel font-title font-bold"
               >
-                Annuler
+                {t('cancel')}
               </button>
             </div>
           </form>
@@ -173,11 +175,11 @@ export default function AdminLanguage() {
 
       {loading ? (
         <div style={{ textAlign: 'center', padding: '2rem', fontSize: '1.125rem' }}>
-          Chargement des langues...
+          {t('loadinglanguages')}
         </div>
       ) : languages.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
-          <p>Aucune langue trouvée. Cliquez sur "Ajouter une langue" pour en créer une.</p>
+          <p>{t('notfindlanguage')}</p>
         </div>
       ) : (
         <div className="admin-language-list">
@@ -209,7 +211,7 @@ export default function AdminLanguage() {
                       handleSaveEdit(language.id_language);
                     }}>
                       <div className="form-group">
-                        <label className="font-title font-semibold">Nom</label>
+                        <label className="font-title font-semibold">{t('name')}</label>
                         <input
                           type="text"
                           name="name_language"
@@ -220,14 +222,14 @@ export default function AdminLanguage() {
                       </div>
                       <div className="form-buttons">
                         <button type="submit" className="button-confirm font-title font-bold">
-                          Enregistrer
+                          {t('save')}
                         </button>
                         <button
                           type="button"
                           onClick={cancelEdit}
                           className="button-cancel font-title font-bold"
                         >
-                          Annuler
+                          {t('cancel')}
                         </button>
                       </div>
                     </form>
@@ -237,13 +239,13 @@ export default function AdminLanguage() {
                         onClick={() => startEdit(language)}
                         className="action-button edit-button font-title font-bold"
                       >
-                        <FaPen /> Modifier
+                        <FaPen /> {t('modify')}
                       </button>
                       <button
                         onClick={() => handleDelete(language.id_language, language.name_language)}
                         className="action-button delete-button font-title font-bold"
                       >
-                        <FaTrash /> Supprimer
+                        <FaTrash /> {t('delete')}
                       </button>
                     </div>
                   )}

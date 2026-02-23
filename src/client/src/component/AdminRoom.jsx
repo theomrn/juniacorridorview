@@ -12,6 +12,8 @@ import { FaPen, FaTrash, FaPlusCircle  } from "react-icons/fa"; // Add FaPlus im
 import { ImLocation2 } from "react-icons/im";
 import { MdOutlineFileUpload } from "react-icons/md";
 import ConfirmDialog from "./dialogs/ConfirmDialog";
+import { useTranslation } from 'react-i18next';
+import { getLanguages } from '../api/AxiosTranslation';
 
 const customSelectStyles = {
   control: (provided, state) => ({
@@ -101,12 +103,13 @@ const AdminRoom = () => {
   const [floorPlan, setFloorPlan] = useState(null);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [textLoading, setTextLoading] = useState("Chargement des données...");
+  const [textLoading, setTextLoading] = useState("");
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmTitle, setConfirmTitle] = useState("");
   const [confirmMessage, setConfirmMessage] = useState("");
   const [roomToDelete, setRoomToDelete] = useState(null);
+  const { t } = useTranslation('adminRoom');
 
   const showLoading = (promises, textLoading, textSuccess, textError) => {
     setIsLoading(true);
@@ -130,7 +133,7 @@ const AdminRoom = () => {
 
       if (!buildingsData || buildingsData.length === 0) {
         setDebugInfo(prev => ({ ...prev, error: "No building data received" }));
-        toast.error('Aucun bâtiment trouvé. Veuillez en créer un.');
+        toast.error(t('noBuildingFound'));
         return [];
       }
 
@@ -143,7 +146,7 @@ const AdminRoom = () => {
           error: "Building data doesn't have expected fields",
           buildingData: buildingsData
         }));
-        toast.error('Format de données des bâtiments incorrect');
+        toast.error(t('incorrectBuildingFormat'));
         return [];
       }
 
@@ -153,7 +156,7 @@ const AdminRoom = () => {
     } catch (error) {
       console.error('Error fetching buildings:', error);
       setDebugInfo(prev => ({ ...prev, error: error.toString() }));
-      toast.error('Erreur lors du chargement des bâtiments');
+      toast.error(t('errorLoadingBuildings'));
       return [];
     }
   };
@@ -165,7 +168,7 @@ const AdminRoom = () => {
       return floorsData;
     } catch (error) {
       console.error('Error fetching floors:', error);
-      toast.error('Erreur lors du chargement des étages');
+      toast.error(t('errorLoadingFloors'));
       return [];
     }
   }
@@ -218,7 +221,7 @@ const AdminRoom = () => {
           // Find the building name that corresponds to the plan floors id that contains the id_buildings
           const floor = floorsData.find(f => f.id_floors === room.id_floors);
           const building = buildingsData.find(b => b.id_buildings === floor.id_buildings);
-          const building_name = building ? building.name : 'Bâtiment inconnu';
+          const building_name = building ? building.name : t('unknownBuilding');
 
           return {
             ...room,
@@ -231,7 +234,7 @@ const AdminRoom = () => {
       setRooms(roomsWithImages);
     } catch (error) {
       console.error('Error fetching rooms:', error);
-      toast.error('Erreur lors du chargement des salles');
+      toast.error(t('errorLoadingRooms'));
     }
   };
 
@@ -244,7 +247,7 @@ const AdminRoom = () => {
       // Then fetch rooms
       const fetchRoomsPromise = fetchRooms();
 
-      showLoading([fetchRoomsPromise], 'Chargement des données...', 'Chargement réussi', 'Erreur lors du chargement');
+      showLoading([fetchRoomsPromise], t('loadingData'), t('loadingSuccess'), t('loadingError'));
 
       dataFetchedRef.current = true;
     }
@@ -291,7 +294,7 @@ const AdminRoom = () => {
     // For each file, check if it's an image
     files.forEach(file => {
         if (!file.type.startsWith("image/")) {
-            alert("Tous les fichiers doivent être des images.");
+            alert(t('allFilesMustBeImages'));
             e.target.value = ""; // Clear the input
             return;
         }
@@ -306,7 +309,7 @@ const AdminRoom = () => {
   const handleNewRoomPreviewChange = (e) => {
     const file = e.target.files[0];
     if (!file.type.startsWith("image/")) {
-      alert("Veuillez sélectionner un fichier image valide.");
+      alert(t('selectValidImage'));
       e.target.value = ""; // Clear the input
       return;
     }
@@ -318,7 +321,7 @@ const AdminRoom = () => {
 
   const getBuildingOptions = () => {
     if (!buildings || buildings.length === 0) {
-      return [{ value: "manual", label: "Aucun bâtiment disponible" }];
+      return [{ value: "manual", label: t('noBuildingAvailable') }];
     }
 
     return buildings.map(building => ({
@@ -331,17 +334,17 @@ const AdminRoom = () => {
     e.preventDefault();
 
     if (!newRoomData.buildingId && newRoomData.buildingId !== "manual" && newRoomData.buildingId !== "0") {
-      toast.error('Veuillez sélectionner un bâtiment');
+      toast.error(t('pleaseSelectBuilding'));
       return;
     }
 
     if (!newRoomData.floorId && newRoomData.floorId !== "manual" && newRoomData.floorId !== "0") {
-      toast.error('Veuillez sélectionner un étage');
+      toast.error(t('pleaseSelectFloor'));
       return;
     }
 
     if (newRoomData.plan_x === '' || newRoomData.plan_y === '') {
-        toast.error('Veuillez placer la salle sur le plan');
+        toast.error(t('pleasePlaceRoomOnPlan'));
         return;
     }
 
@@ -404,10 +407,10 @@ const AdminRoom = () => {
           plan_y: ''
         });
       });
-      showLoading([createRoomPromise, fetchRoomsPromise], 'Ajout de la salle...', 'Salle ajoutée avec succès', 'Erreur lors de l\'ajout de la salle');
+      showLoading([createRoomPromise, fetchRoomsPromise], t('addingRoom'), t('roomAddedSuccess'), t('errorAddingRoom'));
     } catch (error) {
       console.error('Error creating plan:', error);
-      toast.error('Erreur lors de la création de la salle');
+      toast.error(t('errorCreatingRoom'));
     }
   };
 
@@ -415,15 +418,15 @@ const AdminRoom = () => {
     event.stopPropagation();
     event.preventDefault();
     setRoomToDelete(id);
-    setConfirmTitle("Suppression de la salle");
-    setConfirmMessage("Êtes-vous sûr de vouloir supprimer cette salle ? Cette action est irréversible.");
+    setConfirmTitle(t('deleteRoomTitle'));
+    setConfirmMessage(t('deleteRoomConfirm'));
     setShowConfirm(true);
   }
 
   const confirmDeleteRoom = async () => {
     try {
       await api.deleteRoom(roomToDelete);
-      showLoading([fetchRooms()], 'Suppression de la salle...', 'Salle supprimée avec succès', 'Erreur lors de la suppression de la salle');
+      showLoading([fetchRooms()], t('deletingRoom'), t('roomDeletedSuccess'), t('errorDeletingRoom'));
     } catch (error) {
       console.error('Error deleting plan:', error);
     }
@@ -473,7 +476,7 @@ const AdminRoom = () => {
   const handleEditRoomPreviewChange = (e) => {
     const file = e.target.files[0];
     if (!file.type.startsWith("image/")) {
-        alert("Veuillez sélectionner un fichier image valide.");
+        alert(t('selectValidImage'));
         e.target.value = ""; // Clear the input
         return;
     }
@@ -494,7 +497,7 @@ const AdminRoom = () => {
 
     // Use the buildingId directly from editRoomData
     if (!editRoomData.buildingId) {
-      toast.error('Veuillez sélectionner un bâtiment');
+      toast.error(t('pleaseSelectBuilding'));
       return;
     }
 
@@ -525,10 +528,10 @@ const AdminRoom = () => {
           plan_y: ''
         });
       });
-      showLoading([updatePromise, fetchRoomsPromise], 'Modification de la salle...', 'Salle modifiée avec succès', 'Erreur lors de la modification de la salle');
+      showLoading([updatePromise, fetchRoomsPromise], t('modifyingRoom'), t('roomModifiedSuccess'), t('errorModifyingRoom'));
     } catch (error) {
       console.error('Error updating plan:', error);
-      toast.error('Erreur lors de la modification de la salle');
+      toast.error(t('errorModifyingRoom'));
     }
 
     // Remove the try-catch block that's causing the error
@@ -542,10 +545,10 @@ const AdminRoom = () => {
       const updatedRoom = { ...room, hidden: !room.hidden };
       await api.updateRoomVisibility(updatedRoom.id_rooms, updatedRoom.hidden);
       setRooms(prevRooms => prevRooms.map(r => r.id_rooms === room.id_rooms ? updatedRoom : r));
-      toast.success(`La salle a été ${updatedRoom.hidden ? 'désactivée' : 'activée'}`);
+      toast.success(updatedRoom.hidden ? t('roomDisabled') : t('roomEnabled'));
     } catch (error) {
       console.error('Error toggling plan visibility:', error);
-      toast.error('Erreur lors du changement de visibilité de la salle');
+      toast.error(t('errorChangingVisibility'));
     }
   };
 
@@ -566,7 +569,7 @@ const AdminRoom = () => {
           <div className="flex gap-4 items-center ">
             <input
             type="text"
-            placeholder="Rechercher une salle..."
+            placeholder={t('Findroom')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full p-2  research-input bg-white rounded-full" />
@@ -577,7 +580,7 @@ const AdminRoom = () => {
             options={ buildings.map(building => ({ value: building.name, label: building.name })).sort((a, b) => a.value.localeCompare(b.value))}
             className="basic-multi-select"
             classNamePrefix="select"
-            placeholder="Bâtiment"
+            placeholder={t('building')}
             isDisabled={buildings.length === 0}
             isSearchable
             menuPlacement="auto"
@@ -593,7 +596,7 @@ const AdminRoom = () => {
             className="basic-multi-select"
             styles={customSelectStyles}
             classNamePrefix="select"
-            placeholder="Étage"
+            placeholder={t('floor')}
             isSearchable
             menuPlacement="auto"
             menuPosition="fixed"
@@ -606,7 +609,7 @@ const AdminRoom = () => {
             options={getUniqueOptions('name')}
             className="basic-multi-select"
             classNamePrefix="select"
-            placeholder="Nom"
+            placeholder={t('name')}
             isSearchable
             styles={customSelectStyles}
             menuPlacement="auto"
@@ -620,7 +623,7 @@ const AdminRoom = () => {
             options={getUniqueOptions('number')}
             className="basic-multi-select flex"
             classNamePrefix="select"
-            placeholder="Numéro"
+            placeholder={t('Number')}
             isSearchable
             styles={customSelectStyles}
             menuPlacement="auto"
@@ -652,25 +655,43 @@ const AdminRoom = () => {
                 }}
                 className="admin-button-responsive"
             >
-              <FaPlusCircle className="admin-button-icon" /> Ajouter une salle
-            </button> 
+              <FaPlusCircle className="admin-button-icon" /> {t('addroom')}
+            </button>
+
+            
+            <button
+                onClick={() => {
+                  history.push('/admin/language');
+                  setNewRoomModalOpen(true);
+                  setPlanPlacementEditMode(false);
+                }}
+                className="admin-button-responsive"
+            >
+              {t('languages')}
+            </button>
+
+            <button
+                onClick={() => history.push('/admin/convert')}
+                className="admin-button-responsive">
+                {t('fileconversion')}
+            </button>
 
                       <button
                 onClick={() => history.push('/admin/translation')}
                 className="admin-button-responsive">
-                Gestion & traductions
+                {t('translationManagement')}
             </button>
 
             <button
                 onClick={() => history.push('/admin/tour')}
                 className="admin-button-responsive">
-                Parcours
+                {t('course')}
             </button>
             
             <button
                 onClick={() => history.push('/admin/building')}
                 className="admin-button-responsive">
-                Bâtiments
+                {t('buildings')}
             </button>
           </div>
         </div>
@@ -684,23 +705,23 @@ const AdminRoom = () => {
               <div className="mb-2 flex justify-between gap-2 py-2">
                 <div className="flex py-2 flex-col justify-between">
                   <div>
-                    <div className="text-junia-purple font-bold">Salle : </div>
+                    <div className="text-junia-purple font-bold">{t('roomLabel')} : </div>
                     <div className="text-junia-orange font-title text-2xl font-semibold"> {room.name} </div>
                   </div>
                   <div>
-                    <div className="text-junia-purple font-bold"> Numéro : </div>
+                    <div className="text-junia-purple font-bold"> {t('number')} : </div>
                     <div className="text-junia-orange font-title text-2xl font-semibold"> {room.number} </div>
                   </div>
                   <div>
-                    <div className="text-junia-purple font-bold">Bâtiment : </div>
+                    <div className="text-junia-purple font-bold">{t('building')} : </div>
                     <div className="text-junia-orange font-title text-2xl font-semibold"> {room.building_name} </div>
                   </div>
                   <div>
-                    <div className="text-junia-purple font-bold">Etage : </div>
+                    <div className="text-junia-purple font-bold">{t('floor')} : </div>
                     <div className="text-junia-orange font-title text-2xl font-semibold"> {floors.find(floor => floor.id_floors === room.id_floors).name} </div>
                   </div>
                   <div>
-                    <div className="text-junia-purple font-bold">ID Salle: </div>
+                    <div className="text-junia-purple font-bold">{t('roomId')} : </div>
                     <div className="text-junia-orange font-title text-2xl font-semibold"> {room.id_rooms} </div>
                   </div> 
                   
@@ -710,7 +731,7 @@ const AdminRoom = () => {
                       event.stopPropagation();  // Prevent click from bubbling up to the parent div
                     }}
                   >
-                    <div className="text-junia-purple font-bold">Visibilité : </div>
+                    <div className="text-junia-purple font-bold">{t('visibility')} : </div>
                     <label className="toggle-switch mx-2">
                       <input
                         type="checkbox"
@@ -738,10 +759,10 @@ const AdminRoom = () => {
 
               <div className="flex justify-between pb-2">
                 <button onClick={(event) => handleEditRoom(event, room)} className="button-type font-title font-bold px-3 py-2 flex items-center gap-2">
-                  <FaPen /> Modifier
+                  <FaPen /> {t('modify')}
                 </button>
                 <button onClick={(event) => handleDeleteRoom(event, room.id_rooms)} className="button-type2 font-title font-bold px-3 py-2 flex items-center gap-2">
-                  <FaTrash /> Supprimer
+                  <FaTrash /> {t('delete')}
                 </button>
               </div>
 
@@ -767,16 +788,16 @@ const AdminRoom = () => {
           <div className="modal">
             <div className="modal-content">
               <div className="flex justify-between items-center pb-4">
-                <div className="text-3xl font-bold font-title text-center">Ajouter une nouvelle salle</div>
+                <div className="text-3xl font-bold font-title text-center">{t('addNewRoom')}</div>
                 <span className="close items-center" onClick={() => setNewRoomModalOpen(false)}>&times;</span>
               </div>
               <form onSubmit={handleNewRoomSubmit}>
                 <div className="flex items-center gap-4">
-                  <div className="fonts-title text-junia-purple font-bold w-1/3">Numéro de la salle :</div>
+                  <div className="fonts-title text-junia-purple font-bold w-1/3">{t('roomNumber')} :</div>
                   <input
                     type="text"
                     name="number"
-                    placeholder="Numéro de salle"
+                    placeholder={t('roomNumberPlaceholder')}
                     value={newRoomData.number}
                     onChange={handleNewRoomChange}
                     className="w-2/3 p-2 border border-junia-orange rounded-md bg-white font-texts"
@@ -785,27 +806,27 @@ const AdminRoom = () => {
                 </div>
                 
                 <div className="flex items-center gap-4">
-                  <div className="fonts-title text-junia-purple font-bold w-1/3">Nom de la salle :</div>
+                  <div className="fonts-title text-junia-purple font-bold w-1/3">{t('roomName')} :</div>
                   <input
                     type="text"
                     name="name"
-                    placeholder="Nom de la salle"
+                    placeholder={t('roomNamePlaceholder')}
                     value={newRoomData.name}
                     onChange={handleNewRoomChange}
                     className="w-2/3 p-2 border border-junia-orange rounded-md bg-white font-texts"
                     required
                   />
                 </div>
-                
+
                 <div className="flex items-center gap-4">
-                  <div className="fonts-title text-junia-purple font-bold w-1/3">Bâtiment :</div>
+                  <div className="fonts-title text-junia-purple font-bold w-1/3">{t('building')} :</div>
                   <div className="w-2/3">
                     <Select
                       name="building"
                       options={getBuildingOptions()}
                       className="basic-single-select"
                       classNamePrefix="select"
-                      placeholder="Sélectionner un bâtiment"
+                      placeholder={t('selectBuilding')}
                       styles={customSelectStyles}
                       menuPlacement="auto"
                       menuPosition="fixed"
@@ -837,11 +858,11 @@ const AdminRoom = () => {
 
                 {newRoomData.showManualBuildingInput && (
                   <div className="flex items-center gap-4">
-                    <div className="fonts-title text-junia-purple font-bold w-1/3">Nouveau bâtiment :</div>
+                    <div className="fonts-title text-junia-purple font-bold w-1/3">{t('newBuilding')} :</div>
                     <input
                       type="text"
                       name="manualBuilding"
-                      placeholder="Nom du nouveau bâtiment"
+                      placeholder={t('newBuildingPlaceholder')}
                       value={newRoomData.building}
                       onChange={(e) => setNewRoomData(prev => ({ ...prev, building: e.target.value }))}
                       className="w-2/3 p-2 border border-junia-orange rounded-md bg-white font-texts"
@@ -851,14 +872,14 @@ const AdminRoom = () => {
                 )}
                 
                 <div className="flex items-center gap-4">
-                  <div className="fonts-title text-junia-purple font-bold w-1/3">Etage :</div>
+                  <div className="fonts-title text-junia-purple font-bold w-1/3">{t('floor')} :</div>
                   <div className="w-2/3 flex flex-row gap-4 items-center">
                     <Select
                       name="floor"
                       options={floors.filter(floor => floor.id_buildings === parseInt(newRoomData.buildingId)).map(floor => ({ value: floor.id_floors.toString(), label: floor.name })).sort((a, b) => a.value - b.value)}
                       className="basic-single-select"
                       classNamePrefix="select"
-                      placeholder="Sélectionner un étage"
+                      placeholder={t('selectFloor')}
                       styles={customSelectStyles}
                       menuPlacement="auto"
                       menuPosition="fixed"
@@ -876,7 +897,7 @@ const AdminRoom = () => {
                           setFloorPlan(floors.find(floor => floor.id_floors === parseInt(newRoomData.floorId)));
                         }}
                       >
-                        <TbMapPinPlus /> Placer sur le plan
+                        <TbMapPinPlus /> {t('placeOnPlan')}
                       </button>
                       )}
 
@@ -884,7 +905,7 @@ const AdminRoom = () => {
                 </div>
                 
                 <div className="flex items-center gap-4">
-                  <label className="block font-bold text-junia-purple w-1/3">Images panoramiques (360°) :</label>
+                  <label className="block font-bold text-junia-purple w-1/3">{t('panoramicImages')} :</label>
                   <div className="w-2/3">
                     <div className="w-full rounded-md bg-white flex items-center">
                       <input
@@ -901,7 +922,7 @@ const AdminRoom = () => {
                 </div>
                 
                 <div className="flex items-center gap-4">
-                  <label className="block font-bold text-junia-purple w-1/3">Image de prévisualisation :</label>
+                  <label className="block font-bold text-junia-purple w-1/3">{t('previewImage')} :</label>
                   <div className="w-2/3">
                     <div className="w-full rounded-md bg-white flex items-center">
                       <input
@@ -915,11 +936,11 @@ const AdminRoom = () => {
                   </div>
                 </div>
                 
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="mt-4 p-2 button-type"
                 >
-                  Ajouter une salle
+                  {t('addRoomBtn')}
                 </button>
               </form>
             </div>
@@ -930,16 +951,16 @@ const AdminRoom = () => {
           <div className="modal">
             <div className="modal-content">
               <div className="flex justify-between items-center pb-4">
-                <div className="text-3xl font-bold font-title text-center">Modifier la salle</div>
+                <div className="text-3xl font-bold font-title text-center">{t('editRoom')}</div>
                 <span className="close items-center" onClick={() => setEditRoomModalOpen(false)}>&times;</span>
               </div>
               <form onSubmit={handleEditRoomSubmit}>
                 <div className="flex items-center gap-4">
-                  <div className="fonts-title text-junia-purple font-bold w-1/3">Numéro de la salle :</div>
+                  <div className="fonts-title text-junia-purple font-bold w-1/3">{t('roomNumber')} :</div>
                   <input
                     type="text"
                     name="number"
-                    placeholder="Numéro de salle"
+                    placeholder={t('roomNumberPlaceholder')}
                     value={editRoomData.number}
                     onChange={handleEditRoomChange}
                     className="w-2/3 p-2 border border-junia-orange rounded-md bg-white font-texts"
@@ -948,11 +969,11 @@ const AdminRoom = () => {
                 </div>
                 
                 <div className="flex items-center gap-4">
-                  <div className="fonts-title text-junia-purple font-bold w-1/3">Nom de la salle :</div>
+                  <div className="fonts-title text-junia-purple font-bold w-1/3">{t('roomName')} :</div>
                   <input
                     type="text"
                     name="name"
-                    placeholder="Nom de la salle"
+                    placeholder={t('roomNamePlaceholder')}
                     value={editRoomData.name}
                     onChange={handleEditRoomChange}
                     className="w-2/3 p-2 border border-junia-orange rounded-md bg-white font-texts"
@@ -961,14 +982,14 @@ const AdminRoom = () => {
                 </div>
                 
                 <div className="flex items-center gap-4">
-                  <div className="fonts-title text-junia-purple font-bold w-1/3">Bâtiment :</div>
+                  <div className="fonts-title text-junia-purple font-bold w-1/3">{t('building')} :</div>
                   <div className="w-2/3">
                     <Select
                       name="building"
                       options={getBuildingOptions()}
                       className="basic-single-select"
                       classNamePrefix="select"
-                      placeholder="Sélectionner un bâtiment"
+                      placeholder={t('selectBuilding')}
                       value={editRoomData.buildingId ? { value: editRoomData.buildingId, label: editRoomData.building } : null}
                       styles={customSelectStyles}
                       menuPlacement="auto"
@@ -991,14 +1012,14 @@ const AdminRoom = () => {
                 </div>
                 
                 <div className="flex items-center gap-4">
-                  <div className="fonts-title text-junia-purple font-bold w-1/3">Etage :</div>
+                  <div className="fonts-title text-junia-purple font-bold w-1/3">{t('floor')} :</div>
                   <div className="w-2/3 flex flex-row gap-4 items-center">
                     <Select
                       name="floor"
                       options={floors.filter(floor => floor.id_buildings === parseInt(editRoomData.buildingId)).map(floor => ({ value: floor.id_floors.toString(), label: floor.name })).sort((a, b) => a.value - b.value)}
                       className="basic-single-select"
                       classNamePrefix="select"
-                      placeholder="Sélectionner un étage"
+                      placeholder={t('selectFloor')}
                       value={editRoomData.floorId ? { value: editRoomData.floorId.toString(), label: editRoomData.floor } : null}
                       styles={customSelectStyles}
                       menuPlacement="auto"
@@ -1018,14 +1039,14 @@ const AdminRoom = () => {
                               setFloorPlan(floors.find(floor => floor.id_floors === parseInt(editRoomData.floorId)));
                             }}
                         >
-                          <TbMapPinPlus /> Placer sur le plan
+                          <TbMapPinPlus /> {t('placeOnPlan')}
                         </button>
                     )}
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-4">
-                  <label className="block font-bold text-junia-purple w-1/3">Image de prévisualisation :</label>
+                  <label className="block font-bold text-junia-purple w-1/3">{t('previewImage')} :</label>
                   <div className="w-2/3">
                     <div className="w-full rounded-md bg-white flex items-center">
                       <input
@@ -1039,11 +1060,11 @@ const AdminRoom = () => {
                   </div>
                 </div>
                 
-                <button 
+                <button
                   type="submit"
                   className="mt-4 p-2 bg-junia-orange hover:bg-junia-orange-dark rounded-3xl text-white font-bold shadow-md font-title text-center transition flex items-center gap-2 justify-center"
                 >
-                  <FaPen /> Modifier la salle
+                  <FaPen /> {t('editRoomBtn')}
                 </button>
               </form>
             </div>
