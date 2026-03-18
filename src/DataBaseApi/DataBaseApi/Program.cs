@@ -1,16 +1,36 @@
 ﻿using DataBaseApi.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using System.IO.Compression;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var firebaseProjectId = builder.Configuration["Firebase:ProjectId"]
+    ?? throw new InvalidOperationException("Firebase:ProjectId is missing from appsettings.json");
 
 // Controllers / Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Firebase JWT Authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = $"https://securetoken.google.com/{firebaseProjectId}";
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = $"https://securetoken.google.com/{firebaseProjectId}",
+            ValidateAudience = true,
+            ValidAudience = firebaseProjectId,
+            ValidateLifetime = true,
+        };
+    });
 
 // CORS (pas de AllowCredentials si AllowAnyOrigin)
 builder.Services.AddCors(options =>
@@ -67,6 +87,7 @@ app.UseResponseCompression();   // ✔ Compression
 app.UseStaticFiles();           // ✔ Images avec CORS
 app.UseRouting();
 
+app.UseAuthentication();        // ← doit être avant UseAuthorization
 app.UseAuthorization();
 app.MapControllers();
 

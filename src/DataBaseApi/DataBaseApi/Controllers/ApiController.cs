@@ -1,10 +1,12 @@
 using DataBaseApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 namespace DataBaseApi.Controllers;
 
 [ApiController]
 [Route("api")]
+[Authorize]
 public class ApiController : ControllerBase
 {
     private readonly DatabaseService _db;
@@ -41,6 +43,7 @@ public class ApiController : ControllerBase
 
     #region Pictures
 
+    [AllowAnonymous]
     [HttpGet("pictures")]
     public async Task<IActionResult> GetPictures()
     {
@@ -56,6 +59,7 @@ public class ApiController : ControllerBase
         }
     }
 
+    [AllowAnonymous]
     [HttpGet("pictures-by-room/{id}")]
     public async Task<IActionResult> GetPicturesByRoomId(int id)
     {
@@ -122,6 +126,7 @@ public class ApiController : ControllerBase
         }
     }
 
+    [AllowAnonymous]
     [HttpGet("fetch/{id}")]
     public async Task<IActionResult> FetchImage(int id)
     {
@@ -134,6 +139,7 @@ public class ApiController : ControllerBase
 
     #region Rooms
 
+    [AllowAnonymous]
     [HttpGet("rooms")]
     public async Task<IActionResult> GetRooms()
     {
@@ -150,6 +156,7 @@ public class ApiController : ControllerBase
     }
 
 
+    [AllowAnonymous]
     [HttpGet("room-id/{id_pictures}")]
     public async Task<IActionResult> GetRoomIdByPictureID(int id_pictures)
     {
@@ -164,6 +171,7 @@ public class ApiController : ControllerBase
         }
     }
 
+    [AllowAnonymous]
     [HttpGet("room/{id}")]
     public async Task<IActionResult> GetRoom(int id)
     {
@@ -255,6 +263,7 @@ public class ApiController : ControllerBase
 
     #region Room Previews
 
+    [AllowAnonymous]
     [HttpGet("room-preview/{id}")]
     public async Task<IActionResult> RoomPreview(int id)
     {
@@ -281,6 +290,7 @@ public class ApiController : ControllerBase
 
     #region Links
 
+    [AllowAnonymous]
     [HttpPost("retrieveLinkByIdPicture")]
     public async Task<IActionResult> RetrieveLinkByIdPicture([FromBody] IdDto dto)
     {
@@ -313,6 +323,7 @@ public class ApiController : ControllerBase
 
     #region Info PopUps
 
+    [AllowAnonymous]
     [HttpPost("retrieveInfoPopUpByIdPicture")]
     public async Task<IActionResult> RetrieveInfoPopUpByIdPicture([FromBody] IdDto dto)
     {
@@ -361,6 +372,7 @@ public class ApiController : ControllerBase
     }
 
     // Get InfoPopup by ID (base info only)
+    [AllowAnonymous]
     [HttpGet("infospot/{id}")]
     public async Task<IActionResult> GetInfoPopupById(int id)
     {
@@ -370,6 +382,7 @@ public class ApiController : ControllerBase
     }
 
     // Get all translations for a specific InfoPopup
+    [AllowAnonymous]
     [HttpGet("infospot/{id}/translations")]
     public async Task<IActionResult> GetInfoPopupTranslations(int id)
     {
@@ -400,6 +413,7 @@ public class ApiController : ControllerBase
 
     #region Tours
 
+    [AllowAnonymous]
     [HttpGet("tours")]
     public async Task<IActionResult> GetTours()
     {
@@ -407,6 +421,7 @@ public class ApiController : ControllerBase
         return Ok(res);
     }
 
+    [AllowAnonymous]
     [HttpGet("tour-steps/{id}")]
     public async Task<IActionResult> GetTourSteps(int id)
     {
@@ -453,6 +468,7 @@ public class ApiController : ControllerBase
 
     #region Buildings
 
+    [AllowAnonymous]
     [HttpGet("buildings")]
     public async Task<IActionResult> GetBuildings()
     {
@@ -501,6 +517,7 @@ public class ApiController : ControllerBase
 
     #region Floors
 
+    [AllowAnonymous]
     [HttpGet("floors")]
     public async Task<IActionResult> GetFloors()
     {
@@ -508,6 +525,7 @@ public class ApiController : ControllerBase
         return Ok(res);
     }
 
+    [AllowAnonymous]
     [HttpGet("floors/{id}")]
     public async Task<IActionResult> GetFloor(int id)
     {
@@ -545,6 +563,7 @@ public class ApiController : ControllerBase
 
     #region Utility
 
+    [AllowAnonymous]
     [HttpGet("ping")]
     public IActionResult Ping() => Ok("pong");
 
@@ -576,6 +595,7 @@ public class ApiController : ControllerBase
         return Ok(new { id });
     }
 
+    [AllowAnonymous]
     [HttpGet("languages")]
     public async Task<IActionResult> GetLanguages()
     {
@@ -601,6 +621,7 @@ public class ApiController : ControllerBase
     // Visitor Types
     #region Visitor Types
 
+    [AllowAnonymous]
     [HttpGet("visitor-types")]
     public async Task<IActionResult> GetVisitorTypes()
     {
