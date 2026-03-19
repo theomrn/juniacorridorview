@@ -1,5 +1,4 @@
-SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;
-SET @@SESSION.SQL_LOG_BIN= 0;
+
 
 -- Désactiver temporairement la vérification pour le nettoyage des tables
 SET FOREIGN_KEY_CHECKS = 0; 
@@ -179,5 +178,3 @@ KEY `fk_links_pictures_destination` (`id_pictures_destination`),
 CONSTRAINT `fk_links_pictures` FOREIGN KEY (`id_pictures`) REFERENCES `Pictures` (`id_pictures`) ON DELETE CASCADE,
 CONSTRAINT `fk_links_pictures_destination` FOREIGN KEY (`id_pictures_destination`) REFERENCES `Pictures` (`id_pictures`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=88 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-SET @@SESSION.SQL_LOG_BIN = COALESCE(@MYSQLDUMP_TEMP_LOG_BIN, 1);

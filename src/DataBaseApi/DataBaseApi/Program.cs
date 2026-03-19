@@ -9,6 +9,8 @@ using System.IO.Compression;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Force le port 5078
+
 var firebaseProjectId = builder.Configuration["Firebase:ProjectId"]
     ?? throw new InvalidOperationException("Firebase:ProjectId is missing from appsettings.json");
 

@@ -42,6 +42,16 @@ export const updateTranslation = async (id_translation, text) => {
         return null;
     }
 };
+export const getTranslationDashboard = async () => {
+    try {
+        const response = await axios.get('/api/translations/dashboard');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching translation dashboard', error);
+        return null;
+    }
+};
+
 export const getLanguagesId = async () => {
     try {
         const response = await axios.get('http://localhost:5078/api/translations');

@@ -106,4 +106,11 @@ public class TranslationController : ControllerBase
         await _db.DeleteLanguageAsync(id);
         return Ok();
     }
+
+    [HttpGet("dashboard")]
+    public async Task<IActionResult> GetTranslationDashboard()
+    {
+        var result = await _db.GetTranslationDashboardAsync();
+        return Ok(result);
+    }
 }

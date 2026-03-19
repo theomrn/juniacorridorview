@@ -758,6 +758,98 @@ public class DatabaseService
         return await conn.QueryAsync(sql);
     }
 
+    public async Task<TranslationDashboardDto> GetTranslationDashboardAsync()
+    {
+        using var conn = CreateConnection();
+
+        var langRows = (await conn.QueryAsync("SELECT id_language, name_language FROM Languages")).ToList();
+        var vtRows = (await conn.QueryAsync("SELECT id_visitor_type, name_visitor_type FROM Visitor_type")).ToList();
+
+        var languages = langRows.Select(r => new DashboardLanguageDto((int)r.id_language, (string)r.name_language)).ToList();
+        var visitorTypes = vtRows.Select(r => new DashboardVisitorTypeDto((int)r.id_visitor_type, (string)r.name_visitor_type)).ToList();
+
+        // i18n: all translations across all languages
+        var transRows = (await conn.QueryAsync(@"
+            SELECT t.namespace AS ns, t.translation_key AS tkey, t.id_language, t.text, l.name_language
+            FROM Translations t
+            JOIN Languages l ON t.id_language = l.id_language")).ToList();
+
+        var byNsKey = transRows
+            .GroupBy(r => new { ns = (string)r.ns, key = (string)r.tkey })
+            .ToList();
+
+        var i18nMissing = new List<I18nMissingDto>();
+        foreach (var group in byNsKey)
+        {
+            var coveredLangIds = group.Select(r => (int)r.id_language).ToHashSet();
+            var emptyLangIds = group
+                .Where(r => string.IsNullOrWhiteSpace((string)r.text))
+                .Select(r => (int)r.id_language)
+                .ToHashSet();
+
+            var missingIn = languages.Where(l => !coveredLangIds.Contains(l.Id)).ToList();
+            var emptyIn = languages.Where(l => emptyLangIds.Contains(l.Id)).ToList();
+
+            if (missingIn.Any() || emptyIn.Any())
+                i18nMissing.Add(new I18nMissingDto(group.Key.ns, group.Key.key, missingIn, emptyIn));
+        }
+
+        // Infospots: all infospots with room info and translations
+        var isRows = (await conn.QueryAsync(@"
+            SELECT
+                ip.id_info_popup,
+                r.name AS room_name,
+                r.number AS room_number,
+                r.id_rooms,
+                ipt.id_languages,
+                l.name_language,
+                ipt.id_visitor_type,
+                vt.name_visitor_type
+            FROM Info_Popup ip
+            LEFT JOIN Pictures p ON ip.id_pictures = p.id_pictures
+            LEFT JOIN Rooms r ON p.id_rooms = r.id_rooms
+            LEFT JOIN Info_popup_translation ipt ON ip.id_info_popup = ipt.id_info_popup
+            LEFT JOIN Languages l ON ipt.id_languages = l.id_language
+            LEFT JOIN Visitor_type vt ON ipt.id_visitor_type = vt.id_visitor_type
+            ORDER BY ip.id_info_popup")).ToList();
+
+        var infospotGroups = isRows.GroupBy(r => (int)r.id_info_popup).ToList();
+        var infospots = new List<InfospotCoverageDto>();
+
+        foreach (var group in infospotGroups)
+        {
+            var first = group.First();
+            var coveredLangIds = group
+                .Where(r => r.id_languages != null)
+                .Select(r => (int)r.id_languages)
+                .Distinct()
+                .ToHashSet();
+
+            var missingLangs = languages.Where(l => !coveredLangIds.Contains(l.Id)).ToList();
+
+            var translations = group
+                .Where(r => r.id_languages != null)
+                .Select(r => new InfospotTranslationDto(
+                    (int)r.id_languages,
+                    (string)r.name_language,
+                    r.id_visitor_type != null ? (int?)r.id_visitor_type : null,
+                    r.name_visitor_type != null ? (string?)r.name_visitor_type : null
+                ))
+                .ToList();
+
+            infospots.Add(new InfospotCoverageDto(
+                (int)first.id_info_popup,
+                first.room_name != null ? (string)first.room_name : "Salle inconnue",
+                first.room_number != null ? (string)first.room_number : "",
+                first.id_rooms != null ? (int?)first.id_rooms : null,
+                missingLangs,
+                translations
+            ));
+        }
+
+        return new TranslationDashboardDto(languages, visitorTypes, i18nMissing, infospots);
+    }
+
 
 
 
