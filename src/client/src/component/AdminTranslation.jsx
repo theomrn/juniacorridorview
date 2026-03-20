@@ -1,21 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { getLanguages, getEntiereTranslationsByNameSpace, updateTranslation } from "../api/AxiosTranslation";
-import { FaLanguage, FaChevronDown, FaChevronUp, FaSave, FaArrowLeft, FaUsers, FaChartBar } from "react-icons/fa";
+import { getLanguages, getEntiereTranslationsByNameSpace, updateTranslation, insertTranslation, autoTranslate } from "../api/AxiosTranslation";
+import { FaLanguage, FaChevronDown, FaChevronUp, FaSave, FaArrowLeft, FaUsers, FaChartBar, FaMagic } from "react-icons/fa";
 import { toast } from "sonner";
 import '../style/AdminTranslation.css';
 import { useTranslation } from 'react-i18next';
+
+const extractText = (entry) =>
+  typeof entry === 'object' && entry !== null ? (entry.text || '') : (entry || '');
+
+// Le backend retourne un tableau — on le convertit en map { translation_key → entry }
+const toKeyMap = (data) => {
+  const map = {};
+  Object.values(data).forEach((value) => {
+    if (typeof value === 'object' && value !== null && value.translation_key) {
+      map[value.translation_key] = value;
+    }
+  });
+  return map;
+};
 
 export default function AdminTranslation() {
   const { t } = useTranslation('adminTranslation');
   const history = useHistory();
   const [selectedLanguage, setSelectedLanguage] = useState(null);
+  const [englishLangId, setEnglishLangId] = useState(null);
   const [languages, setLanguages] = useState([]);
-  const [namespaces] = useState(['home', 'navbar', 'contact', 'navigation']);
+  const [namespaces] = useState([
+    'common', 'home', 'login', 'navbar',
+    'adminUser', 'adminTour', 'adminRoom', 'adminBuilding',
+    'adminRoomDetails', 'adminTranslation', 'adminLanguage', 'adminVisitor',
+    'pano', 'tour',
+  ]);
   const [translations, setTranslations] = useState({});
   const [translationIds, setTranslationIds] = useState({});
   const [loading, setLoading] = useState(false);
   const [savingNamespace, setSavingNamespace] = useState(null);
+  const [translatingNamespace, setTranslatingNamespace] = useState(null);
+  const [translatingKey, setTranslatingKey] = useState(null);
   const [expandedNamespace, setExpandedNamespace] = useState(null);
 
   useEffect(() => {
@@ -25,6 +47,8 @@ export default function AdminTranslation() {
         setLanguages(data);
         if (data.length > 0) {
           setSelectedLanguage(data[0].id_language);
+          const en = data.find(l => l.name_language?.toUpperCase() === 'EN');
+          setEnglishLangId(en?.id_language ?? null);
         }
       } catch (error) {
         console.error('Erreur lors du chargement des langues:', error);
@@ -37,18 +61,15 @@ export default function AdminTranslation() {
   useEffect(() => {
     const fetchAllTranslations = async () => {
       if (!selectedLanguage) return;
-
       setLoading(true);
       const translationsData = {};
       const idsData = {};
-
       try {
         for (const ns of namespaces) {
           const data = await getEntiereTranslationsByNameSpace(ns, selectedLanguage);
           if (Object.keys(data).length > 0) {
             translationsData[ns] = {};
             idsData[ns] = {};
-
             Object.entries(data).forEach(([key, value]) => {
               if (typeof value === 'object' && value !== null) {
                 const translationKey = value.translation_key || key;
@@ -58,9 +79,21 @@ export default function AdminTranslation() {
                 translationsData[ns][key] = value || '';
               }
             });
+          } else if (englishLangId && String(englishLangId) !== String(selectedLanguage)) {
+            // Nouvelle langue : charger les clés depuis EN, valeurs vides
+            const sourceData = await getEntiereTranslationsByNameSpace(ns, englishLangId);
+            if (Object.keys(sourceData).length > 0) {
+              translationsData[ns] = {};
+              idsData[ns] = {};
+              Object.entries(sourceData).forEach(([key, value]) => {
+                const translationKey = typeof value === 'object' && value !== null
+                  ? (value.translation_key || key)
+                  : key;
+                translationsData[ns][translationKey] = '';
+              });
+            }
           }
         }
-
         setTranslations(translationsData);
         setTranslationIds(idsData);
       } catch (error) {
@@ -70,17 +103,13 @@ export default function AdminTranslation() {
         setLoading(false);
       }
     };
-
     fetchAllTranslations();
-  }, [selectedLanguage, namespaces]);
+  }, [selectedLanguage, englishLangId, namespaces]);
 
   const handleTranslationChange = (namespace, key, value) => {
     setTranslations({
       ...translations,
-      [namespace]: {
-        ...translations[namespace],
-        [key]: value,
-      }
+      [namespace]: { ...translations[namespace], [key]: value },
     });
   };
 
@@ -93,25 +122,84 @@ export default function AdminTranslation() {
     try {
       const nsTranslations = translations[namespace] || {};
       const nsIds = translationIds[namespace] || {};
-
+      const newIds = { ...nsIds };
       for (const [key, value] of Object.entries(nsTranslations)) {
         const id = nsIds[key];
         if (id) {
           await updateTranslation(id, value);
+        } else {
+          const result = await insertTranslation(selectedLanguage, namespace, key, value);
+          if (result?.id) newIds[key] = result.id;
         }
       }
+      setTranslationIds({ ...translationIds, [namespace]: newIds });
       toast.success(t('namespaceSavedSuccess', { namespace }));
     } catch (error) {
-      console.error(`Erreur lors de la sauvegarde du namespace "${namespace}":`, error);
       toast.error(t('errorSavingNamespace', { namespace }));
     } finally {
       setSavingNamespace(null);
     }
   };
 
-  const getTranslationCount = (namespace) => {
-    return Object.keys(translations[namespace] || {}).length;
+  const handleTranslateKey = async (namespace, key) => {
+    if (!englishLangId || String(englishLangId) === String(selectedLanguage)) return;
+    setTranslatingKey(`${namespace}.${key}`);
+    try {
+      const sourceMap = toKeyMap(await getEntiereTranslationsByNameSpace(namespace, englishLangId));
+      const sourceText = extractText(sourceMap[key]);
+      if (!sourceText) {
+        toast.error('Aucun texte source pour cette clé');
+        return;
+      }
+      const result = await autoTranslate(Number(englishLangId), Number(selectedLanguage), [sourceText]);
+      if (result?.translations?.[0]) {
+        handleTranslationChange(namespace, key, result.translations[0]);
+      }
+    } catch {
+      toast.error('Erreur LibreTranslate — vérifiez l\'URL dans appsettings.json');
+    } finally {
+      setTranslatingKey(null);
+    }
   };
+
+  const handleTranslateNamespace = async (namespace) => {
+    if (!englishLangId || String(englishLangId) === String(selectedLanguage)) return;
+    setTranslatingNamespace(namespace);
+    try {
+      const sourceMap = toKeyMap(await getEntiereTranslationsByNameSpace(namespace, englishLangId));
+      const emptyKeys = Object.entries(translations[namespace] || {})
+        .filter(([, v]) => !v || v.trim() === '')
+        .map(([k]) => k);
+
+      if (emptyKeys.length === 0) {
+        toast.info('Aucun champ vide dans ce namespace');
+        return;
+      }
+
+      const texts = emptyKeys.map(k => extractText(sourceMap[k]));
+      const result = await autoTranslate(Number(englishLangId), Number(selectedLanguage), texts);
+      if (!result?.translations) {
+        toast.error('Erreur LibreTranslate — vérifiez l\'URL dans appsettings.json');
+        return;
+      }
+
+      const updated = { ...translations[namespace] };
+      emptyKeys.forEach((k, i) => {
+        if (result.translations[i]) updated[k] = result.translations[i];
+      });
+      setTranslations({ ...translations, [namespace]: updated });
+      toast.success(`${result.translations.length} champ(s) traduit(s) — pensez à sauvegarder`);
+    } catch {
+      toast.error('Erreur LibreTranslate — vérifiez l\'URL dans appsettings.json');
+    } finally {
+      setTranslatingNamespace(null);
+    }
+  };
+
+  const getTranslationCount = (namespace) =>
+    Object.keys(translations[namespace] || {}).length;
+
+  const canTranslate = englishLangId && selectedLanguage && String(englishLangId) !== String(selectedLanguage);
 
   return (
     <div className="admin-translation-container">
@@ -149,18 +237,20 @@ export default function AdminTranslation() {
       </div>
 
       <div className="language-selector">
-        <label className="font-title font-semibold">{t('selectLanguage')} :</label>
-        <select
-          value={selectedLanguage || ''}
-          onChange={(e) => setSelectedLanguage(e.target.value)}
-          className="font-texts"
-        >
-          {languages.map((language) => (
-            <option key={language.id_language} value={language.id_language}>
-              {language.name_language}
-            </option>
-          ))}
-        </select>
+        <div className="language-selector-item">
+          <label className="font-title font-semibold">{t('selectLanguage')} :</label>
+          <select
+            value={selectedLanguage || ''}
+            onChange={(e) => setSelectedLanguage(e.target.value)}
+            className="font-texts"
+          >
+            {languages.map((language) => (
+              <option key={language.id_language} value={language.id_language}>
+                {language.name_language}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {loading ? (
@@ -189,11 +279,7 @@ export default function AdminTranslation() {
                     </span>
                   </div>
                   <span className="chevron-icon">
-                    {expandedNamespace === namespace ? (
-                      <FaChevronUp />
-                    ) : (
-                      <FaChevronDown />
-                    )}
+                    {expandedNamespace === namespace ? <FaChevronUp /> : <FaChevronDown />}
                   </span>
                 </div>
 
@@ -204,6 +290,7 @@ export default function AdminTranslation() {
                         <tr>
                           <th className="font-title" style={{ width: '35%' }}>{t('key')}</th>
                           <th className="font-title">{t('value')}</th>
+                          {canTranslate && <th style={{ width: '48px' }}></th>}
                         </tr>
                       </thead>
                       <tbody>
@@ -221,12 +308,34 @@ export default function AdminTranslation() {
                                 placeholder={t('enterText')}
                               />
                             </td>
+                            {canTranslate && (
+                              <td>
+                                <button
+                                  className="translate-icon-btn"
+                                  title="Traduire automatiquement depuis EN (LibreTranslate)"
+                                  disabled={translatingKey === `${namespace}.${key}`}
+                                  onClick={() => handleTranslateKey(namespace, key)}
+                                >
+                                  {translatingKey === `${namespace}.${key}` ? '…' : <FaMagic />}
+                                </button>
+                              </td>
+                            )}
                           </tr>
                         ))}
                       </tbody>
                     </table>
 
                     <div className="namespace-actions">
+                      {canTranslate && (
+                        <button
+                          onClick={() => handleTranslateNamespace(namespace)}
+                          disabled={translatingNamespace === namespace}
+                          className="translate-ns-btn font-title font-bold"
+                        >
+                          <FaMagic />
+                          {translatingNamespace === namespace ? 'Traduction…' : 'Traduire les vides'}
+                        </button>
+                      )}
                       <button
                         onClick={() => handleSaveNamespace(namespace)}
                         disabled={savingNamespace === namespace}

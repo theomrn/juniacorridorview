@@ -1,9 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { getTranslationDashboard } from '../api/AxiosTranslation';
-import { FaArrowLeft, FaSync, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { getTranslationDashboard, getEntiereTranslationsByNameSpace, insertTranslation, autoTranslate } from '../api/AxiosTranslation';
+import { FaArrowLeft, FaSync, FaChevronDown, FaChevronUp, FaMagic } from 'react-icons/fa';
+import { toast } from 'sonner';
 import '../style/AdminTranslation.css';
 import '../style/AdminTranslationDashboard.css';
+
+const extractText = (entry) =>
+  typeof entry === 'object' && entry !== null ? (entry.text || '') : (entry || '');
+
+const toKeyMap = (data) => {
+  const map = {};
+  Object.values(data).forEach((value) => {
+    if (typeof value === 'object' && value !== null && value.translation_key) {
+      map[value.translation_key] = value;
+    }
+  });
+  return map;
+};
 
 export default function AdminTranslationDashboard() {
   const history = useHistory();
@@ -12,12 +26,18 @@ export default function AdminTranslationDashboard() {
   const [expandedNamespaces, setExpandedNamespaces] = useState(new Set());
   const [selectedVisitorType, setSelectedVisitorType] = useState(null);
   const [activeSection, setActiveSection] = useState('i18n');
+  const [sourceLangId, setSourceLangId] = useState(null);
+  const [translatingNamespace, setTranslatingNamespace] = useState(null);
 
   const fetchData = async () => {
     setLoading(true);
     try {
       const result = await getTranslationDashboard();
       setData(result);
+      if (result?.languages?.length > 0) {
+        const en = result.languages.find(l => l.name?.toUpperCase() === 'EN');
+        setSourceLangId(en?.id ?? result.languages[0].id);
+      }
     } catch (e) {
       console.error('Erreur dashboard traductions:', e);
     } finally {
@@ -43,15 +63,58 @@ export default function AdminTranslationDashboard() {
 
   // Filter infospots based on selected visitor type
   const filteredInfospots = data?.infospots?.filter(spot => {
-    if (selectedVisitorType === null) {
-      return spot.missingLanguages.length > 0;
-    }
-    // Show infospots that have NO translation for the selected visitor type
+    if (selectedVisitorType === null) return spot.missingLanguages.length > 0;
     return !spot.translations.some(t => t.visitorTypeId === selectedVisitorType.id);
   }) ?? [];
 
   const totalI18nMissing = data?.i18nMissing?.length ?? 0;
   const totalInfospotsMissing = data?.infospots?.filter(s => s.missingLanguages.length > 0).length ?? 0;
+
+  const handleTranslateNamespace = async (ns, items) => {
+    if (!sourceLangId) return;
+    setTranslatingNamespace(ns);
+    try {
+      const sourceMap = toKeyMap(await getEntiereTranslationsByNameSpace(ns, sourceLangId));
+
+      // Group truly missing keys by target language (exclude source lang)
+      const byTargetLang = {};
+      for (const item of items) {
+        for (const lang of item.missingIn) {
+          if (lang.id === sourceLangId) continue;
+          if (!byTargetLang[lang.id]) byTargetLang[lang.id] = { langId: lang.id, keys: [] };
+          byTargetLang[lang.id].keys.push(item.key);
+        }
+      }
+
+      let inserted = 0;
+      for (const { langId, keys } of Object.values(byTargetLang)) {
+        const texts = keys.map(k => extractText(sourceMap[k])).filter(Boolean);
+        if (texts.length === 0) continue;
+
+        const result = await autoTranslate(sourceLangId, langId, texts);
+        if (!result?.translations) continue;
+
+        for (let i = 0; i < keys.length; i++) {
+          if (result.translations[i]) {
+            await insertTranslation(langId, ns, keys[i], result.translations[i]);
+            inserted++;
+          }
+        }
+      }
+
+      if (inserted > 0) {
+        toast.success(`${inserted} traduction(s) insérée(s) dans "${ns}"`);
+        fetchData();
+      } else {
+        toast.info('Aucune traduction à insérer (vérifiez la langue source)');
+      }
+    } catch (e) {
+      toast.error('Erreur LibreTranslate — vérifiez l\'URL dans appsettings.json');
+      console.error(e);
+    } finally {
+      setTranslatingNamespace(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -141,9 +204,22 @@ export default function AdminTranslationDashboard() {
                         {items.length} clé{items.length > 1 ? 's' : ''} incomplète{items.length > 1 ? 's' : ''}
                       </span>
                     </div>
-                    <span className="chevron-icon">
-                      {expandedNamespaces.has(ns) ? <FaChevronUp /> : <FaChevronDown />}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }} onClick={e => e.stopPropagation()}>
+                      {sourceLangId && (
+                        <button
+                          className="translate-ns-btn font-title font-bold"
+                          style={{ padding: '0.4rem 0.9rem', fontSize: '0.85rem' }}
+                          disabled={translatingNamespace === ns}
+                          onClick={() => handleTranslateNamespace(ns, items)}
+                        >
+                          <FaMagic />
+                          {translatingNamespace === ns ? 'Traduction…' : 'Auto-traduire'}
+                        </button>
+                      )}
+                      <span className="chevron-icon" onClick={() => toggleNamespace(ns)}>
+                        {expandedNamespaces.has(ns) ? <FaChevronUp /> : <FaChevronDown />}
+                      </span>
+                    </div>
                   </div>
 
                   {expandedNamespaces.has(ns) && (
@@ -194,7 +270,6 @@ export default function AdminTranslationDashboard() {
       {/* Infospots section */}
       {activeSection === 'infospots' && (
         <div className="dashboard-section">
-          {/* Visitor type filter */}
           <div className="infospot-filters">
             <label className="font-title font-semibold">Filtrer par type de visiteur :</label>
             <div className="vt-filter-chips">
@@ -244,7 +319,6 @@ export default function AdminTranslationDashboard() {
                     )}
                   </div>
 
-                  {/* Language coverage */}
                   <div className="coverage-row">
                     <span className="font-texts coverage-label">Langues :</span>
                     <div className="coverage-badges">
@@ -262,7 +336,6 @@ export default function AdminTranslationDashboard() {
                     </div>
                   </div>
 
-                  {/* Visitor type coverage */}
                   {data.visitorTypes.length > 0 && (
                     <div className="coverage-row">
                       <span className="font-texts coverage-label">Types visiteur :</span>

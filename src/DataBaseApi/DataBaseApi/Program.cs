@@ -72,6 +72,7 @@ builder.Services.Configure<GzipCompressionProviderOptions>(options =>
 
 // DI
 builder.Services.AddSingleton<DatabaseService>();
+builder.Services.AddSingleton<LibreTranslateService>();
 
 var app = builder.Build();
 

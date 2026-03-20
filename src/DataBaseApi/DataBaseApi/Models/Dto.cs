@@ -36,3 +36,5 @@ public record I18nMissingDto(string Namespace, string Key, List<DashboardLanguag
 public record InfospotTranslationDto(int LanguageId, string LanguageName, int? VisitorTypeId, string? VisitorTypeName);
 public record InfospotCoverageDto(int Id, string RoomName, string RoomNumber, int? RoomId, List<DashboardLanguageDto> MissingLanguages, List<InfospotTranslationDto> Translations);
 public record TranslationDashboardDto(List<DashboardLanguageDto> Languages, List<DashboardVisitorTypeDto> VisitorTypes, List<I18nMissingDto> I18nMissing, List<InfospotCoverageDto> Infospots);
+
+public record AutoTranslateDto(int SourceLangId, int TargetLangId, List<string> Texts);
