@@ -29,7 +29,7 @@ export async function initI18n() {
       defaultNS: 'common',
 
       backend: {
-        loadPath: 'http://localhost:5078/api/translations/{{lng}}/{{ns}}'
+        loadPath: `${import.meta.env.VITE_API_BASE_URL ?? ''}/api/translations/{{lng}}/{{ns}}`
       },
 
       interpolation: {

@@ -1,0 +1,72 @@
+services:
+
+  # ── Base de données MySQL ──────────────────────────────────────────────────
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    command: >
+      --lower-case-table-names=1
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --init-connect='SET NAMES utf8mb4'
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: corridorview_simple
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./docker/db/import.sh:/docker-entrypoint-initdb.d/import.sh:ro
+      - ./db_script_empty.sql:/sql/01_schema.sql:ro
+      - ./translations_script.sql:/sql/02_translations.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ── API traduction (LibreTranslate) ───────────────────────────────────────
+  libretranslate:
+    image: libretranslate/libretranslate:latest
+    restart: unless-stopped
+    environment:
+      LT_LOAD_ONLY: "fr,en"   # ajuster selon les langues utilisées
+    # Port non exposé à l'hôte — accessible uniquement par l'API en interne
+
+  # ── API .NET principale ───────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      libretranslate:
+        condition: service_started
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Server=db;Port=3306;Database=corridorview_simple;User Id=root;Password=root;SslMode=none;AllowPublicKeyRetrieval=True;CharSet=utf8mb4;"
+      Firebase__ProjectId: "yp-2425-10"
+      LibreTranslate__Url: "http://libretranslate:5000/translate"
+      LibreTranslate__ApiKey: ""
+      ASPNETCORE_URLS: "http://+:5078"
+    volumes:
+      - api_previews:/app/wwwroot/previews
+    ports:
+      - "5078:5078"
+
+  # ── Client React (build statique servi par nginx) ─────────────────────────
+  client:
+    build:
+      context: .
+      dockerfile: docker/client/Dockerfile
+      args:
+        VITE_API_BASE_URL: ""   # URL relative → nginx proxy vers api
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+
+volumes:
+  db_data:
+  api_previews:

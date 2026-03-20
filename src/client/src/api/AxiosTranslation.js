@@ -84,7 +84,7 @@ export const autoTranslate = async (sourceLangId, targetLangId, texts) => {
 
 export const getLanguagesId = async () => {
     try {
-        const response = await axios.get('http://localhost:5078/api/translations');
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL ?? ''}/api/translations`);
         
         // 1. Axios stores the parsed JSON directly in the .data property.
         // 2. Axios automatically throws an error if the status is not 2xx.
