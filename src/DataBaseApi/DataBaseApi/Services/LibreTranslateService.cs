@@ -9,22 +9,6 @@ public class LibreTranslateService
     private readonly string? _apiKey;
     private readonly ILogger<LibreTranslateService> _logger;
 
-    // Maps language names (as stored in DB) to ISO 639-1 codes (lowercase)
-    // Add entries here if you add languages whose names are not yet covered
-    private static readonly Dictionary<string, string> LangNameToCode = new(StringComparer.OrdinalIgnoreCase)
-    {
-        { "français", "fr" }, { "french", "fr" }, { "fr", "fr" },
-        { "anglais", "en" }, { "english", "en" }, { "en", "en" },
-        { "espagnol", "es" }, { "spanish", "es" }, { "es", "es" },
-        { "allemand", "de" }, { "german", "de" }, { "de", "de" },
-        { "néerlandais", "nl" }, { "dutch", "nl" }, { "nl", "nl" },
-        { "italien", "it" }, { "italian", "it" }, { "it", "it" },
-        { "portugais", "pt" }, { "portuguese", "pt" }, { "pt", "pt" },
-        { "polonais", "pl" }, { "polish", "pl" }, { "pl", "pl" },
-        { "japonais", "ja" }, { "japanese", "ja" }, { "ja", "ja" },
-        { "chinois", "zh" }, { "chinese", "zh" }, { "zh", "zh" },
-        { "russe", "ru" }, { "russian", "ru" }, { "ru", "ru" },
-    };
 
     public LibreTranslateService(IConfiguration config, ILogger<LibreTranslateService> logger)
     {
@@ -34,9 +18,6 @@ public class LibreTranslateService
     }
 
     public bool IsConfigured => !string.IsNullOrEmpty(_baseUrl);
-
-    public string? GetIsoCode(string languageName) =>
-        LangNameToCode.TryGetValue(languageName.Trim(), out var code) ? code : null;
 
     public async Task<List<string>?> TranslateAsync(List<string> texts, string sourceLangCode, string targetLangCode)
     {

@@ -665,11 +665,11 @@ public class DatabaseService
     }
 
     // Languages
-    public async Task<int> InsertLanguageAsync(string name_language)
+    public async Task<int> InsertLanguageAsync(string name_language, string code_language)
     {
         using var conn = CreateConnection();
-        var sql = "INSERT INTO Languages (name_language) VALUES (@Name)";
-        return await conn.ExecuteAsync(sql, new {Name = name_language });
+        var sql = "INSERT INTO Languages (name_language, code_language) VALUES (@Name, @Code)";
+        return await conn.ExecuteAsync(sql, new { Name = name_language, Code = code_language });
     }
 
     public async Task<IEnumerable<dynamic>> GetLanguagesAsync()
@@ -684,10 +684,10 @@ public class DatabaseService
         return await conn.ExecuteAsync("DELETE FROM Languages WHERE id_language = @Id", new { Id = id_language });
     }
 
-    public async Task<int> UpdateLanguageAsync(int id_language, string name_language)
+    public async Task<int> UpdateLanguageAsync(int id_language, string name_language, string code_language)
     {
         using var conn = CreateConnection();
-        return await conn.ExecuteAsync("UPDATE Languages SET name_language = @Name WHERE id_language = @Id", new { Name = name_language, Id = id_language });
+        return await conn.ExecuteAsync("UPDATE Languages SET name_language = @Name, code_language = @Code WHERE id_language = @Id", new { Name = name_language, Code = code_language, Id = id_language });
     }
 
     // Visitor Types

@@ -23,9 +23,9 @@ public class FileDto { public IFormFile file { get; set; } }
 public record UpdateTranslationDto(int id_translation, string text);
 public record InsertTranslationDto(int id_language,string translation_namespace,string translation_key,string text);
 
-public record CreateLanguageDto(string name_language);
+public record CreateLanguageDto(string name_language, string code_language);
 
-public record UpdateLanguageDto(string name_language, int id_language);
+public record UpdateLanguageDto(string name_language, string code_language, int id_language);
 
 public record AddTranslationDto(string Title, string Text, int IdLanguages, int? IdVisitorType);
 

@@ -47,8 +47,8 @@ export default function AdminTranslation() {
         setLanguages(data);
         if (data.length > 0) {
           setSelectedLanguage(data[0].id_language);
-          const en = data.find(l => l.name_language?.toUpperCase() === 'EN');
-          setEnglishLangId(en?.id_language ?? null);
+          const en = data.find(l => l.code_language === 'en') ?? data[0];
+          setEnglishLangId(en.id_language);
         }
       } catch (error) {
         console.error('Erreur lors du chargement des langues:', error);
@@ -278,9 +278,22 @@ export default function AdminTranslation() {
                       {translationCount} {translationCount > 1 ? t('translations') : t('translation')}
                     </span>
                   </div>
-                  <span className="chevron-icon">
-                    {expandedNamespace === namespace ? <FaChevronUp /> : <FaChevronDown />}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }} onClick={e => e.stopPropagation()}>
+                    {canTranslate && (
+                      <button
+                        onClick={() => handleTranslateNamespace(namespace)}
+                        disabled={translatingNamespace === namespace}
+                        className="translate-ns-btn font-title font-bold"
+                        style={{ padding: '0.4rem 0.9rem', fontSize: '0.85rem' }}
+                      >
+                        <FaMagic />
+                        {translatingNamespace === namespace ? 'Traduction…' : 'Traduire les vides'}
+                      </button>
+                    )}
+                    <span className="chevron-icon" onClick={() => toggleNamespace(namespace)}>
+                      {expandedNamespace === namespace ? <FaChevronUp /> : <FaChevronDown />}
+                    </span>
+                  </div>
                 </div>
 
                 {expandedNamespace === namespace && (
@@ -326,16 +339,6 @@ export default function AdminTranslation() {
                     </table>
 
                     <div className="namespace-actions">
-                      {canTranslate && (
-                        <button
-                          onClick={() => handleTranslateNamespace(namespace)}
-                          disabled={translatingNamespace === namespace}
-                          className="translate-ns-btn font-title font-bold"
-                        >
-                          <FaMagic />
-                          {translatingNamespace === namespace ? 'Traduction…' : 'Traduire les vides'}
-                        </button>
-                      )}
                       <button
                         onClick={() => handleSaveNamespace(namespace)}
                         disabled={savingNamespace === namespace}

@@ -659,18 +659,7 @@ const AdminRoom = () => {
             </button>
 
             
-            <button
-                onClick={() => {
-                  history.push('/admin/language');
-                  setNewRoomModalOpen(true);
-                  setPlanPlacementEditMode(false);
-                }}
-                className="admin-button-responsive"
-            >
-              {t('languages')}
-            </button>
-
-            <button
+<button
                 onClick={() => history.push('/admin/convert')}
                 className="admin-button-responsive">
                 {t('fileconversion')}

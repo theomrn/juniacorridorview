@@ -5,7 +5,7 @@ export const createLanguage = async (name_language, code) => {
     try {
         const response = await axios.post('/api/translations/create-language', {
             name_language,
-            code
+            code_language: code
         });
         return response.data;
     } catch (error) {
@@ -19,7 +19,7 @@ export const updateLanguage = async (id_language, name_language, code) => {
         const response = await axios.put('/api/translations/update-language', {
             id_language,
             name_language,
-            code
+            code_language: code
         });
         return response.data;
     } catch (error) {

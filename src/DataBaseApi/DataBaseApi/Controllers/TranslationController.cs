@@ -91,14 +91,14 @@ public class TranslationController : ControllerBase
     [HttpPost("create-language")]
     public async Task<IActionResult> CreateLanguage([FromBody] CreateLanguageDto dto)
     {
-        var id = await _db.InsertLanguageAsync(dto.name_language);
+        var id = await _db.InsertLanguageAsync(dto.name_language, dto.code_language.Trim().ToLowerInvariant());
         return Ok(new { id });
     }
 
     [HttpPut("update-language")]
     public async Task<IActionResult> UpdateLanguage([FromBody] UpdateLanguageDto dto)
     {
-        await _db.UpdateLanguageAsync(dto.id_language, dto.name_language);
+        await _db.UpdateLanguageAsync(dto.id_language, dto.name_language, dto.code_language.Trim().ToLowerInvariant());
         return Ok();
     }
 
@@ -129,11 +129,11 @@ public class TranslationController : ControllerBase
         if (sourceLang == null || targetLang == null)
             return BadRequest(new { error = "Unknown language ID" });
 
-        var sourceCode = _libreTranslate.GetIsoCode(sourceLang.name_language);
-        var targetCode = _libreTranslate.GetIsoCode(targetLang.name_language);
+        string? sourceCode = string.IsNullOrWhiteSpace((string?)sourceLang.code_language) ? null : (string)sourceLang.code_language;
+        string? targetCode = string.IsNullOrWhiteSpace((string?)targetLang.code_language) ? null : (string)targetLang.code_language;
 
         if (sourceCode == null || targetCode == null)
-            return BadRequest(new { error = $"Unsupported language: add the ISO code mapping in LibreTranslateService.cs" });
+            return BadRequest(new { error = "Language is missing a code — set the ISO 639-1 code in the language settings" });
 
         var result = await _libreTranslate.TranslateAsync(dto.Texts, sourceCode, targetCode);
         if (result == null)
