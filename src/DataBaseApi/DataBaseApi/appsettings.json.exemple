@@ -1,0 +1,8 @@
+﻿{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=exemple;Port=exemple;Database=exemple;User Id=exemple;Password=exemple;SslMode=none;"
+  },
+  "Firebase": {
+    "ProjectId": "projet-id-exemple"
+  }
+}
