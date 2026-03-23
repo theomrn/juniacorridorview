@@ -28,7 +28,7 @@ services:
     image: libretranslate/libretranslate:latest
     restart: unless-stopped
     environment:
-      LT_LOAD_ONLY: "fr,en"   # ajuster selon les langues utilisées
+      LT_LOAD_ONLY: "fr,en,es"   # ajuster selon les langues utilisées
     # Port non exposé à l'hôte — accessible uniquement par l'API en interne
 
   # ── API .NET principale ───────────────────────────────────────────────────
