@@ -14,8 +14,10 @@ export default function AdminLanguage() {
   const [expandedId, setExpandedId] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [newLanguageName, setNewLanguageName] = useState('');
+  const [newLanguageCode, setNewLanguageCode] = useState('');
   const [editFormData, setEditFormData] = useState({
-    name_language: ''
+    name_language: '',
+    code_language: ''
   });
   const [showNewLanguageForm, setShowNewLanguageForm] = useState(false);
   const { t } = useTranslation('adminLanguage');
@@ -50,14 +52,16 @@ export default function AdminLanguage() {
   const startEdit = (language) => {
     setEditingId(language.id_language);
     setEditFormData({
-      name_language: language.name_language
+      name_language: language.name_language,
+      code_language: language.code_language || ''
     });
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setEditFormData({
-      name_language: ''
+      name_language: '',
+      code_language: ''
     });
   };
 
@@ -74,9 +78,13 @@ export default function AdminLanguage() {
       toast.error(t('namerequired'));
       return;
     }
+    if (!editFormData.code_language.trim()) {
+      toast.error(t('coderequired'));
+      return;
+    }
 
     try {
-      await updateLanguage(id_language, editFormData.name_language);
+      await updateLanguage(id_language, editFormData.name_language, editFormData.code_language.trim().toLowerCase());
       toast.success(t('succeslanguage'));
       fetchLanguages();
       setEditingId(null);
@@ -101,16 +109,21 @@ export default function AdminLanguage() {
 
   const handleAddNewLanguage = async (e) => {
     e.preventDefault();
-    
+
     if (!newLanguageName.trim()) {
       toast.error(t('namerequired'));
       return;
     }
+    if (!newLanguageCode.trim()) {
+      toast.error(t('coderequired'));
+      return;
+    }
 
     try {
-      await createLanguage(newLanguageName);
+      await createLanguage(newLanguageName, newLanguageCode.trim().toLowerCase());
       toast.success(t('createlanguage'));
       setNewLanguageName('');
+      setNewLanguageCode('');
       setShowNewLanguageForm(false);
       fetchLanguages();
     } catch (error) {
@@ -154,6 +167,17 @@ export default function AdminLanguage() {
                 className="form-input"
               />
             </div>
+            <div className="form-group">
+              <label className="font-title font-semibold">{t('codelanguage')}</label>
+              <input
+                type="text"
+                value={newLanguageCode}
+                onChange={(e) => setNewLanguageCode(e.target.value)}
+                placeholder="fr, en, es…"
+                className="form-input"
+                maxLength={10}
+              />
+            </div>
             <div className="form-buttons">
               <button type="submit" className="button-confirm font-title font-bold">
                 {t('create')}
@@ -163,6 +187,7 @@ export default function AdminLanguage() {
                 onClick={() => {
                   setShowNewLanguageForm(false);
                   setNewLanguageName('');
+                  setNewLanguageCode('');
                 }}
                 className="button-cancel font-title font-bold"
               >
@@ -193,6 +218,11 @@ export default function AdminLanguage() {
                   <span className="language-name font-title font-bold">
                     {language.name_language}
                   </span>
+                  {language.code_language && (
+                    <span className="language-code font-title" style={{ marginLeft: '0.75rem', opacity: 0.6, fontSize: '0.85em' }}>
+                      [{language.code_language}]
+                    </span>
+                  )}
                 </div>
                 <span className="chevron-icon">
                   {expandedId === language.id_language ? (
@@ -218,6 +248,18 @@ export default function AdminLanguage() {
                           value={editFormData.name_language}
                           onChange={handleEditChange}
                           className="form-input"
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="font-title font-semibold">{t('codelanguage')}</label>
+                        <input
+                          type="text"
+                          name="code_language"
+                          value={editFormData.code_language}
+                          onChange={handleEditChange}
+                          className="form-input"
+                          maxLength={10}
+                          placeholder="fr, en, es…"
                         />
                       </div>
                       <div className="form-buttons">

@@ -42,9 +42,49 @@ export const updateTranslation = async (id_translation, text) => {
         return null;
     }
 };
+export const insertTranslation = async (id_language, translation_namespace, translation_key, text) => {
+    try {
+        const response = await axios.post('/api/translations/insert-translation', {
+            id_language,
+            translation_namespace,
+            translation_key,
+            text
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error inserting translation', error);
+        return null;
+    }
+};
+
+export const getTranslationDashboard = async () => {
+    try {
+        const response = await axios.get('/api/translations/dashboard');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching translation dashboard', error);
+        return null;
+    }
+};
+
+export const autoTranslate = async (sourceLangId, targetLangId, texts) => {
+    try {
+        const response = await axios.post('/api/translations/auto-translate', {
+            sourceLangId,
+            targetLangId,
+            texts
+        });
+        console.log('Auto-translate response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error auto-translating', error);
+        return null;
+    }
+};
+
 export const getLanguagesId = async () => {
     try {
-        const response = await axios.get('http://localhost:5078/api/translations');
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL ?? ''}/api/translations`);
         
         // 1. Axios stores the parsed JSON directly in the .data property.
         // 2. Axios automatically throws an error if the status is not 2xx.

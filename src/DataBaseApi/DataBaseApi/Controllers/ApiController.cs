@@ -591,7 +591,7 @@ public class ApiController : ControllerBase
     [HttpPost("insert-language")]
     public async Task<IActionResult> InsertLanguage([FromBody] NameDto dto)
     {
-        var id = await _db.InsertLanguageAsync(dto.Name);
+        var id = await _db.InsertLanguageAsync(dto.Name, "");
         return Ok(new { id });
     }
 
@@ -613,7 +613,7 @@ public class ApiController : ControllerBase
     [HttpPut("update-language/{id}")]
     public async Task<IActionResult> UpdateLanguage(int id, [FromBody] NameDto dto)
     {
-        await _db.UpdateLanguageAsync(id, dto.Name);
+        await _db.UpdateLanguageAsync(id, dto.Name, "");
         return Ok();
     }
     #endregion

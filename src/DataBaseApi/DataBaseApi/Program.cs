@@ -9,6 +9,8 @@ using System.IO.Compression;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Force le port 5078
+
 var firebaseProjectId = builder.Configuration["Firebase:ProjectId"]
     ?? throw new InvalidOperationException("Firebase:ProjectId is missing from appsettings.json");
 
@@ -70,6 +72,7 @@ builder.Services.Configure<GzipCompressionProviderOptions>(options =>
 
 // DI
 builder.Services.AddSingleton<DatabaseService>();
+builder.Services.AddSingleton<LibreTranslateService>();
 
 var app = builder.Build();
 

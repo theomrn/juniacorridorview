@@ -17,6 +17,7 @@ import AdminUser from './component/AdminUser';
 import ConvertFile from './component/ConvertFile';
 import AdminLanguage from './component/AdminLanguage';
 import AdminVisitor from './component/AdminVisitor';
+import AdminTranslationDashboard from './component/AdminTranslationDashboard';
 
 import './App.css';
 import {Toaster} from "sonner";
@@ -94,6 +95,7 @@ const App = () => {
         <PrivateRoute exact path="/admin/translation" component={AdminTranslation} />
         <PrivateRoute exact path="/admin/language" component={AdminLanguage} />
         <PrivateRoute exact path="/admin/visitor" component={AdminVisitor} />
+        <PrivateRoute exact path="/admin/translation-dashboard" component={AdminTranslationDashboard} />
         <Route exact path="/login" component={Login} />
       </Switch>
     </AppContext.Provider>

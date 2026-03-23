@@ -23,8 +23,18 @@ public class FileDto { public IFormFile file { get; set; } }
 public record UpdateTranslationDto(int id_translation, string text);
 public record InsertTranslationDto(int id_language,string translation_namespace,string translation_key,string text);
 
-public record CreateLanguageDto(string name_language);
+public record CreateLanguageDto(string name_language, string code_language);
 
-public record UpdateLanguageDto(string name_language, int id_language);
+public record UpdateLanguageDto(string name_language, string code_language, int id_language);
 
 public record AddTranslationDto(string Title, string Text, int IdLanguages, int? IdVisitorType);
+
+// Dashboard traductions
+public record DashboardLanguageDto(int Id, string Name);
+public record DashboardVisitorTypeDto(int Id, string Name);
+public record I18nMissingDto(string Namespace, string Key, List<DashboardLanguageDto> MissingIn, List<DashboardLanguageDto> EmptyIn);
+public record InfospotTranslationDto(int LanguageId, string LanguageName, int? VisitorTypeId, string? VisitorTypeName);
+public record InfospotCoverageDto(int Id, string RoomName, string RoomNumber, int? RoomId, List<DashboardLanguageDto> MissingLanguages, List<InfospotTranslationDto> Translations);
+public record TranslationDashboardDto(List<DashboardLanguageDto> Languages, List<DashboardVisitorTypeDto> VisitorTypes, List<I18nMissingDto> I18nMissing, List<InfospotCoverageDto> Infospots);
+
+public record AutoTranslateDto(int SourceLangId, int TargetLangId, List<string> Texts);

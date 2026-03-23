@@ -9,11 +9,13 @@ public class TranslationController : ControllerBase
 {
 
     private readonly DatabaseService _db;
+    private readonly LibreTranslateService _libreTranslate;
     private readonly ILogger<TranslationController> _logger;
 
-    public TranslationController(DatabaseService db, ILogger<TranslationController> logger)
+    public TranslationController(DatabaseService db, LibreTranslateService libreTranslate, ILogger<TranslationController> logger)
     {
         _db = db;
+        _libreTranslate = libreTranslate;
         _logger = logger;
     }
 
@@ -89,14 +91,14 @@ public class TranslationController : ControllerBase
     [HttpPost("create-language")]
     public async Task<IActionResult> CreateLanguage([FromBody] CreateLanguageDto dto)
     {
-        var id = await _db.InsertLanguageAsync(dto.name_language);
+        var id = await _db.InsertLanguageAsync(dto.name_language, dto.code_language.Trim().ToLowerInvariant());
         return Ok(new { id });
     }
 
     [HttpPut("update-language")]
     public async Task<IActionResult> UpdateLanguage([FromBody] UpdateLanguageDto dto)
     {
-        await _db.UpdateLanguageAsync(dto.id_language, dto.name_language);
+        await _db.UpdateLanguageAsync(dto.id_language, dto.name_language, dto.code_language.Trim().ToLowerInvariant());
         return Ok();
     }
 
@@ -105,5 +107,38 @@ public class TranslationController : ControllerBase
     {
         await _db.DeleteLanguageAsync(id);
         return Ok();
+    }
+
+    [HttpGet("dashboard")]
+    public async Task<IActionResult> GetTranslationDashboard()
+    {
+        var result = await _db.GetTranslationDashboardAsync();
+        return Ok(result);
+    }
+
+    [HttpPost("auto-translate")]
+    public async Task<IActionResult> AutoTranslate([FromBody] AutoTranslateDto dto)
+    {
+        if (!_libreTranslate.IsConfigured)
+            return StatusCode(503, new { error = "LibreTranslate not configured — set LibreTranslate:Url in appsettings.json" });
+
+        var languages = await _db.GetLanguagesAsync();
+        var sourceLang = languages.FirstOrDefault(l => l.id_language == dto.SourceLangId);
+        var targetLang = languages.FirstOrDefault(l => l.id_language == dto.TargetLangId);
+
+        if (sourceLang == null || targetLang == null)
+            return BadRequest(new { error = "Unknown language ID" });
+
+        string? sourceCode = string.IsNullOrWhiteSpace((string?)sourceLang.code_language) ? null : (string)sourceLang.code_language;
+        string? targetCode = string.IsNullOrWhiteSpace((string?)targetLang.code_language) ? null : (string)targetLang.code_language;
+
+        if (sourceCode == null || targetCode == null)
+            return BadRequest(new { error = "Language is missing a code — set the ISO 639-1 code in the language settings" });
+
+        var result = await _libreTranslate.TranslateAsync(dto.Texts, sourceCode, targetCode);
+        if (result == null)
+            return StatusCode(502, new { error = "LibreTranslate request failed — check the instance is running" });
+
+        return Ok(new { translations = result });
     }
 }

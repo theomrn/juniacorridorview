@@ -7,8 +7,8 @@ DELETE FROM languages;
 -- FRANÇAIS
 -- =========================
 
-INSERT INTO languages (name_language)
-VALUES ('Français');
+INSERT INTO languages (name_language, code_language)
+VALUES ('Français', 'fr');
 
 SET @id_language := LAST_INSERT_ID();
 
@@ -410,8 +410,8 @@ VALUES
 -- ENGLISH
 -- =========================
 
-INSERT INTO languages (name_language)
-VALUES ('English');
+INSERT INTO languages (name_language, code_language)
+VALUES ('English', 'en');
 
 SET @id_language := LAST_INSERT_ID();
 
