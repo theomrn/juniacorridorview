@@ -1,237 +1,269 @@
 # Junia Corridor View
 
-Junia Corridor View is a comprehensive web application designed to manage and visualize room and building information, including panoramic (360°) images, across various floors and buildings. It provides an intuitive interface for both administrators and visitors to organize, explore, and interact with spatial data effectively.
+Application web de visite virtuelle des couloirs et salles de Junia. Elle permet aux visiteurs d'explorer des panoramas 360°, et aux administrateurs de gérer les salles, bâtiments, visites guidées, et traductions.
 
-## Project Structure
+## Stack
 
-This is a **unified monorepo project** combining:
-- **Frontend**: React.js application (Vite) in `src/client/`
-- **Backend**: .NET API in `src/DataBaseApi/`
-- **Database**: MySQL
-- **Legacy**: Old Node.js/Express server in `src/server_old/`
+| Couche | Technologie |
+|--------|-------------|
+| Frontend | React 19 + Vite, React Router DOM v5, Tailwind CSS, i18next |
+| Backend | ASP.NET Core (.NET 10), Swagger/OpenAPI |
+| Base de données | MySQL 8.4 |
+| Traduction auto | LibreTranslate (self-hosted) |
+| Auth | Firebase (frontend) + Firebase Admin SDK (backend) |
+| Panorama | Panolens 0.12.1 + Three.js |
 
-## Installation
+## Lancement
 
-### Prerequisites
-- Node.js (v16 or higher)
-- .NET 10.0
-- MySQL database
-- Firebase credentials
+### Production — Docker complet
 
-### Setup Steps
+Tout tourne dans des conteneurs (MySQL, LibreTranslate, API .NET, client React via nginx).
 
-1. **Clone and install dependencies**:
-   ```bash
-   npm install
-   ```
-
-2. **Configure Firebase**:
-   - Copy `src/client/src/firebaseConfig.js.example` to `src/client/src/firebaseConfig.js`
-   - Add your Firebase configuration credentials
-
-3. **Initialize the database**:
-   - Create a MySQL database
-   - Run the SQL scripts in the project root:
-     - `db_script_empty.sql`: Initial database schema
-     - `translations_script.sql`: Translation setup and sample data
-   ```bash
-   mysql -u your_user -p your_database < db_script_empty.sql
-   mysql -u your_user -p your_database < translations_script.sql
-   ```
-   - Update the database connection string in the `.NET backend configuration`
-
-4. **Start development servers**:
-   ```bash
-   npm run dev
-   ```
-   This runs:
-   - React client on Vite dev server
-   - .NET API on `http://localhost:5078`
-
-4. **Build for production**:
-   ```bash
-   npm run build
-   ```
-
-## Features
-
-### Visitor Features
-
-#### Home Page
-- Choose between two exploration modes:
-  - **Guided Tour**: Follow a predefined path through rooms with structured information
-  - **Free Tour**: Explore buildings freely at your own pace
-
-#### Panoramic Viewer (360° Mode)
-- View immersive panoramic images of rooms
-- Interactive information hotspots providing technical details
-- Room navigation and building maps
-- Smooth transitions between rooms
-
-#### Building Navigation
-- Visual floor plans with room placements
-- Real-time location tracking
-- Multi-floor navigation
-
-### Administration Features
-
-#### Room Management
-- View all rooms in card-based layout with detailed metadata
-- Add, edit, and delete room information
-- Upload and manage panoramic (360°) images
-- Assign images to rooms
-- Place rooms on interactive floor plans
-- Room categorization and filtering
-
-#### Building & Floor Management
-- Create and manage buildings
-- Organize floors within buildings
-- Associate rooms with specific buildings and floors
-- Edit floor information and metadata
-
-#### Guided Tour Management
-- Create and edit guided tours
-- Manage tour steps and sequence
-- Add multiple rooms to tours
-- Organize rooms in carousel format
-
-#### Language & Translation Management
-- Support for multiple languages
-- Manage translations for:
-  - Room names and descriptions
-  - Building and floor information
-  - User interface elements
-  - Technical hotspot information
-
-#### User Management
-- Create and manage admin accounts
-- Control access permissions
-- User role management
-
-#### File Management
-- Convert and optimize panoramic images
-- Handle AVIF image format support
-- File upload and storage management
-
-## Tech Stack
-
-### Frontend
-- **Framework**: React 19.2.3 with Vite
-- **Routing**: React Router DOM 5.2.0
-- **Styling**: Tailwind CSS with PostCSS
-- **State Management**: React Context API
-- **API Client**: Axios
-- **Panorama Viewer**: Panolens 0.12.1 with Three.js
-- **UI Components**: React Icons, React Select, Sonner (toasts)
-- **Animations**: Framer Motion
-- **Drag & Drop**: dnd-kit
-- **Internationalization**: i18next with HTTP backend
-- **Firebase**: Firebase 11.8.1 for authentication and services
-
-### Backend
-- **Framework**: .NET 8.0 with ASP.NET Core
-- **Database**: MySQL
-- **API Documentation**: Swagger/OpenAPI
-- **CORS**: Enabled for all origins
-- **Compression**: Gzip & Brotli HTTP compression
-- **File Processing**: Multer for uploads
-- **Email**: Nodemailer
-- **Real-time**: Socket.io for live updates
-- **Firebase Admin SDK**: For backend authentication
-
-### Database
-- **System**: MySQL
-- Schema includes:
-  - Users & Authentication
-  - Buildings, Floors, Rooms
-  - Panoramic Images & Metadata
-  - Guided Tours & Steps
-  - Translations & Languages
-  - Technical Information Hotspots
-
-## Available Scripts
+**Prérequis :** Docker Desktop installé et démarré.
 
 ```bash
-# Development mode (runs client + .NET server concurrently)
-npm run dev
+# Configurer Firebase (une seule fois)
+cp src/client/src/firebaseConfig.js.example src/client/src/firebaseConfig.js
+# → remplir les credentials Firebase dans le fichier
 
-# Development - Client only (Vite dev server)
-npm run dev:client
-
-# Development - Server only (.NET API)
-npm run dev:server
-
-# Production build
-npm run build
-
-# Preview production build
-npm run preview
+# Lancer la stack
+docker compose up --build
 ```
 
-## API Structure
+Accès :
+- Application → http://localhost:80
+- API .NET → http://localhost:5078
 
-The backend exposes REST endpoints through `http://localhost:5078`:
+> La base de données est initialisée automatiquement au premier démarrage via `db_script_empty.sql` et `translations_script.sql`.
 
-### Main Controllers
-- **ApiController**: Core room, building, and floor operations
-- **TranslationController**: Language and translation management
+---
 
-### Services
-- **DatabaseService**: Database operations and queries
-- **FileOptimiserService**: Image optimization and format conversion
+### Développement — local + services Docker
 
-## Component Architecture
+Le client React et l'API .NET tournent en local (hot reload). MySQL et LibreTranslate tournent en Docker.
 
-### Key Client Components
-- `App.jsx`: Main routing and authentication logic
-- `Navbar.jsx`: Navigation and user menu
-- `Home.jsx`: Landing page with tour selection
-- `Tour.jsx`: Guided tour interface
-- `Pano.jsx`: Panorama 360° viewer
-- `AdminRoom.jsx`: Room list and management
-- `AdminRoomDetails.jsx`: Detailed room editing
-- `AdminBuilding.jsx`: Building management
-- `AdminTour.jsx`: Tour creation and editing
-- `AdminTranslation.jsx`: Language and translation management
-- `AdminUser.jsx`: User account management
-- `AdminLanguage.jsx`: Language configuration
+**Prérequis :** Docker Desktop, Node.js ≥ 16, .NET 10 SDK.
 
-### Sub-Components
-- `buildings/`: Building-related components
-- `dialogs/`: Modal dialogs for forms and confirmations
-- `plan/`: Floor plan visualization
-- `room_details/`: Detailed room information displays
+```bash
+# 1. Configurer Firebase (une seule fois)
+cp src/client/src/firebaseConfig.js.example src/client/src/firebaseConfig.js
 
-## Internationalization
+# 2. Installer les dépendances Node
+npm install
 
-The application supports multiple languages using i18next:
-- Language files in `src/client/src/i18n/locales/`
-- HTTP backend for dynamic translation loading
-- Full translation coverage for UI and content
+# 3. Démarrer les services d'infrastructure
+docker compose up db libretranslate
+# → MySQL exposé sur localhost:3306
+# → LibreTranslate exposé sur localhost:5000
 
-## Authentication
+# 4. Dans un autre terminal, lancer le frontend + backend
+npm run dev
+```
 
-- Firebase-based authentication for users
-- JWT token management
-- Admin role-based access control
-- Protected routes for admin panels
+Accès :
+- Client React → http://localhost:5173
+- API .NET → http://localhost:5078
+- Swagger → http://localhost:5078/swagger
 
-## Database Scripts
+> `docker-compose.override.yml` expose automatiquement les ports 3306 et 5000 à l'hôte en dev.
 
-- `db_script_empty.sql`: Initial database schema
-- `translations_script.sql`: Translation setup and sample data
+---
 
-## Performance Features
+## Configuration Firebase
 
-- Image optimization and AVIF format support
-- HTTP compression (Gzip & Brotli)
-- Optimized panoramic image rendering with Three.js
-- Efficient asset bundling with Vite
+1. Copier `src/client/src/firebaseConfig.js.example` → `src/client/src/firebaseConfig.js`
+2. Remplir les credentials du projet Firebase
+3. Dans la console Firebase, activer l'authentification par email/mot de passe
+4. Le backend utilise Firebase Admin SDK — le `ProjectId` est configuré dans `appsettings.json` (valeur par défaut : `yp-2425-10`)
 
-## Development Notes
+## Structure du projet
 
-- The project uses modern ES modules and JSX syntax
-- Tailwind CSS for responsive design
-- Environment configuration through `.env` files
-- Firebase configuration stored separately for security
-- Hot module reloading during development
+```
+├── src/
+│   ├── client/              # Frontend React + Vite
+│   │   └── src/
+│   │       ├── component/   # Composants pages et UI
+│   │       ├── api/         # Fichiers Axios par domaine
+│   │       └── i18n.ts      # Initialisation i18next
+│   └── DataBaseApi/         # Backend ASP.NET Core
+│       ├── Controllers/     # ApiController + TranslationController
+│       ├── Services/        # DatabaseService, FileOptimiserService
+│       └── Models/          # DTOs
+├── docker/                  # Dockerfiles et config nginx/MySQL
+├── docker-compose.yml       # Stack complète
+├── docker-compose.override.yml  # Surcharge dev (ports exposés)
+├── db_script_empty.sql      # Schéma initial de la base
+└── translations_script.sql  # Données de traduction initiales
+```
+
+## Fonctionnalités
+
+### Côté visiteur
+- **Page d'accueil** : choix entre visite guidée et visite libre
+- **Panorama 360°** : visionneuse immersive avec hotspots d'information, navigation entre salles
+- **Plan de bâtiment** : plans interactifs par étage
+
+### Côté administration
+- **Salles** : création, édition, suppression, upload d'images panoramiques, placement sur le plan
+- **Bâtiments & étages** : gestion de la hiérarchie bâtiment → étage → salle
+- **Visites guidées** : création et ordonnancement des étapes de visite
+- **Traductions** : gestion multilingue des contenus (stockées en base, pas dans des fichiers locaux)
+- **Langues** : ajout de nouvelles langues avec traduction automatique via LibreTranslate
+- **Utilisateurs** : gestion des comptes administrateurs
+
+## Traduction automatique
+
+Déclenchée depuis `AdminTranslation.jsx`, traitée côté backend via `LibreTranslateService`.
+
+**Flux :**
+1. L'admin sélectionne une langue cible dans l'interface de traduction
+2. Deux modes de déclenchement :
+   - **Clé unique** : bouton icône sur une ligne → traduit ce seul texte depuis l'anglais
+   - **Masse** : bouton "Traduire les vides" sur un namespace → traduit toutes les clés vides d'un bloc
+3. Le backend appelle `POST http://libretranslate:5000/translate` (ou `http://localhost:5000` en dev)
+4. Les traductions sont affichées localement dans le formulaire — l'admin valide avant de sauvegarder
+
+**Endpoint :** `POST /api/translations/auto-translate`
+```json
+{ "sourceLangId": 1, "targetLangId": 2, "texts": ["Hello", "Room"] }
+```
+
+**Configuration (`appsettings.json`) :**
+```json
+"LibreTranslate": {
+  "Url": "http://libretranslate:5000/translate",
+  "ApiKey": ""
+}
+```
+La langue source doit exister en base. Si LibreTranslate n'est pas accessible, le bouton indique une erreur de configuration.
+
+---
+
+## Dashboard de monitoring i18n
+
+Route : `/admin/translation-dashboard` — composant `AdminTranslationDashboard.jsx`.
+
+Audit de la couverture des traductions sur l'ensemble du projet, en deux sections :
+
+### Traductions i18n
+
+- Liste toutes les clés de namespace dont la traduction est **absente** (pas d'entrée en base) ou **vide** (texte whitespace)
+- Affichage en tableaux pliables par namespace
+- Chaque cellule indique le statut par langue : **OK** (vert) / **Absent** (rouge) / **Vide** (jaune)
+
+### Infobulles (infospots)
+
+- Liste les infobulles sans traduction pour une ou plusieurs langues
+- Filtre par type de visiteur (chips cliquables)
+- Chaque carte affiche : ID, salle associée, langues couvertes/manquantes, types de visiteur couverts
+- Lien direct vers la page de détail de la salle concernée
+
+**Endpoint :** `GET /api/translations/dashboard`
+Retourne les clés i18n incomplètes et les infobulles non traduites, calculées par requêtes SQL en base.
+
+---
+
+## Configuration des ports et proxy
+
+### Carte des ports
+
+| Service | Dev (local) | Docker prod | Variable de config |
+|---------|-------------|-------------|--------------------|
+| Client React (Vite) | `localhost:5173` | `localhost:80` | `vite.config.js → server.port` |
+| API .NET | `localhost:5078` | `localhost:5078` | `ASPNETCORE_URLS` / `launchSettings.json` |
+| MySQL | `localhost:3306` (exposé via override) | réseau interne Docker | `ConnectionStrings__DefaultConnection` |
+| LibreTranslate | `localhost:5000` (exposé via override) | réseau interne Docker | `LibreTranslate__Url` |
+
+### Proxy Vite (`vite.config.js`)
+
+En développement, Vite proxie tous les appels `/api/*` vers l'API .NET :
+
+```js
+proxy: {
+  '/api': {
+    target: 'http://localhost:5078',  // port de l'API .NET locale
+    changeOrigin: true,
+    secure: false,
+  }
+}
+```
+
+**Exception** : `getLanguagesId()` dans `AxiosTranslation.js` appelle `http://localhost:5078` directement (sans proxy) — nécessaire pour le bootstrap i18n avant le montage de l'app React.
+
+Pour changer le port de l'API, modifier `target` ici **et** `ASPNETCORE_URLS` dans `launchSettings.json`.
+
+### `appsettings.json` — configuration du backend
+
+Fichier : `src/DataBaseApi/DataBaseApi/appsettings.json`
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Port=3306;Database=corridorview_simple;User Id=root;Password=root;SslMode=none;AllowPublicKeyRetrieval=True;CharSet=utf8mb4;"
+  },
+  "Firebase": {
+    "ProjectId": "yp-2425-10"
+  },
+  "LibreTranslate": {
+    "Url": "http://localhost:5000/translate",
+    "ApiKey": ""
+  }
+}
+```
+
+| Clé | Dev | Prod (Docker) | À changer si… |
+|-----|-----|---------------|----------------|
+| `ConnectionStrings.DefaultConnection` → `Server` | `localhost` | `db` (nom du service Docker) | MySQL tourne ailleurs |
+| `ConnectionStrings.DefaultConnection` → `Port` | `3306` | `3306` | Port MySQL personnalisé |
+| `Firebase.ProjectId` | `yp-2425-10` | idem | Vous changez de projet Firebase |
+| `LibreTranslate.Url` | `http://localhost:5000/translate` | `http://libretranslate:5000/translate` | LibreTranslate tourne ailleurs |
+| `LibreTranslate.ApiKey` | `""` (pas de clé) | `""` | Instance LibreTranslate avec clé API |
+
+**En production Docker**, `appsettings.json` n'est pas utilisé directement — les variables d'environnement définies dans `docker-compose.yml` le surchargent (convention ASP.NET Core : `__` remplace `:`) :
+
+```yaml
+environment:
+  ConnectionStrings__DefaultConnection: "Server=db;Port=3306;..."
+  Firebase__ProjectId: "yp-2425-10"
+  LibreTranslate__Url: "http://libretranslate:5000/translate"
+  LibreTranslate__ApiKey: ""
+```
+
+Pour changer la configuration en prod, modifier ces variables dans `docker-compose.yml` — pas `appsettings.json`.
+
+### `docker-compose.override.yml` — ports exposés en dev
+
+Ce fichier est mergé automatiquement par Docker Compose quand il existe. Il expose MySQL et LibreTranslate à l'hôte pour que l'API .NET locale puisse y accéder :
+
+```yaml
+services:
+  db:
+    ports:
+      - "3306:3306"    # MySQL accessible depuis localhost:3306
+  libretranslate:
+    ports:
+      - "5000:5000"    # LibreTranslate accessible depuis localhost:5000
+```
+
+En production (`docker compose up --build`), ce fichier est toujours chargé — si vous ne voulez pas exposer ces ports en prod, supprimez ou renommez `docker-compose.override.yml` et passez l'option `-f docker-compose.yml` explicitement.
+
+### Ajouter ou changer les langues LibreTranslate
+
+LibreTranslate ne charge que les langues listées dans `LT_LOAD_ONLY` (dans `docker-compose.yml`) pour réduire l'utilisation mémoire :
+
+```yaml
+libretranslate:
+  environment:
+    LT_LOAD_ONLY: "fr,en,es"   # codes ISO 639-1, séparés par des virgules
+```
+
+Modifier cette variable puis relancer `docker compose up --build libretranslate` pour prendre en compte les nouvelles langues.
+
+---
+
+## Points techniques notables
+
+- **Proxy Vite** : en dev, les appels `/api/*` sont proxiés vers `http://localhost:5078` (API .NET locale). Exception : `getLanguagesId()` appelle `http://localhost:5078` directement (bootstrap i18n avant montage de l'app).
+- **Traductions en base** : les traductions i18next sont stockées en MySQL et servies par `TranslationController`. Pas de fichiers JSON locaux.
+- **Conflit Panolens/Three.js** : `panolens@0.12.1` requiert `three@^0.125.2` mais l'app utilise `three@^0.176` — résolu via `overrides` dans `package.json`.
+- **Auth admin** : vérifiée via `localStorage.getItem("isAuthenticated") === "true"` dans `PrivateRoute`.
