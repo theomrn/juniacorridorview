@@ -831,7 +831,7 @@ const AdminRoomDetails = () => {
                 <div className="flex justify-center ">
                   {popup.image_path && (
                     <div className="max-h-30">
-                      <img src={`http://localhost:5078/${popup.image_path}`} alt={`Aperçu de ${popup.title}`}/>
+                      <img src={`/${popup.image_path}`} alt={`Aperçu de ${popup.title}`}/>
                     </div>
                   )}
                 </div>

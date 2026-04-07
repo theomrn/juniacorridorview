@@ -14,9 +14,9 @@ services:
       MYSQL_DATABASE: corridorview_simple
     volumes:
       - db_data:/var/lib/mysql
-      - ./docker/db/import.sh:/docker-entrypoint-initdb.d/import.sh:ro
-      - ./db_script_empty.sql:/sql/01_schema.sql:ro
-      - ./translations_script.sql:/sql/02_translations.sql:ro
+      - ./docker/db/00_charset.sql:/docker-entrypoint-initdb.d/00_charset.sql:ro
+      - ./db_script_empty.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./translations_script.sql:/docker-entrypoint-initdb.d/02_translations.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       interval: 10s

@@ -1,5 +1,4 @@
 import axios from "axios";
-axios.defaults.baseURL = 'http://localhost:5078';
 /*
    _____ ______ _______
   / ____|  ____|__   __|

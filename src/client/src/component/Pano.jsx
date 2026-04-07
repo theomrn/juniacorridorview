@@ -99,7 +99,7 @@ const PanoramaViewer = ({ location, setSelectedImageName, setCurrentRoomNumber }
         const imagePath = await api.getImage(picture.id_pictures);
         return {
           id: picture.id_pictures,
-          imageUrl: `http://localhost:5078/${imagePath}`,
+          imageUrl: `/${imagePath}`,
         };
       })
     );

@@ -54,7 +54,7 @@ export const getLinks = async (id_pictures) => {
 export const getImage = async (id) => {
   try {
     const response = await axios.get(`/api/fetch/${id}`, { responseType: 'blob' });
-    const imageUrl = `http://localhost:5078/${response.data}`;
+    const imageUrl = `/${response.data}`;
     return imageUrl;
   } catch (error) {
     console.error('Error fetching image:', error);

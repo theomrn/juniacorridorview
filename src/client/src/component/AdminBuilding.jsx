@@ -204,7 +204,7 @@ const AdminBuilding = () => {
                                             <div className="flex flex-col items-center justify-center pt-2 border-t">
                                                 <h6 className="font-title">{t('floorPlan')}</h6>
                                                 <div className="overflow-hidden flex items-center">
-                                                    <img src={`http://localhost:5078/${floor.plan_path}`} alt={`Preview of ${floor.name}`} className="object-cover h-90% rounded-xl" />
+                                                    <img src={`/${floor.plan_path}`} alt={`Preview of ${floor.name}`} className="object-cover h-90% rounded-xl" />
                                                 </div>
                                             </div>
                                         )}
