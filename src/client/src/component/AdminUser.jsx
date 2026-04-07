@@ -35,6 +35,7 @@ const AdminUser = () => {
   const [resetModal, setResetModal] = useState({ open: false, email: "", link: "" });
   const [confirmDelete, setConfirmDelete] = useState({ open: false, email: "", uid: "" });
   const [search, setSearch] = useState(""); // Ajout de l'état pour la recherche
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
     // Fetch users on mount
@@ -43,7 +44,11 @@ const AdminUser = () => {
         setUsers(users);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        setLoading(false);
+        setLoadError("Impossible de charger la liste des administrateurs — veuillez réessayer plus tard.");
+        toast.error("Erreur lors du chargement des administrateurs");
+      });
   }, []);
 
   const handleCreateUser = async (e) => {
@@ -143,6 +148,11 @@ const AdminUser = () => {
                   {message && (
                     <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg text-center font-semibold">
                       {message}
+                    </div>
+                  )}
+                  {loadError && (
+                    <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-center font-semibold">
+                      {loadError}
                     </div>
                   )}
                   <div className="overflow-x-auto rounded-xl m-4">

@@ -40,6 +40,7 @@ const updateTourSteps = async (data) => {
         await axios.post('/api/update-tour-steps', { id_tours: data.id_tours, steps: stepsWithNumbers, title: data.title, description: data.description });
     } catch (error) {
         console.error('Error updating tour steps:', error);
+        throw error;
     }
 };
 
@@ -48,6 +49,7 @@ const addTourStep = async (data) => {
         await axios.post('/api/add-tour-step', data);
     } catch (error) {
         console.error('Error adding tour step:', error);
+        throw error;
     }
 };
 
@@ -60,6 +62,7 @@ const createTour = async (data) => {
         await axios.post('/api/create-tour', { ...data, steps: stepsWithNumbers });
     } catch (error) {
         console.error('Error creating tour:', error);
+        throw error;
     }
 };
 
@@ -68,6 +71,7 @@ const updateTourVisibility = async (id_tours, hidden) => {
         await axios.post('/api/update-tour-visibility', { id_tours, hidden });
     } catch (error) {
         console.error('Error updating tour visibility:', error);
+        throw error;
     }
 }
 
@@ -76,6 +80,7 @@ const deleteTour = async (id_tours) => {
         await axios.delete(`/api/delete-tour/${id_tours}`);
     } catch (error) {
         console.error('Error deleting tour:', error);
+        throw error;
     }
 };
 
@@ -116,6 +121,7 @@ const getImage = async (id) => {
     return imageUrl;
   } catch (error) {
     console.error('Error fetching image:', error);
+    return null;
   }
 };
 

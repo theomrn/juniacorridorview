@@ -58,6 +58,7 @@ export const getImage = async (id) => {
     return imageUrl;
   } catch (error) {
     console.error('Error fetching image:', error);
+    return null;
   }
 };
 
@@ -66,6 +67,7 @@ export const updateImage = async (formData) => {
     await axios.post('/api/update-image', formData);
   } catch (error) {
     console.error('Error updating image:', error);
+    throw error;
   }
 };
 
@@ -74,6 +76,7 @@ export const updateInfospot = async (formData) => {
     await axios.post('/api/update-infospot', formData);
   } catch (error) {
     console.error('Error updating infospot:', error);
+    throw error;
   }
 };
 
@@ -82,6 +85,7 @@ export const updateLink = async (formData) => {
     await axios.post('/api/update-link', formData);
   } catch (error) {
     console.error('Error updating link:', error);
+    throw error;
   }
 };
 
@@ -101,6 +105,7 @@ export const insertInfoPopUp = async (formData) => {
       await axios.post('/api/insertInfoPopUp', formData);
   } catch (error) {
       console.error('Error inserting info popup:', error);
+      throw error;
   }
 };
 
@@ -109,6 +114,7 @@ export const insertLink = async (data) => {
       await axios.post('/api/insertLink', data);
   } catch (error) {
       console.error('Error inserting link:', error);
+      throw error;
   }
 };
 
@@ -117,6 +123,7 @@ export const uploadFile = async (formData) => {
       await axios.post('/api/upload', formData);
   } catch (error) {
       console.error('Error uploading file:', error);
+      throw error;
   }
 };
 
@@ -146,5 +153,6 @@ export const setAdminClaim = async (uid) => {
     await axios.post("/api/set-admin-claim", { uid });
   } catch (error) {
     console.error("Error setting admin claim:", error);
+    throw error;
   }
 };

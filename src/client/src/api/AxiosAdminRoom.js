@@ -31,6 +31,7 @@ const getImage = async (id) => {
     return imageUrl;
   } catch (error) {
     console.error('Error fetching image:', error);
+    return null;
   }
 };
 
@@ -60,19 +61,16 @@ const insertInfoPopUp = async (formData) => {
       await axios.post('/api/insertInfoPopUp', formData);
   } catch (error) {
       console.error('Error inserting info popup:', error);
+      throw error;
   }
 };
 
 const insertLink = async (data) => {
   try {
-    console.log(data.posX);
-        console.log(data.posY);
-        console.log(data.posZ);
-    console.log(data.selectedPictureId);
-    console.log(data.id_pictures_destination);
       await axios.post('/api/insertLink', data);
   } catch (error) {
       console.error('Error inserting link:', error);
+      throw error;
   }
 };
 
@@ -163,6 +161,7 @@ const deleteRoom = async (id_rooms) => {
         await axios.delete(`/api/delete-room/${id_rooms}`);
     } catch (error) {
         console.error('Error deleting plan:', error);
+        throw error;
     }
 }
 
@@ -171,6 +170,7 @@ const updateImage = async (formData) => {
     await axios.post('/api/update-image', formData);
   } catch (error) {
     console.error('Error updating image:', error);
+    throw error;
   }
 };
 
@@ -179,6 +179,7 @@ const deleteImage = async (id_pictures) => {
         await axios.delete(`/api/delete-image/${id_pictures}`);
     } catch (error) {
         console.error('Error deleting image:', error);
+        throw error;
     }
 };
 
@@ -188,6 +189,7 @@ const updateRoomVisibility = async (id_rooms, hidden) => {
     await axios.post('/api/update-room-visibility', { id_rooms, hidden });
   } catch (error) {
     console.error('Error updating plan visibility:', error);
+    throw error;
   }
 };
 
@@ -222,6 +224,7 @@ const updateInfospot = async (formData) => {
         await axios.put('/api/update-infospot', formData);
     } catch (error) {
         console.error('Error updating infospot:', error);
+        throw error;
     }
 };
 
@@ -230,6 +233,7 @@ const updateLink = async (formData) => {
         await axios.put('/api/update-link', formData);
     } catch (error) {
         console.error('Error updating link:', error);
+        throw error;
     }
 };
 
@@ -238,6 +242,7 @@ const deleteLink = async (id_links) => {
         await axios.delete(`/api/delete-link/${id_links}`);
     } catch (error) {
         console.error('Error deleting link:', error);
+        throw error;
     }
 };
 
@@ -246,6 +251,7 @@ const deleteInfospot = async (id_infospots) => {
         await axios.delete(`/api/delete-infospot/${id_infospots}`);
     } catch (error) {
         console.error('Error deleting infospot:', error);
+        throw error;
     }
 };
 
@@ -316,6 +322,7 @@ const uploadFile = async (formData) => {
     await axios.post('/api/upload', formData);
   } catch (error) {
     console.error('Error uploading file:', error);
+    throw error;
   }
 };
 
