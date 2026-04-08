@@ -1,0 +1,4 @@
+services:
+  db:
+    volumes:
+      - ./inserts_buildings.sql:/docker-entrypoint-initdb.d/03_data.sql:ro
