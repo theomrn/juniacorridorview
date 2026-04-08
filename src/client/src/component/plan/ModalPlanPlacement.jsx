@@ -76,7 +76,7 @@ const ModalPlanPlacement = ({
                         </div>
                         <div style={{maxHeight: "60vh", display: "flex", justifyContent: "center"}}>
                             <div className="relative inline-block cursor-pointer" onClick={handleImageClick}>
-                                <img ref={imageRef} src={`http://localhost:5078/${floor.plan_path}`} alt={t('floorPlanAlt')} style={{ maxHeight: "60vh", height: "auto", width: "auto", display: "block" }} />
+                                <img ref={imageRef} src={`/${floor.plan_path}`} alt={t('floorPlanAlt')} style={{ maxHeight: "60vh", height: "auto", width: "auto", display: "block" }} />
                                 {pinPosition && pinPosition.x && pinPosition.y && (
                                     <div className="absolute top-0 left-0" style={{ left: `${pinPosition.x * 100}%`, top: `${pinPosition.y * 100}%`, transform: "translate(-50%, -100%)" }}>
                                         <FaMapMarkerAlt color={"red"} className="text-red-500 text-2xl" />

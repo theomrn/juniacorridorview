@@ -4,4 +4,4 @@ services:
       - "3306:3306"
   libretranslate:
     ports:
-      - "5000:5000"
+      - "1234:5000"

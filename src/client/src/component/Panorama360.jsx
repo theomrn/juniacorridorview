@@ -137,7 +137,7 @@ const Panorama360 = ({ infoPopups, selectedPicture, links, onLinkClick, onPositi
 
           const image = new Image(); // Créer un nouvel objet Image
           image.crossOrigin = "anonymous";
-          image.src = `http://localhost:5078/${popup.image_path}`;
+          image.src = `/${popup.image_path}`;
           // Draw image
           context.drawImage(image, imgX, imgY, imageWidth, imageHeight);
 
@@ -230,7 +230,7 @@ const Panorama360 = ({ infoPopups, selectedPicture, links, onLinkClick, onPositi
         if (popup.image_path) {
                     const image = new Image(); // Créer un nouvel objet Image
                     image.crossOrigin = "anonymous";
-          image.src = `http://localhost:5078/${popup.image_path}`;
+          image.src = `/${popup.image_path}`;
           context.drawImage(image, imgX, imgY, imageWidth, imageHeight);
           context.strokeStyle = '#3c2c53';
           context.lineWidth = 5;
