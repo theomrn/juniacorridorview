@@ -1,7 +1,9 @@
 ﻿using DataBaseApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
@@ -13,6 +15,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 var firebaseProjectId = builder.Configuration["Firebase:ProjectId"]
     ?? throw new InvalidOperationException("Firebase:ProjectId is missing from appsettings.json");
+
+// // Limite upload (panoramas + preview peuvent être volumineux)
+// builder.WebHost.ConfigureKestrel(options =>
+// {
+//     options.Limits.MaxRequestBodySize = null; // illimité
+// });
+// builder.Services.Configure<FormOptions>(options =>
+// {
+//     options.MultipartBodyLengthLimit = long.MaxValue; // illimité
+// });
 
 // Controllers / Swagger
 builder.Services.AddControllers();

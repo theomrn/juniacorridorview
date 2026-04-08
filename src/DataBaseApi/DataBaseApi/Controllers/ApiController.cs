@@ -1,3 +1,4 @@
+using System.Globalization;
 using DataBaseApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -77,6 +78,8 @@ public class ApiController : ControllerBase
 
     [HttpPost("upload")]
     [RequestSizeLimit(50_000_000)]
+    [DisableRequestSizeLimit]
+    // [RequestFormLimits(MultipartBodyLengthLimit = long.MaxValue)]
     public async Task<IActionResult> UploadImage([FromForm] int id_rooms)
     {
         try
@@ -190,11 +193,13 @@ public class ApiController : ControllerBase
     }
 
     [HttpPost("add-room")]
+    [DisableRequestSizeLimit]
+    [RequestFormLimits(MultipartBodyLengthLimit = long.MaxValue)]
     public async Task<IActionResult> AddRoom([FromForm] string name, [FromForm] string number, [FromForm] int id_floors, [FromForm] string? plan_x, [FromForm] string? plan_y, IFormFile? previewImage)
     {
         try
         {
-            var roomId = await _db.AddRoomAsync(name, number, id_floors, double.Parse(plan_x.Replace(".", ",")), double.Parse(plan_y.Replace(".", ",")));
+            var roomId = await _db.AddRoomAsync(name, number, id_floors, double.Parse(plan_x, CultureInfo.InvariantCulture), double.Parse(plan_y, CultureInfo.InvariantCulture));
             if (previewImage != null)
             {
                 await _db.InsertRoomPreviewFileAsync(roomId, previewImage);
@@ -213,7 +218,7 @@ public class ApiController : ControllerBase
     {
         try
         {
-            var res = await _db.UpdateRoomAsync(id_rooms, name, number, id_floors, double.Parse(plan_x.Replace(".",",")), double.Parse(plan_y.Replace(".",",")));
+            var res = await _db.UpdateRoomAsync(id_rooms, name, number, id_floors, double.Parse(plan_x, CultureInfo.InvariantCulture), double.Parse(plan_y, CultureInfo.InvariantCulture));
             if (previewImage != null)
             {
                 await _db.InsertRoomPreviewFileAsync(id_rooms, previewImage);
