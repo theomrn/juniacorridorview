@@ -4,6 +4,7 @@
 
 /src/server/database*
 /src/client/src/firebaseConfig.js
+/src/client/firebaseConfig.js
 /src/server/yp-2425-10-firebase-adminsdk-fbsvc-7dfe32071b.json
 src/publish
 /src/server_old/*

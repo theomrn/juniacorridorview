@@ -6,6 +6,7 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 
 import App from './App';
+import FallbackApp from './component/FallbackApp';
 import { initI18n } from './i18n';
 import './output.css';
 import './App.css';
@@ -21,12 +22,18 @@ axios.interceptors.request.use(async (config) => {
 });
 
 async function bootstrap() {
-  await initI18n();
+  let i18nInitialized = false;
+  try {
+    await initI18n();
+    i18nInitialized = true;
+  } catch (error) {
+    console.error('Failed to initialize i18n:', error);
+  }
 
   ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
       <BrowserRouter>
-        <App />
+        {i18nInitialized ? <App /> : <FallbackApp />}
       </BrowserRouter>
     </React.StrictMode>
   );
