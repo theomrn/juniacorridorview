@@ -13,6 +13,7 @@ import {FaArrowLeft, FaPen, FaTrash, FaPlusCircle, FaLanguage, FaGlobe} from "re
 import {ImLocation2} from "react-icons/im";
 import {MdOutlineFileUpload} from "react-icons/md";
 import ModalAddEditImage from "./room_details/ModalAddEditImage";
+import VisitorTypeMultiSelect from "./room_details/VisitorTypeMultiSelect";
 import ConfirmDialog from "./dialogs/ConfirmDialog";
 import { useTranslation } from 'react-i18next';
 
@@ -69,6 +70,7 @@ const AdminRoomDetails = () => {
   const [visitorTypes, setVisitorTypes] = useState([]);
   const [selectedLanguage, setSelectedLanguage] = useState('');
   const [selectedVisitorType, setSelectedVisitorType] = useState('');
+  const [selectedVisitorTypes, setSelectedVisitorTypes] = useState([]);
 
   // Translation modal state
   const [translationModalOpen, setTranslationModalOpen] = useState(false);
@@ -237,15 +239,31 @@ const AdminRoomDetails = () => {
         return;
     }
 
-    // Add language and visitor type to form data
+    // Add language to form data
     if (selectedLanguage) {
       formData.append('id_languages', selectedLanguage);
     }
-    if (selectedVisitorType) {
-      formData.append('id_visitor_type', selectedVisitorType);
+
+    // First visitor type (or null if none selected)
+    const firstVisitorType = selectedVisitorTypes.length > 0 ? selectedVisitorTypes[0] : null;
+    if (firstVisitorType) {
+      formData.append('id_visitor_type', firstVisitorType);
     }
 
-    const insertPromise = api.insertInfoPopUp(formData);
+    const insertPromise = api.insertInfoPopUp(formData).then(async (result) => {
+      // For each additional visitor type, add a translation row with the same content
+      if (selectedVisitorTypes.length > 1 && result && result.id_info_popup) {
+        const title = formData.get('title');
+        const text = formData.get('text');
+        const additionalTypes = selectedVisitorTypes.slice(1);
+        await Promise.all(
+          additionalTypes.map((vtId) =>
+            api.addInfospotTranslation(result.id_info_popup, title, text, parseInt(selectedLanguage), parseInt(vtId))
+          )
+        );
+      }
+      return result;
+    });
 
     const updatedInfoPopupsPromise = insertPromise.then(async () => {
       await getInfoPopup(selectedPictureId);
@@ -302,6 +320,7 @@ const AdminRoomDetails = () => {
       setSelectedLanguage(languages[0].id_language);
     }
     setSelectedVisitorType('');
+    setSelectedVisitorTypes([]);
 
     if (pictures.length > 0) {
       const firstPicture = pictures[0];
@@ -336,6 +355,7 @@ const AdminRoomDetails = () => {
     setPosX('');
     setPosY('');
     setPosZ('');
+    setSelectedVisitorTypes([]);
   }
 
   const handleModalLink = () => {
@@ -1076,18 +1096,27 @@ const AdminRoomDetails = () => {
                     </div>
                     <div className="flex-1">
                       <label className="text-junia-purple font-bold text-sm mb-1 block">{t('visitorTypeLabel')} :</label>
-                      <select
-                        value={selectedVisitorType}
-                        onChange={(e) => setSelectedVisitorType(e.target.value)}
-                        className="w-full p-2 rounded orange-border"
-                      >
-                        <option value="">{t('allVisitors')}</option>
-                        {visitorTypes.map((vt) => (
-                          <option key={vt.id_visitor_type} value={vt.id_visitor_type}>
-                            {vt.name_visitor_type}
-                          </option>
-                        ))}
-                      </select>
+                      {editInfospotMod ? (
+                        <select
+                          value={selectedVisitorType}
+                          onChange={(e) => setSelectedVisitorType(e.target.value)}
+                          className="w-full p-2 rounded orange-border"
+                        >
+                          <option value="">{t('allVisitors')}</option>
+                          {visitorTypes.map((vt) => (
+                            <option key={vt.id_visitor_type} value={vt.id_visitor_type}>
+                              {vt.name_visitor_type}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <VisitorTypeMultiSelect
+                          visitorTypes={visitorTypes}
+                          selected={selectedVisitorTypes}
+                          onChange={setSelectedVisitorTypes}
+                          allVisitorsLabel={t('allVisitors')}
+                        />
+                      )}
                     </div>
                   </div>
                 </div>

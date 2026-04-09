@@ -57,7 +57,8 @@ const getLinks = async (id_pictures) => {
 
 const insertInfoPopUp = async (formData) => {
   try {
-      await axios.post('/api/insertInfoPopUp', formData);
+      const response = await axios.post('/api/insertInfoPopUp', formData);
+      return response.data;
   } catch (error) {
       console.error('Error inserting info popup:', error);
   }
