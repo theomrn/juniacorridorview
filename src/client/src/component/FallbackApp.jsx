@@ -1,6 +1,7 @@
 import React from 'react';
 
 const FallbackApp = () => {
+  let randomApiPath = '../../public/img/api/' || '/img/api/';
   const randomApi = Math.floor(Math.random() * 8) + 1;
   return (
     <>
@@ -32,7 +33,7 @@ const FallbackApp = () => {
           maxWidth: '500px',
         }}>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <img src={`../../public/img/api/api${randomApi}.webp`} alt="Error" style={{ width: '170px', height: '270px', marginBottom: '20px' }} />
+            <img src={`${randomApiPath}${randomApi}.webp`} alt="Error" style={{ width: '170px', height: '270px', marginBottom: '20px' }} />
           </div>
           <p style={{ color: '#555', marginBottom: '16px' }}>
             Impossible de se connecter au serveur. Certaines fonctionnalités peuvent ne pas être disponibles.
