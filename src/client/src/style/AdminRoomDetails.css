@@ -18,6 +18,11 @@
     width: 15vw;
 
 }
+
+.one-info-spot img,
+.one-link-container img {
+    border-radius: 5px;
+}
 .research-input-IS {
     border-width: 2px;
     border-color: #f06b42;
@@ -29,47 +34,73 @@
     width: 15vw;
 }
 
-  .image-panorama-container{  
+.image-list {
+    justify-content: flex-start !important;
+}
+
+  .image-panorama-container{
     border-width: 2px;
     border-color: #3c2c53;
+    aspect-ratio: 16 / 9;
+    height: auto;
 }
 
 .all-IS-button{
     font-size: var(--text-xl); /* 1.25rem (20px) */ 
     line-height: var(--text-xl--line-height); /* calc(1.75 / 1.25) */
 }
-/* Conteneur parent pour l'affichage côte à côte */
+/* Conteneur parent vertical */
 .content-container {
     display: flex;
+    flex-direction: column;
     width: 100%;
-    gap: 1.5rem;
+    gap: 2rem;
     margin-top: 1rem;
 }
 
-/* Styles pour la section des infospots (contient la recherche et la grille) */
+/* Section des liens - pleine largeur, alignée à gauche */
+.links-section {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* Cards liens en ligne horizontale */
+.links-cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    width: 100%;
+    justify-content: flex-start;
+}
+
+/* Section des infospots - pleine largeur, alignée à gauche */
 .infospots-section {
     display: flex;
     flex-direction: column;
-    width: 66%; /* 2/3 de la largeur */
+    width: 100%;
 }
 
-/* Styles pour la grille d'infospots */
-.all-infospots-container {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 colonnes */
-    gap: 1rem; /* Espacement entre les éléments de la grille */
-    width: 100%; /* Prend toute la largeur disponible */
+/* Cards infospots en ligne horizontale */
+.infospots-cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: flex-start;
 }
 
 .one-info-spot {
-    /* Styles pour chaque infospot dans la grille */
     display: flex;
-    flex-direction: column; /* Empile les éléments verticalement */
+    flex-direction: column;
     border-radius: 2vh;
     padding: 1rem;
     background-color: white;
     transition: transform 0.2s, box-shadow 0.2s;
-    break-inside: avoid; /* Empêche qu'un élément soit coupé entre deux colonnes */
+    min-width: 260px;
+    max-width: 340px;
+    flex: 1 1 260px;
 }
 
 .one-info-spot:hover {
@@ -77,24 +108,18 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Styles pour la liste des liens */
-
-
-/* Adaptation pour les écrans plus petits - changer le seuil de 1024px à 800px */
-@media (max-width: 800px) {
-    .content-container {
+@media (max-width: 640px) {
+    .links-cards-container,
+    .infospots-cards-container {
         flex-direction: column;
     }
-    
-    .infospots-section,
-    .content-container > div:nth-child(2) {
-        width: 100% !important;
-    }
-}
 
-@media (max-width: 640px) {
-    .all-infospots-container {
-        grid-template-columns: 1fr; /* 1 colonne sur petits écrans */
+    .one-info-spot,
+    .one-link-container {
+        min-width: unset;
+        max-width: unset;
+        flex: unset;
+        width: 100%;
     }
 }
 
@@ -106,12 +131,30 @@
 
 .one-link-container{
     border-radius: 1vh;
-    
+    min-width: 260px;
+    max-width: 340px;
+    flex: 1 1 260px;
 }
 
 .one-link-container:hover {
     transform: translateY(-3px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.infospot-actions-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 0.5rem;
+}
+
+.infospot-action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    font-size: 1rem;
 }
 
 
@@ -369,6 +412,26 @@ input[type="file"]::file-selector-button {
   padding: 0.5rem 0.75rem;
 }
 
+/* Zone de recherche - liens et infospots identiques, éléments en ligne centrés */
+.links-research-zone,
+.info-spot-research-zone {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.links-research-zone > div,
+.info-spot-research-zone > div {
+  width: auto !important;
+  max-width: none !important;
+  flex-shrink: 0;
+}
+
 /* Boutons d'en-tête (Nouvelle infobulle, Nouveau lien) */
 .info-spot-research-zone .button-type,
 .links-research-zone .button-type {
@@ -410,26 +473,12 @@ input[type="file"]::file-selector-button {
   }
 }
 
-/* Adaptation responsive pour les infobulles et liens */
 @media (max-width: 1075px) {
-  .infospots-section {
-    width: 50% !important; /* Passe de 66% à 50% */
-  }
-  
-  .content-container > div:nth-child(2) {
-    width: 50% !important; /* Passe de 33% à 50% */
-  }
-  
-  /* Ajustement des inputs de recherche pour s'adapter à la nouvelle largeur */
-  .research-input-IS {
-    width: 100%;
-  }
-  
+  .research-input-IS,
   .research-input-L {
     width: 100%;
   }
-  
-  /* Ajuster les boutons de filtre pour qu'ils tiennent mieux dans l'espace */
+
   .all-IS-button {
     font-size: clamp(0.8rem, 1.5vw, 1rem);
     white-space: nowrap;

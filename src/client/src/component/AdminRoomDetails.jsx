@@ -7,7 +7,6 @@ import Panorama360 from './Panorama360';
 import { Buffer } from 'buffer';
 import { toast } from "sonner";
 import Loader from "./Loader";
-import Masonry from 'react-masonry-css';
 import '../style/AdminRoomDetails.css';
 import {FaArrowLeft, FaPen, FaTrash, FaPlusCircle, FaLanguage, FaGlobe} from "react-icons/fa";
 import {ImLocation2} from "react-icons/im";
@@ -594,12 +593,6 @@ const AdminRoomDetails = () => {
     }
   };
 
-  const breakpointColumnsObj = {
-    default: 2,
-    1075: 1,  // Passe à une seule colonne pour les écrans <= 1075px
-    700: 1,
-  };
-
   // Open translation modal for an existing InfoPopup
   const handleOpenTranslationModal = async (infoPopup) => {
     setInfospotForTranslation(infoPopup);
@@ -797,48 +790,82 @@ const AdminRoomDetails = () => {
 
       </div>
 
-      {/* Nouveau conteneur flex pour affichage côte à côte */}
       <div className="content-container">
-        {/* Section des infospots (2/3 de la largeur) */}
-        <div className="infospots-section" style={{width: '66%'}}>
-          {/* Zone de recherche d'infospots en haut des 2/3 gauche */}
+        {/* Section des liens - ligne horizontale de cards */}
+        <div className="links-section">
+          <div className="links-research-zone w-full mb-4">
+            <div className="flex flex-wrap gap-4 items-center w-full mb-2">
+              <div className="text-white text-4xl bg-junia-purple px-4 py-1 font-title font-bold rounded-full">{t('links')}</div>
+              <div className="button-type font-bold font-title text-xl px-4 py-2">
+                <button onClick={handleModalLink} className="flex items-center gap-2"><FaPlusCircle /> {t('newLink')}</button>
+              </div>
+              <input
+                type="text"
+                placeholder={t('searchByDestinationId')}
+                value={searchLinkTerm}
+                onChange={(e) => setSearchLinkTerm(e.target.value)}
+                className="p-2 bg-white research-input-L research-input-orange-text rounded-full"/>
+              <button
+                onClick={() => setShowAllLinks(!showAllLinks)}
+                className="button-type all-IS-button font-title font-bold px-4 py-2">
+                {showAllLinks ? t('allLinks') : t('currentImageLinks')}
+              </button>
+            </div>
+          </div>
+
+          <div className="links-cards-container">
+            {displayedLinks.map((link) => (
+              <div key={link.id_links} className="one-link-container flex flex-col justify-between items-center bg-white p-2">
+                <div className="flex justify-around w-full">
+                  <div className="flex">
+                    <div className="font-bold font-title text-2xl text-junia-purple">ID : </div>
+                    <div className="font-bold font-title text-2xl text-junia-orange pl-2"> {link.id_links}</div>
+                  </div>
+                  <div className="flex">
+                    <div className="font-title text-2xl text-junia-purple">{t('destinationId')} : </div>
+                    <div className="font-title text-2xl text-junia-orange pl-2">{link.id_pictures_destination}</div>
+                  </div>
+                </div>
+                <div className="flex-1 flex justify-center p-2">
+                  <img src={pictures.find(pic => pic.id_pictures === link.id_pictures_destination)?.imageUrl} alt={`Destination ${link.id_pictures_destination}`} className="max-w-[180px] max-h-[180px]" />
+                </div>
+                <div className="flex w-full justify-between px-2">
+                  <button onClick={(event) => handleEditLink(event, link)} className="button-type p-2 font-title font-bold flex items-center gap-2"><FaPen /> {t('modify')}</button>
+                  <button onClick={(event) => handleDeleteLink(event, link.id_links)} className="button-type2 p-2 font-title font-bold flex items-center gap-2"><FaTrash /> {t('delete')}</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Section des infospots - ligne horizontale de cards */}
+        <div className="infospots-section">
           <div className="info-spot-research-zone w-full mb-4">
             <div className="flex gap-4 items-center w-full mb-4">
               <div className="text-white text-4xl bg-junia-purple px-4 py-1 font-title font-bold rounded-full">{t('infospots')}</div>
               <div className="button-type font-bold font-title text-xl px-4 py-2">
                 <button onClick={handleModalInfopopup} className="flex items-center gap-2"><FaPlusCircle /> {t('newInfospot')}</button>
               </div>
-              
             </div>
-            <div className="flex gap-4 justify-between items-center mb-3 w-full">
-              <div className="flex gap-4">
-                  <input
-                    type="text"
-                    placeholder={t('searchByTitle')}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full p-2 bg-white research-input-IS research-input-orange-text rounded-full" />
-                
-                  <button 
-                    onClick={() => setShowAllInfospots(!showAllInfospots)} 
-                    className="button-type all-IS-button font-title font-bold px-4 py-2 ">
-                    {showAllInfospots ? t('allInfospots') : t('currentImageInfospots')}
-                  </button>
-              </div>
-
-              
+            <div className="flex gap-4 items-center mb-3 w-full">
+              <input
+                type="text"
+                placeholder={t('searchByTitle')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full p-2 bg-white research-input-IS research-input-orange-text rounded-full" />
+              <button
+                onClick={() => setShowAllInfospots(!showAllInfospots)}
+                className="button-type all-IS-button font-title font-bold px-4 py-2">
+                {showAllInfospots ? t('allInfospots') : t('currentImageInfospots')}
+              </button>
             </div>
           </div>
 
-          {/* Grille d'infospots sous la zone de recherche */}
-          <Masonry
-            breakpointCols={breakpointColumnsObj}
-            className="my-masonry-grid"
-            columnClassName="my-masonry-grid_column"
-          >
+          <div className="infospots-cards-container">
             {groupedDisplayedInfoPopups.map((popup) => (
               <div key={popup.id_info_popup} className="one-info-spot flex flex-col gap-2">
-                <div className="font-bold font-title text-2xl"> 
+                <div className="font-bold font-title text-2xl">
                   <span className="text-junia-purple"> {t('title')} : </span>
                   <span className="text-junia-orange">{popup.title}</span>
                 </div>
@@ -848,7 +875,7 @@ const AdminRoomDetails = () => {
                   <span className="text-junia-purple"> {t('panoramaId')} : </span>
                   <span className="text-junia-orange">{popup.id_pictures}</span>
                 </div>
-                <div className="flex justify-center ">
+                <div className="flex justify-center">
                   {popup.image_path && (
                     <div className="max-h-30">
                       <img src={`/${popup.image_path}`} alt={`Aperçu de ${popup.title}`}/>
@@ -860,83 +887,29 @@ const AdminRoomDetails = () => {
                   <button onClick={(event) => handleDeleteInfoPopup(event, popup.id_info_popup)} className="button-type2 p-2 font-title font-bold flex items-center gap-2"><FaTrash /> {t('delete')}</button>
                 </div>
               </div> */}
-               <div className="flex w-full gap-2 flex-wrap">
+                <div className="infospot-actions-row">
                   <button
                     onClick={() => handleOpenTranslationModal(popup)}
-                    className="button-type p-2 font-title font-bold flex items-center gap-2 flex-1"
+                    className="button-type infospot-action-btn"
                   >
-                    <FaLanguage /> Traductions
+                    <FaLanguage />
                   </button>
                   <button
                     onClick={(event) => handleEditInfoPopup(event, {...popup, ...popup.translations[0]})}
-                    className="button-type p-2 font-title font-bold flex items-center gap-2"
+                    className="button-type infospot-action-btn"
                   >
                     <FaPen />
                   </button>
                   <button
                     onClick={(event) => handleDeleteInfoPopup(event, popup.id_info_popup)}
-                    className="button-type2 p-2 font-title font-bold flex items-center gap-2"
+                    className="button-type2 infospot-action-btn"
                   >
                     <FaTrash />
                   </button>
                 </div>
               </div>
             ))}
-          </Masonry>
-        </div>
-
-        {/* Section des liens (1/3 de la largeur) */}
-        <div className=" flex flex-col gap-2 w-1/3">
-          <div className="links-research-zone w-full mb-4">
-            <div className="flex gap-4 items-center w-full mb-4">
-              <div className="text-white text-4xl bg-junia-purple px-4 py-1 font-title font-bold rounded-full">{t('links')}</div>
-              <div className="button-type font-bold font-title text-xl px-4 py-2">
-                <button onClick={handleModalLink} className="flex items-center gap-2"><FaPlusCircle /> {t('newLink')}</button>
-              </div>
-            </div>
-
-            <div className="flex gap-4 items-center mb-2 w-full ">
-              <div className="flex gap-4">
-                <input
-                  type="text"
-                  placeholder={t('searchByDestinationId')}
-                  value={searchLinkTerm}
-                  onChange={(e) => setSearchLinkTerm(e.target.value)}
-                  className="w-full p-2 bg-white research-input-L research-input-orange-text rounded-full"/>
-                
-                <button 
-                  onClick={() => setShowAllLinks(!showAllLinks)}
-                  className="button-type all-IS-button font-title font-bold px-4 py-2">
-                  {showAllLinks ? t('allLinks') : t('currentImageLinks')}
-                </button>
-              </div>
-
-              
-            </div>
           </div>
-
-          {displayedLinks.map((link) => (
-            <div key={link.id_links} className="one-link-container flex flex-col justify-between items-center bg-white p-2 mb-2.5">
-              
-              <div className="flex justify-around w-full">
-                <div className="flex">
-                  <div className="font-bold font-title text-2xl text-junia-purple">ID : </div>
-                  <div className="font-bold font-title text-2xl text-junia-orange pl-2"> {link.id_links}</div>
-                </div>
-                <div className="flex">
-                  <div className="font-title text-2xl text-junia-purple">{t('destinationId')} : </div>
-                  <div className="font-title text-2xl text-junia-orange pl-2">{link.id_pictures_destination}</div>
-                </div>
-              </div>
-              <div className="flex-1 flex justify-center p-2">
-                <img src={pictures.find(pic => pic.id_pictures === link.id_pictures_destination)?.imageUrl} alt={`Destination ${link.id_pictures_destination}`} className="max-w-[100px] max-h-[100px]" />
-              </div>
-              <div className="flex w-full justify-between px-2">
-                <button onClick={(event) => handleEditLink(event, link)} className="button-type p-2 font-title font-bold flex items-center gap-2"><FaPen /> {t('modify')}</button>
-                <button onClick={(event) => handleDeleteLink(event, link.id_links)} className="button-type2 p-2 font-title font-bold flex items-center gap-2"><FaTrash /> {t('delete')}</button>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
       </div>
