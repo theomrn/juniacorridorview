@@ -18,7 +18,7 @@ src/DataBaseApi/DataBaseApi/wwwroot/previews/*
 /src/DataBaseApi/appsettings.json
 /src/DataBaseApi/DataBaseApi/appsettings.json
 .vs/*
-
+/seed/*
 # Claude Code
 .claude/
 CLAUDE.md
