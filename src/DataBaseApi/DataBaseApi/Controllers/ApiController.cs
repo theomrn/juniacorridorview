@@ -573,22 +573,6 @@ public class ApiController : ControllerBase
     public IActionResult Ping() => Ok("pong");
 
 
-    [HttpPost("file-converter")]
-    [Consumes("multipart/form-data")]
-    public async Task<IActionResult> ConvertFile([FromForm] FileDto fileRequest)
-    {
-        if (fileRequest.file == null || fileRequest.file.Length == 0)
-            return BadRequest("No file uploaded");
-
-        var result = await FileOptimiserService.ConvertFileToAvifAsync(fileRequest.file);
-
-        return File(
-            result,
-            "image/avif",
-            Path.ChangeExtension(fileRequest.file.FileName, ".avif")
-        );
-    }
-
     #endregion
 
     #region Languages

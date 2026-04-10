@@ -14,7 +14,6 @@ import AdminTranslation from './component/AdminTranslation';
 import Login from './component/Login';
 import AdminBuilding from "./component/AdminBuilding";
 import AdminUser from './component/AdminUser';
-import ConvertFile from './component/ConvertFile';
 import AdminLanguage from './component/AdminLanguage';
 import AdminVisitor from './component/AdminVisitor';
 import AdminTranslationDashboard from './component/AdminTranslationDashboard';
@@ -91,7 +90,6 @@ const App = () => {
         <PrivateRoute exact path="/admin/room/:id" component={AdminRoomDetails} />
         <PrivateRoute exact path="/admin/building" component={AdminBuilding} />
         <PrivateRoute exact path="/admin/user" component={AdminUser} />
-        <PrivateRoute exact path="/admin/convert" component={ConvertFile} />
         <PrivateRoute exact path="/admin/translation" component={AdminTranslation} />
         <PrivateRoute exact path="/admin/language" component={AdminLanguage} />
         <PrivateRoute exact path="/admin/visitor" component={AdminVisitor} />
