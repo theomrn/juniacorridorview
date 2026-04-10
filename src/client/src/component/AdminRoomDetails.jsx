@@ -7,17 +7,17 @@ import Panorama360 from './Panorama360';
 import { Buffer } from 'buffer';
 import { toast } from "sonner";
 import Loader from "./Loader";
-import Masonry from 'react-masonry-css';
 import '../style/AdminRoomDetails.css';
 import {FaArrowLeft, FaPen, FaTrash, FaPlusCircle, FaLanguage, FaGlobe} from "react-icons/fa";
 import {ImLocation2} from "react-icons/im";
 import {MdOutlineFileUpload} from "react-icons/md";
 import ModalAddEditImage from "./room_details/ModalAddEditImage";
+import VisitorTypeMultiSelect from "./room_details/VisitorTypeMultiSelect";
 import ConfirmDialog from "./dialogs/ConfirmDialog";
 import { useTranslation } from 'react-i18next';
 
 const AdminRoomDetails = () => {
-  const { t } = useTranslation('adminRoomDetails');
+  const { t, i18n } = useTranslation('adminRoomDetails');
   const { id } = useParams();
   const [pictures, setPictures] = useState([]);
   const [selectedPicture, setSelectedPicture] = useState('');
@@ -69,6 +69,7 @@ const AdminRoomDetails = () => {
   const [visitorTypes, setVisitorTypes] = useState([]);
   const [selectedLanguage, setSelectedLanguage] = useState('');
   const [selectedVisitorType, setSelectedVisitorType] = useState('');
+  const [selectedVisitorTypes, setSelectedVisitorTypes] = useState([]);
 
   // Translation modal state
   const [translationModalOpen, setTranslationModalOpen] = useState(false);
@@ -237,15 +238,31 @@ const AdminRoomDetails = () => {
         return;
     }
 
-    // Add language and visitor type to form data
+    // Add language to form data
     if (selectedLanguage) {
       formData.append('id_languages', selectedLanguage);
     }
-    if (selectedVisitorType) {
-      formData.append('id_visitor_type', selectedVisitorType);
+
+    // First visitor type (or null if none selected)
+    const firstVisitorType = selectedVisitorTypes.length > 0 ? selectedVisitorTypes[0] : null;
+    if (firstVisitorType) {
+      formData.append('id_visitor_type', firstVisitorType);
     }
 
-    const insertPromise = api.insertInfoPopUp(formData);
+    const insertPromise = api.insertInfoPopUp(formData).then(async (result) => {
+      // For each additional visitor type, add a translation row with the same content
+      if (selectedVisitorTypes.length > 1 && result && result.id_info_popup) {
+        const title = formData.get('title');
+        const text = formData.get('text');
+        const additionalTypes = selectedVisitorTypes.slice(1);
+        await Promise.all(
+          additionalTypes.map((vtId) =>
+            api.addInfospotTranslation(result.id_info_popup, title, text, parseInt(selectedLanguage), parseInt(vtId))
+          )
+        );
+      }
+      return result;
+    });
 
     const updatedInfoPopupsPromise = insertPromise.then(async () => {
       await getInfoPopup(selectedPictureId);
@@ -302,6 +319,7 @@ const AdminRoomDetails = () => {
       setSelectedLanguage(languages[0].id_language);
     }
     setSelectedVisitorType('');
+    setSelectedVisitorTypes([]);
 
     if (pictures.length > 0) {
       const firstPicture = pictures[0];
@@ -336,6 +354,7 @@ const AdminRoomDetails = () => {
     setPosX('');
     setPosY('');
     setPosZ('');
+    setSelectedVisitorTypes([]);
   }
 
   const handleModalLink = () => {
@@ -442,7 +461,7 @@ const AdminRoomDetails = () => {
     setPosZ(popup.position_z);
     // Pre-fill language and visitor type from popup data
     setSelectedLanguage(popup.id_languages || (languages.length > 0 ? languages[0].id_language : ''));
-    setSelectedVisitorType(popup.id_visitor_type || '');
+    setSelectedVisitorTypes(popup.id_visitor_type ? [popup.id_visitor_type] : []);
     const image = pictures.find(pic => pic.id_pictures === popup.id_pictures);
     handleModalPictureClick(image, popup.id_pictures);
     setNewInfospotModalOpen(true);
@@ -456,15 +475,27 @@ const AdminRoomDetails = () => {
     }
     formData.append('id_info_popup', infospotToEdit.id_info_popup);
 
-    // Add language and visitor type to form data
+    // Add language and visitor types to form data
     if (selectedLanguage) {
       formData.append('id_languages', selectedLanguage);
     }
-    if (selectedVisitorType) {
-      formData.append('id_visitor_type', selectedVisitorType);
+    const firstVisitorType = selectedVisitorTypes.length > 0 ? selectedVisitorTypes[0] : null;
+    if (firstVisitorType) {
+      formData.append('id_visitor_type', firstVisitorType);
     }
 
-    const updatePromise = api.updateInfospot(formData);
+    const updatePromise = api.updateInfospot(formData).then(async () => {
+      if (selectedVisitorTypes.length > 1) {
+        const title = formData.get('title');
+        const text = infospotToEdit.text;
+        const additionalTypes = selectedVisitorTypes.slice(1);
+        await Promise.all(
+          additionalTypes.map((vtId) =>
+            api.addInfospotTranslation(infospotToEdit.id_info_popup, title, text, parseInt(selectedLanguage), parseInt(vtId))
+          )
+        );
+      }
+    });
 
     const updatedInfoPopupsPromise = updatePromise.then(async () => {
       await getInfoPopup(selectedPictureId);
@@ -574,12 +605,6 @@ const AdminRoomDetails = () => {
     }
   };
 
-  const breakpointColumnsObj = {
-    default: 2,
-    1075: 1,  // Passe à une seule colonne pour les écrans <= 1075px
-    700: 1,
-  };
-
   // Open translation modal for an existing InfoPopup
   const handleOpenTranslationModal = async (infoPopup) => {
     setInfospotForTranslation(infoPopup);
@@ -631,7 +656,7 @@ const AdminRoomDetails = () => {
         newTranslationTitle,
         newTranslationText,
         parseInt(selectedLanguage),
-        selectedVisitorType ? parseInt(selectedVisitorType) : null
+        null
       );
       toast.success(t('translationAddedSuccess'));
 
@@ -692,6 +717,15 @@ const AdminRoomDetails = () => {
     if (!id_visitor_type) return t('allVisitorsShort');
     const vt = visitorTypes.find(v => v.id_visitor_type === id_visitor_type);
     return vt ? vt.name_visitor_type : `${t('typeFallback')} ${id_visitor_type}`;
+  };
+
+  const getTitleForCurrentLang = (popup) => {
+    console.log(languages);
+    console.log(i18n.language);
+    const currentLang = languages.find(l => parseInt(l.id_language) === parseInt(i18n.language));
+    console.log("current lang",currentLang);
+    const match = currentLang && popup.translations?.find(tr => tr.id_languages === currentLang.id_language);
+    return (match || popup.translations?.[0])?.title || '';
   };
 
   // Group displayed infopopups
@@ -777,58 +811,90 @@ const AdminRoomDetails = () => {
 
       </div>
 
-      {/* Nouveau conteneur flex pour affichage côte à côte */}
       <div className="content-container">
-        {/* Section des infospots (2/3 de la largeur) */}
-        <div className="infospots-section" style={{width: '66%'}}>
-          {/* Zone de recherche d'infospots en haut des 2/3 gauche */}
+        {/* Section des liens - ligne horizontale de cards */}
+        <div className="links-section">
+          <div className="links-research-zone w-full mb-4">
+            <div className="flex flex-wrap gap-4 items-center w-full mb-2">
+              <div className="text-white text-4xl bg-junia-purple px-4 py-1 font-title font-bold rounded-full">{t('links')}</div>
+              <div className="button-type font-bold font-title text-xl px-4 py-2">
+                <button onClick={handleModalLink} className="flex items-center gap-2"><FaPlusCircle /> {t('newLink')}</button>
+              </div>
+              <input
+                type="text"
+                placeholder={t('searchByDestinationId')}
+                value={searchLinkTerm}
+                onChange={(e) => setSearchLinkTerm(e.target.value)}
+                className="p-2 bg-white research-input-L research-input-orange-text rounded-full"/>
+              <button
+                onClick={() => setShowAllLinks(!showAllLinks)}
+                className="button-type all-IS-button font-title font-bold px-4 py-2">
+                {showAllLinks ? t('allLinks') : t('currentImageLinks')}
+              </button>
+            </div>
+          </div>
+
+          <div className="links-cards-container">
+            {displayedLinks.map((link) => (
+              <div key={link.id_links} className="one-link-container flex flex-col justify-between items-center bg-white p-2">
+                <div className="flex justify-around w-full">
+                  <div className="flex">
+                    <div className="font-bold font-title text-2xl text-junia-purple">ID : </div>
+                    <div className="font-bold font-title text-2xl text-junia-orange pl-2"> {link.id_links}</div>
+                  </div>
+                  <div className="flex">
+                    <div className="font-title text-2xl text-junia-purple">{t('destinationId')} : </div>
+                    <div className="font-title text-2xl text-junia-orange pl-2">{link.id_pictures_destination}</div>
+                  </div>
+                </div>
+                <div className="flex-1 flex justify-center p-2">
+                  <img src={pictures.find(pic => pic.id_pictures === link.id_pictures_destination)?.imageUrl} alt={`Destination ${link.id_pictures_destination}`} className="max-w-[180px] max-h-[180px]" />
+                </div>
+                <div className="flex w-full justify-between px-2">
+                  <button onClick={(event) => handleEditLink(event, link)} className="button-type p-2 font-title font-bold flex items-center gap-2"><FaPen /> {t('modify')}</button>
+                  <button onClick={(event) => handleDeleteLink(event, link.id_links)} className="button-type2 p-2 font-title font-bold flex items-center gap-2"><FaTrash /> {t('delete')}</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Section des infospots - ligne horizontale de cards */}
+        <div className="infospots-section">
           <div className="info-spot-research-zone w-full mb-4">
             <div className="flex gap-4 items-center w-full mb-4">
               <div className="text-white text-4xl bg-junia-purple px-4 py-1 font-title font-bold rounded-full">{t('infospots')}</div>
               <div className="button-type font-bold font-title text-xl px-4 py-2">
                 <button onClick={handleModalInfopopup} className="flex items-center gap-2"><FaPlusCircle /> {t('newInfospot')}</button>
               </div>
-              
             </div>
-            <div className="flex gap-4 justify-between items-center mb-3 w-full">
-              <div className="flex gap-4">
-                  <input
-                    type="text"
-                    placeholder={t('searchByTitle')}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full p-2 bg-white research-input-IS research-input-orange-text rounded-full" />
-                
-                  <button 
-                    onClick={() => setShowAllInfospots(!showAllInfospots)} 
-                    className="button-type all-IS-button font-title font-bold px-4 py-2 ">
-                    {showAllInfospots ? t('allInfospots') : t('currentImageInfospots')}
-                  </button>
-              </div>
-
-              
+            <div className="flex gap-4 items-center mb-3 w-full">
+              <input
+                type="text"
+                placeholder={t('searchByTitle')}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full p-2 bg-white research-input-IS research-input-orange-text rounded-full" />
+              <button
+                onClick={() => setShowAllInfospots(!showAllInfospots)}
+                className="button-type all-IS-button font-title font-bold px-4 py-2">
+                {showAllInfospots ? t('allInfospots') : t('currentImageInfospots')}
+              </button>
             </div>
           </div>
 
-          {/* Grille d'infospots sous la zone de recherche */}
-          <Masonry
-            breakpointCols={breakpointColumnsObj}
-            className="my-masonry-grid"
-            columnClassName="my-masonry-grid_column"
-          >
+          <div className="infospots-cards-container">
             {groupedDisplayedInfoPopups.map((popup) => (
               <div key={popup.id_info_popup} className="one-info-spot flex flex-col gap-2">
-                <div className="font-bold font-title text-2xl"> 
+                <div className="font-bold font-title text-2xl">
                   <span className="text-junia-purple"> {t('title')} : </span>
-                  <span className="text-junia-orange">{popup.title}</span>
+                  <span className="text-junia-orange">{getTitleForCurrentLang(popup)}</span>
                 </div>
-                <div className="font-bold font-title text-2xl text-junia-purple">{t('description')} :</div>
-                <div className="font-texts text-md text-junia-orange text-justify">{popup.text}</div>
                 <div className="font-bold font-title text-2xl text-junia-purple">
                   <span className="text-junia-purple"> {t('panoramaId')} : </span>
                   <span className="text-junia-orange">{popup.id_pictures}</span>
                 </div>
-                <div className="flex justify-center ">
+                <div className="flex justify-center">
                   {popup.image_path && (
                     <div className="max-h-30">
                       <img src={`/${popup.image_path}`} alt={`Aperçu de ${popup.title}`}/>
@@ -840,83 +906,29 @@ const AdminRoomDetails = () => {
                   <button onClick={(event) => handleDeleteInfoPopup(event, popup.id_info_popup)} className="button-type2 p-2 font-title font-bold flex items-center gap-2"><FaTrash /> {t('delete')}</button>
                 </div>
               </div> */}
-               <div className="flex w-full gap-2 flex-wrap">
+                <div className="infospot-actions-row">
                   <button
                     onClick={() => handleOpenTranslationModal(popup)}
-                    className="button-type p-2 font-title font-bold flex items-center gap-2 flex-1"
+                    className="button-type infospot-action-btn"
                   >
-                    <FaLanguage /> Traductions
+                    <FaLanguage />
                   </button>
                   <button
                     onClick={(event) => handleEditInfoPopup(event, {...popup, ...popup.translations[0]})}
-                    className="button-type p-2 font-title font-bold flex items-center gap-2"
+                    className="button-type infospot-action-btn"
                   >
                     <FaPen />
                   </button>
                   <button
                     onClick={(event) => handleDeleteInfoPopup(event, popup.id_info_popup)}
-                    className="button-type2 p-2 font-title font-bold flex items-center gap-2"
+                    className="button-type2 infospot-action-btn"
                   >
                     <FaTrash />
                   </button>
                 </div>
               </div>
             ))}
-          </Masonry>
-        </div>
-
-        {/* Section des liens (1/3 de la largeur) */}
-        <div className=" flex flex-col gap-2 w-1/3">
-          <div className="links-research-zone w-full mb-4">
-            <div className="flex gap-4 items-center w-full mb-4">
-              <div className="text-white text-4xl bg-junia-purple px-4 py-1 font-title font-bold rounded-full">{t('links')}</div>
-              <div className="button-type font-bold font-title text-xl px-4 py-2">
-                <button onClick={handleModalLink} className="flex items-center gap-2"><FaPlusCircle /> {t('newLink')}</button>
-              </div>
-            </div>
-
-            <div className="flex gap-4 items-center mb-2 w-full ">
-              <div className="flex gap-4">
-                <input
-                  type="text"
-                  placeholder={t('searchByDestinationId')}
-                  value={searchLinkTerm}
-                  onChange={(e) => setSearchLinkTerm(e.target.value)}
-                  className="w-full p-2 bg-white research-input-L research-input-orange-text rounded-full"/>
-                
-                <button 
-                  onClick={() => setShowAllLinks(!showAllLinks)}
-                  className="button-type all-IS-button font-title font-bold px-4 py-2">
-                  {showAllLinks ? t('allLinks') : t('currentImageLinks')}
-                </button>
-              </div>
-
-              
-            </div>
           </div>
-
-          {displayedLinks.map((link) => (
-            <div key={link.id_links} className="one-link-container flex flex-col justify-between items-center bg-white p-2 mb-2.5">
-              
-              <div className="flex justify-around w-full">
-                <div className="flex">
-                  <div className="font-bold font-title text-2xl text-junia-purple">ID : </div>
-                  <div className="font-bold font-title text-2xl text-junia-orange pl-2"> {link.id_links}</div>
-                </div>
-                <div className="flex">
-                  <div className="font-title text-2xl text-junia-purple">{t('destinationId')} : </div>
-                  <div className="font-title text-2xl text-junia-orange pl-2">{link.id_pictures_destination}</div>
-                </div>
-              </div>
-              <div className="flex-1 flex justify-center p-2">
-                <img src={pictures.find(pic => pic.id_pictures === link.id_pictures_destination)?.imageUrl} alt={`Destination ${link.id_pictures_destination}`} className="max-w-[100px] max-h-[100px]" />
-              </div>
-              <div className="flex w-full justify-between px-2">
-                <button onClick={(event) => handleEditLink(event, link)} className="button-type p-2 font-title font-bold flex items-center gap-2"><FaPen /> {t('modify')}</button>
-                <button onClick={(event) => handleDeleteLink(event, link.id_links)} className="button-type2 p-2 font-title font-bold flex items-center gap-2"><FaTrash /> {t('delete')}</button>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
       </div>
@@ -1022,15 +1034,15 @@ const AdminRoomDetails = () => {
                     </div>
                   </div>
                   
-                  <div className="flex gap-4 justify-center">
-                    <button 
-                      type="button" 
-                      onClick={(event) => handleSelectPositionClick(event)} 
+                  <div className="flex gap-4 justify-center mt-auto">
+                    <button
+                      type="button"
+                      onClick={(event) => handleSelectPositionClick(event)}
                       className="button-type font-bold font-title text-xl px-4 py-2 flex items-center gap-2">
                       <ImLocation2 /> {t('position')}
                     </button>
-                    <button 
-                      type="submit" 
+                    <button
+                      type="submit"
                       className="button-type font-bold font-title text-xl px-4 py-2 flex items-center gap-2">
                       {editInfospotMod ? <><FaPen /> {t('modify')}</> : t('add')}
                     </button>
@@ -1039,55 +1051,55 @@ const AdminRoomDetails = () => {
 
                 {/* Right column - pas de justify-between ici */}
                 <div className="flex flex-col h-full">
-                  <input 
-                    type="text" 
-                    name="title" 
-                    placeholder={t('titlePlaceholder')} 
-                    required 
-                    defaultValue={editInfospotMod ? infospotToEdit.title : ''} 
-                    maxLength="45" 
-                    className="p-2 rounded orange-border mb-2" 
-                  />
-                  <textarea 
-                    name="text" 
-                    placeholder={t('textPlaceholder')} 
-                    required 
-                    defaultValue={editInfospotMod ? infospotToEdit.text : ''} 
-                    maxLength="300" 
-                    className="p-2 rounded resize-none orange-border flex-grow" 
-                  />
+                  {editInfospotMod ? (
+                    <input type="hidden" name="title" value={infospotToEdit.title} readOnly />
+                  ) : (
+                    <input
+                      type="text"
+                      name="title"
+                      placeholder={t('titlePlaceholder')}
+                      required
+                      maxLength="45"
+                      className="p-2 rounded orange-border mb-2"
+                    />
+                  )}
+                  {!editInfospotMod && (
+                    <textarea
+                      name="text"
+                      placeholder={t('textPlaceholder')}
+                      required
+                      maxLength="300"
+                      className="p-2 rounded resize-none orange-border flex-grow"
+                    />
+                  )}
 
                   {/* Language and Visitor Type selectors */}
                   <div className="flex gap-2 mt-2">
-                    <div className="flex-1">
-                      <label className="text-junia-purple font-bold text-sm mb-1 block">{t('languageLabel')} :</label>
-                      <select
-                        value={selectedLanguage}
-                        onChange={(e) => setSelectedLanguage(e.target.value)}
-                        className="w-full p-2 rounded orange-border"
-                        required
-                      >
-                        {languages.map((lang) => (
-                          <option key={lang.id_language} value={lang.id_language}>
-                            {lang.name_language}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    {!editInfospotMod && (
+                      <div className="flex-1">
+                        <label className="text-junia-purple font-bold text-sm mb-1 block">{t('languageLabel')} :</label>
+                        <select
+                          value={selectedLanguage}
+                          onChange={(e) => setSelectedLanguage(e.target.value)}
+                          className="w-full p-2 rounded orange-border"
+                          required
+                        >
+                          {languages.map((lang) => (
+                            <option key={lang.id_language} value={lang.id_language}>
+                              {lang.name_language}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
                     <div className="flex-1">
                       <label className="text-junia-purple font-bold text-sm mb-1 block">{t('visitorTypeLabel')} :</label>
-                      <select
-                        value={selectedVisitorType}
-                        onChange={(e) => setSelectedVisitorType(e.target.value)}
-                        className="w-full p-2 rounded orange-border"
-                      >
-                        <option value="">{t('allVisitors')}</option>
-                        {visitorTypes.map((vt) => (
-                          <option key={vt.id_visitor_type} value={vt.id_visitor_type}>
-                            {vt.name_visitor_type}
-                          </option>
-                        ))}
-                      </select>
+                      <VisitorTypeMultiSelect
+                        visitorTypes={visitorTypes}
+                        selected={selectedVisitorTypes}
+                        onChange={setSelectedVisitorTypes}
+                        allVisitorsLabel={t('allVisitors')}
+                      />
                     </div>
                   </div>
                 </div>
@@ -1234,7 +1246,7 @@ const AdminRoomDetails = () => {
       {/* Translation Modal */}
       {translationModalOpen && infospotForTranslation && (
         <div className="fixed inset-0 flex justify-center items-center modal-background z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full translation-modal">
             {/* Header */}
             <div className="modal-header flex justify-between items-center p-4 border-b">
               <div className="text-2xl font-bold text-junia-purple font-title">
@@ -1248,94 +1260,72 @@ const AdminRoomDetails = () => {
               </button>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4">
-              {/* Existing translations */}
-              <div className="mb-6">
-                <h3 className="font-bold font-title text-junia-purple mb-3 flex items-center gap-2">
-                  <FaGlobe /> {t('existingTranslations')} ({infospotTranslations.length})
-                </h3>
+            {/* Existing translations — scrollable section */}
+              <h3 className="font-bold font-title text-junia-purple mb-3 flex items-center justify-center gap-2">
+                <FaGlobe /> {t('existingTranslations')} ({infospotTranslations.length})
+              </h3>
 
-                {infospotTranslations.length === 0 ? (
-                  <div className="text-gray-500 italic p-4 bg-gray-50 rounded">
-                    {t('noTranslationFound')}
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {infospotTranslations.map((trans) => (
-                      <div key={trans.id_languages} className="bg-gray-50 p-3 rounded-lg border-l-4 border-junia-orange">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="bg-junia-purple text-white text-xs px-2 py-1 rounded">
-                                {trans.name_language || getLanguageName(trans.id_languages)}
-                              </span>
-                              {trans.id_visitor_type && (
-                                <span className="bg-junia-orange text-white text-xs px-2 py-1 rounded">
-                                  {trans.name_visitor_type || getVisitorTypeName(trans.id_visitor_type)}
-                                </span>
-                              )}
-                            </div>
-                            <div className="font-bold text-junia-orange text-lg">{trans.title}</div>
-                            <div className="text-gray-700 text-sm mt-1">{trans.text}</div>
+            <div className="translation-list-scroll">
+              {infospotTranslations.length === 0 ? (
+                <div className="text-gray-500 italic p-4 bg-gray-50 rounded">
+                  {t('noTranslationFound')}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {infospotTranslations.filter((trans, idx, arr) =>
+                    arr.findIndex(t => t.id_languages === trans.id_languages) === idx
+                  ).map((trans) => (
+                    <div key={trans.id_languages} className="bg-gray-50 p-3 rounded-lg border-l-4 border-junia-orange">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="bg-junia-purple text-white text-xs px-2 py-1 rounded">
+                              {trans.name_language || getLanguageName(trans.id_languages)}
+                            </span>
                           </div>
-                          <button
-                            onClick={() => handleDeleteTranslation(trans.id_languages)}
-                            className="ml-2 p-2 text-red-500 hover:bg-red-100 rounded"
-                            title={t('deleteTranslationTooltip')}
-                          >
-                            <FaTrash />
-                          </button>
+                          <div className="font-bold text-junia-orange text-lg">{trans.title}</div>
+                          <div className="text-gray-700 text-sm mt-1">{trans.text}</div>
                         </div>
+                        <button
+                          onClick={() => handleDeleteTranslation(trans.id_languages)}
+                          className="ml-2 p-2 text-red-500 hover:bg-red-100 rounded"
+                          title={t('deleteTranslationTooltip')}
+                        >
+                          <FaTrash />
+                        </button>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-              {/* Add new translation form */}
-              <div className="border-t pt-4">
+            {/* Add new translation form — fixed, never scrolls */}
+            <div className="translation-form-fixed">
                 <h3 className="font-bold font-title text-junia-purple mb-3 flex items-center gap-2">
                   <FaPlusCircle /> {t('addTranslationSection')}
                 </h3>
 
                 <form onSubmit={handleAddTranslation} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-junia-purple font-bold text-sm mb-1 block">{t('languageLabel')} :</label>
-                      <select
-                        value={selectedLanguage}
-                        onChange={(e) => setSelectedLanguage(e.target.value)}
-                        className="w-full p-2 rounded orange-border"
-                        required
-                      >
-                        {languages.map((lang) => (
-                          <option
-                            key={lang.id_language}
-                            value={lang.id_language}
-                            disabled={infospotTranslations.some(tr => tr.id_languages === lang.id_language)}
-                          >
-                            {lang.name_language}
-                            {infospotTranslations.some(tr => tr.id_languages === lang.id_language) && ` (${t('alreadyTranslated')})`}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-junia-purple font-bold text-sm mb-1 block">{t('visitorTypeLabel')} :</label>
-                      <select
-                        value={selectedVisitorType}
-                        onChange={(e) => setSelectedVisitorType(e.target.value)}
-                        className="w-full p-2 rounded orange-border"
-                      >
-                        <option value="">{t('allVisitors')}</option>
-                        {visitorTypes.map((vt) => (
-                          <option key={vt.id_visitor_type} value={vt.id_visitor_type}>
-                            {vt.name_visitor_type}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                  <div>
+                    <label className="text-junia-purple font-bold text-sm mb-1 block">{t('languageLabel')} :</label>
+                    <select
+                      value={selectedLanguage}
+                      onChange={(e) => setSelectedLanguage(e.target.value)}
+                      className="w-full p-2 rounded orange-border"
+                      required
+                    >
+                      {languages.map((lang) => (
+                        <option
+                          key={lang.id_language}
+                          value={lang.id_language}
+                          disabled={infospotTranslations.some(tr => tr.id_languages === lang.id_language)}
+                        >
+                          {lang.name_language}
+                          {infospotTranslations.some(tr => tr.id_languages === lang.id_language) && ` (${t('alreadyTranslated')})`}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <div>
@@ -1380,7 +1370,6 @@ const AdminRoomDetails = () => {
                     </button>
                   </div>
                 </form>
-              </div>
             </div>
           </div>
         </div>

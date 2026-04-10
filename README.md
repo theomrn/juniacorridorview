@@ -15,9 +15,10 @@ Application web de visite virtuelle des couloirs et salles de Junia. Elle permet
 
 ## Lancement
 
-### Production — Docker complet
+### Production — Docker complet (livrable client)
 
 Tout tourne dans des conteneurs (MySQL, LibreTranslate, API .NET, client React via nginx).
+Les données et images sont pré-chargées automatiquement au premier démarrage.
 
 **Prérequis :** Docker Desktop installé et démarré.
 
@@ -26,15 +27,22 @@ Tout tourne dans des conteneurs (MySQL, LibreTranslate, API .NET, client React v
 cp src/client/src/firebaseConfig.js.example src/client/src/firebaseConfig.js
 # → remplir les credentials Firebase dans le fichier
 
-# Lancer la stack
-docker compose up --build
+# Lancer la stack complète avec données pré-chargées
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build
 ```
 
 Accès :
 - Application → http://localhost:80
 - API .NET → http://localhost:5078
 
-> La base de données est initialisée automatiquement au premier démarrage via `db_script_empty.sql` et `translations_script.sql`.
+> La base de données est initialisée automatiquement au premier démarrage via les scripts SQL montés dans `docker-entrypoint-initdb.d` :
+> - `db_script_empty.sql` — schéma
+> - `translations_script.sql` — traductions
+> - `inserts_buildings.sql` — données (bâtiments, salles, images, tours) — via `docker-compose.prod.yml`
+>
+> Les images sont servies directement depuis `seed/images/` et `seed/previews/` via bind mounts.
+>
+> **Important :** si le volume `db_data` existe déjà (relance), les scripts d'init ne s'exécutent pas à nouveau. Pour repartir de zéro : `docker compose down -v` avant le démarrage.
 
 ---
 
@@ -90,10 +98,15 @@ Accès :
 │       ├── Services/        # DatabaseService, FileOptimiserService
 │       └── Models/          # DTOs
 ├── docker/                  # Dockerfiles et config nginx/MySQL
-├── docker-compose.yml       # Stack complète
+├── docker-compose.yml           # Stack de base (schéma vide)
+├── docker-compose.prod.yml      # Surcharge prod : monte inserts_buildings.sql
 ├── docker-compose.override.yml  # Surcharge dev (ports exposés)
-├── db_script_empty.sql      # Schéma initial de la base
-└── translations_script.sql  # Données de traduction initiales
+├── db_script_empty.sql          # Schéma initial de la base
+├── translations_script.sql      # Données de traduction initiales
+├── inserts_buildings.sql        # Données migrées (généré par ImportToNewApp)
+└── seed/
+    ├── images/                  # Images panoramiques (bind mount → wwwroot/images)
+    └── previews/                # Plans d'étages + previews salles (bind mount → wwwroot/previews)
 ```
 
 ## Fonctionnalités
@@ -110,6 +123,52 @@ Accès :
 - **Traductions** : gestion multilingue des contenus (stockées en base, pas dans des fichiers locaux)
 - **Langues** : ajout de nouvelles langues avec traduction automatique via LibreTranslate
 - **Utilisateurs** : gestion des comptes administrateurs
+
+## Génération du livrable (migration depuis l'ancienne base)
+
+Les outils de migration sont dans `../DB/` (hors du repo juniacorridorview).
+
+### Prérequis
+
+- Ancienne base MySQL Aiven accessible
+- Docker Desktop démarré
+- .NET SDK installé
+
+### Étapes
+
+```bash
+# 1. Extraire les images de l'ancienne base
+cd ../DB/ExtractDataBasePicture
+dotnet run
+# → génère DB/Pictures/{Pictures, Plans, RoomPreview, InfoPopup}/
+
+# 2. Démarrer une DB vide + l'API (sans données)
+cd ../juniacorridorview
+docker compose down -v
+docker compose up db api -d
+
+# 3. Migrer via l'API
+cd ../DB/ImportToNewApp
+dotnet run
+# → peuple la DB via l'API
+# → génère juniacorridorview/seed/images/
+# → génère juniacorridorview/seed/previews/
+# → génère juniacorridorview/inserts_buildings.sql
+
+# 4. Stopper (le livrable est prêt)
+cd ../juniacorridorview
+docker compose down -v
+```
+
+### Livrer au client
+
+Le dossier `juniacorridorview/` est le livrable. Le client fait :
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build
+```
+
+---
 
 ## Traduction automatique
 

@@ -141,14 +141,16 @@ CREATE TABLE `Languages` (
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `Info_popup_translation` (
+  `id_translation` int NOT NULL AUTO_INCREMENT,
   `id_info_popup` int NOT NULL,
   `id_languages` int NOT NULL,
   `title` varchar(50) DEFAULT NULL,
   `text` longtext,
   `id_visitor_type` int DEFAULT NULL,
-  PRIMARY KEY (`id_info_popup`,`id_languages`),
+  PRIMARY KEY (`id_translation`),
   KEY `Info_popup_translation_Languages_FK` (`id_languages`),
   KEY `Info_popup_translation_Visitor_type_FK` (`id_visitor_type`),
+  KEY `Info_popup_translation_InfoPopup_FK` (`id_info_popup`),
   CONSTRAINT `Info_popup_translation_Info_Popup_FK` FOREIGN KEY (`id_info_popup`) REFERENCES `Info_Popup` (`id_info_popup`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `Info_popup_translation_Languages_FK` FOREIGN KEY (`id_languages`) REFERENCES `Languages` (`id_language`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `Info_popup_translation_Visitor_type_FK` FOREIGN KEY (`id_visitor_type`) REFERENCES `Visitor_type` (`id_visitor_type`) ON DELETE CASCADE

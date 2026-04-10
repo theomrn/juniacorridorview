@@ -567,7 +567,7 @@ public class DatabaseService
     public async Task<IEnumerable<dynamic>> GetPicturesByRoomIdAsync(int id_rooms)
     {
         using var conn = CreateConnection();
-        return await conn.QueryAsync("SELECT id_pictures FROM Pictures WHERE id_rooms = @Id", new { Id = id_rooms });
+        return await conn.QueryAsync("SELECT id_pictures, picture_path FROM Pictures WHERE id_rooms = @Id", new { Id = id_rooms });
     }
 
     public async Task<dynamic?> GetFirstPictureByRoomIdAsync(int id_rooms)
