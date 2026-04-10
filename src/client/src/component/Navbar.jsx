@@ -57,9 +57,6 @@ const Navbar = ({ isAuthenticated, selectedImageName, currentRoomNumber }) => {
       case '/admin/user':
         setRouteName(t('adminUser'));
         break;
-      case '/admin/convert':
-        setRouteName(t('adminConvert'));
-        break;
       case '/admin/translation':
         setRouteName(t('adminTranslation'));
         break;

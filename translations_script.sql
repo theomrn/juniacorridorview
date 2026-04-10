@@ -29,7 +29,6 @@ VALUES
 (@id_language,'navbar','adminRoom','Gestion des Salles'),
 (@id_language,'navbar','adminBuilding','Gestion des Bâtiments'),
 (@id_language,'navbar','adminUser','Gestion des Administrateurs'),
-(@id_language,'navbar','adminConvert','Conversion AVIF'),
 (@id_language,'navbar','adminTranslation','Gestion des Traductions'),
 (@id_language,'navbar','adminLanguage','Gestion des Langues'),
 (@id_language,'navbar','mainMenu','Menu Principal'),
@@ -52,7 +51,6 @@ VALUES
 
 (@id_language,'adminRoom','languages','Langages'),
 (@id_language,'adminRoom','addroom','Ajouter une salle'),
-(@id_language,'adminRoom','fileconversion','Convertion fichier'),
 (@id_language,'adminRoom','translation','Traduction'),
 (@id_language,'adminRoom','translationManagement','Gestion & traductions'),
 (@id_language,'adminRoom','course','Parcours'),
@@ -432,7 +430,6 @@ VALUES
 (@id_language,'navbar','adminRoom','Room Management'),
 (@id_language,'navbar','adminBuilding','Building Management'),
 (@id_language,'navbar','adminUser','Admin Management'),
-(@id_language,'navbar','adminConvert','AVIF Conversion'),
 (@id_language,'navbar','adminTranslation','Translation Management'),
 (@id_language,'navbar','adminLanguage','Language Management'),
 (@id_language,'navbar','mainMenu','Main Menu'),
@@ -455,7 +452,6 @@ VALUES
 
 (@id_language,'adminRoom','languages','Languages'),
 (@id_language,'adminRoom','addroom','Add room'),
-(@id_language,'adminRoom','fileconversion','File conversion'),
 (@id_language,'adminRoom','translation','Translation'),
 (@id_language,'adminRoom','translationManagement','Translation Management'),
 (@id_language,'adminRoom','course','Tour'),
