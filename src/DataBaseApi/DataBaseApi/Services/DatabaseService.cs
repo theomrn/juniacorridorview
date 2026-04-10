@@ -25,11 +25,12 @@ public class DatabaseService
 
     private async Task<string> SaveFileAsync(IFormFile file, string folder)
     {
-        var fileName = $"{Path.GetFileNameWithoutExtension(file.FileName)}_{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-        var relPath = Path.Combine(folder == "images" ? "images" : "previews", fileName).Replace("\\", "/");
-        var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", folder == "images" ? "images" : "previews", fileName);
-        await using var stream = File.Create(fullPath);
-        await file.CopyToAsync(stream);
+        var avifBytes = await FileOptimiserService.ConvertFileToAvifAsync(file);
+        var fileName = $"{Path.GetFileNameWithoutExtension(file.FileName)}_{Guid.NewGuid()}.avif";
+        var subFolder = folder == "images" ? "images" : "previews";
+        var relPath = Path.Combine(subFolder, fileName).Replace("\\", "/");
+        var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", subFolder, fileName);
+        await File.WriteAllBytesAsync(fullPath, avifBytes);
         return relPath; // path relative to wwwroot
     }
 
