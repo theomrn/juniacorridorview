@@ -403,7 +403,13 @@ VALUES
 (@id_language,'adminRoomDetails','addNewImage360','Ajouter une nouvelle image 360°'),
 (@id_language,'adminRoomDetails','editImageBtn','Modifier l''image'),
 (@id_language,'adminRoomDetails','addImageBtn','Ajouter l''image'),
-(@id_language,'adminRoomDetails','imageLabel','Image');
+(@id_language,'adminRoomDetails','imageLabel','Image'),
+
+-- login
+(@id_language,'login','title','Connexion Administrateur'),
+(@id_language,'login','email','Adresse e-mail'),
+(@id_language,'login','password','Mot de passe'),
+(@id_language,'login','login','Se connecter');
 
 -- =========================
 -- ENGLISH
@@ -804,6 +810,12 @@ VALUES
 (@id_language,'adminRoomDetails','addNewImage360','Add a new 360° image'),
 (@id_language,'adminRoomDetails','editImageBtn','Edit image'),
 (@id_language,'adminRoomDetails','addImageBtn','Add image'),
-(@id_language,'adminRoomDetails','imageLabel','Image');
+(@id_language,'adminRoomDetails','imageLabel','Image'),
+
+-- login
+(@id_language,'login','title','Administrator Login'),
+(@id_language,'login','email','Email address'),
+(@id_language,'login','password','Password'),
+(@id_language,'login','login','Sign in');
 
 COMMIT;
