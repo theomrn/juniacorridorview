@@ -46,12 +46,14 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__DefaultConnection: "Server=db;Port=3306;Database=corridorview_simple;User Id=root;Password=root;SslMode=none;AllowPublicKeyRetrieval=True;CharSet=utf8mb4;"
       Firebase__ProjectId: "yp-2425-10"
+      Firebase__ServiceAccountPath: "/app/firebase-service-account.json"
       LibreTranslate__Url: "http://libretranslate:5000/translate"
       LibreTranslate__ApiKey: ""
       ASPNETCORE_URLS: "http://+:5078"
     volumes:
       - ./seed/previews:/app/wwwroot/previews
       - ./seed/images:/app/wwwroot/images
+      - ./src/DataBaseApi/DataBaseApi/firebase-service-account.json:/app/firebase-service-account.json:ro
     ports:
       - "5078:5078"
 

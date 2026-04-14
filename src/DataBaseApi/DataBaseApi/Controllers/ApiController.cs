@@ -7,7 +7,7 @@ namespace DataBaseApi.Controllers;
 
 [ApiController]
 [Route("api")]
-// [Authorize]
+[Authorize]
 public class ApiController : ControllerBase
 {
     private readonly DatabaseService _db;

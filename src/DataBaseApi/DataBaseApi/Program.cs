@@ -1,5 +1,8 @@
 ﻿using DataBaseApi.Services;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -16,6 +19,28 @@ var builder = WebApplication.CreateBuilder(args);
 var firebaseProjectId = builder.Configuration["Firebase:ProjectId"]
     ?? throw new InvalidOperationException("Firebase:ProjectId is missing from appsettings.json");
 
+// Firebase Admin SDK
+var serviceAccountPath = builder.Configuration["Firebase:ServiceAccountPath"] ?? "firebase-service-account.json";
+if (File.Exists(serviceAccountPath))
+{
+    // Lire manuellement pour normaliser les fins de ligne (CRLF → LF)
+    // qui peuvent corrompre la clé privée RSA au parsing
+    var jsonContent = File.ReadAllText(serviceAccountPath)
+        .Replace("\r\n", "\n")
+        .Replace("\r", "\n");
+
+    FirebaseApp.Create(new AppOptions
+    {
+        Credential = GoogleCredential.FromJson(jsonContent)
+    });
+}
+else
+{
+    throw new FileNotFoundException(
+        $"Firebase service account file not found: {serviceAccountPath}. " +
+        "Placer firebase-service-account.json dans le répertoire de l'API.");
+}
+
 // // Limite upload (panoramas + preview peuvent être volumineux)
 // builder.WebHost.ConfigureKestrel(options =>
 // {
@@ -30,6 +55,17 @@ var firebaseProjectId = builder.Configuration["Firebase:ProjectId"]
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Politique "AdminOnly" : vérifie le custom claim Firebase admin=true
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireAssertion(ctx =>
+        {
+            var claim = ctx.User.FindFirst("admin");
+            return claim != null && (claim.Value == "true" || claim.Value == "True");
+        }));
+});
 
 // Firebase JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
