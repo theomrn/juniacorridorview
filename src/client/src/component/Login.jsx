@@ -48,9 +48,9 @@ const Login = () => {
   return (
     <div className="login-container bg-junia-lavender flex justify-center items-center h-screen">
       <div className="login-box bg-white px-12 py-12 rounded-lg shadow-lg w-full max-w-lg">
-        <h1 className="text-junia-purple font-title text-2xl mb-6 text-center">
+        <h2 className="text-junia-purple font-title text-2xl mb-6 text-center">
           {t('title')}
-        </h1>
+        </h2>
         {error && (
           <p className="text-red-500 text-center mb-4">{error}</p>
         )}
