@@ -38,3 +38,9 @@ public record InfospotCoverageDto(int Id, string RoomName, string RoomNumber, in
 public record TranslationDashboardDto(List<DashboardLanguageDto> Languages, List<DashboardVisitorTypeDto> VisitorTypes, List<I18nMissingDto> I18nMissing, List<InfospotCoverageDto> Infospots);
 
 public record AutoTranslateDto(int SourceLangId, int TargetLangId, List<string> Texts);
+
+// User management
+public record CreateUserRequestDto(string Email, string Password);
+public record ResetPasswordRequestDto(string Email);
+public record DeleteUserRequestDto(string Uid);
+public record SetAdminClaimRequestDto(string Uid);
