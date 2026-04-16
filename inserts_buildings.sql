@@ -18,13 +18,13 @@ INSERT INTO `Buildings` VALUES
 -- 2. FLOORS
 --
 INSERT INTO `Floors` VALUES
-(33, 'previews/1_0_7973c7ed-807a-432c-b224-72b975c329f5.png', 11, 'H0'),
-(34, 'previews/2_1_2c3d0b77-7235-4cdd-9938-fc38fbd92bb1.png', 11, 'H1'),
-(35, 'previews/3_2_0e83055a-532a-4880-bc1f-cf182cd0bc82.png', 11, 'H2'),
-(36, 'previews/4_3_412e748a-e5c8-41b1-86cd-bc8298683950.png', 11, 'H3'),
-(37, 'previews/5_4_ecbb0a42-85b9-42aa-a382-42bcb543625e.png', 11, 'H4'),
-(38, 'previews/6_5_f2ad017b-9e7f-4873-a89a-a4d47f769d0f.png', 11, 'H5'),
-(39, 'previews/7_6_800a59ff-7e64-45dc-8f80-496c3fbc883e.png', 11, 'S1')
+(33, 'previews/1_0_7973c7ed-807a-432c-b224-72b975c329f5.avif', 11, 'H0'),
+(34, 'previews/2_1_2c3d0b77-7235-4cdd-9938-fc38fbd92bb1.avif', 11, 'H1'),
+(35, 'previews/3_2_0e83055a-532a-4880-bc1f-cf182cd0bc82.avif', 11, 'H2'),
+(36, 'previews/4_3_412e748a-e5c8-41b1-86cd-bc8298683950.avif', 11, 'H3'),
+(37, 'previews/5_4_ecbb0a42-85b9-42aa-a382-42bcb543625e.avif', 11, 'H4'),
+(38, 'previews/6_5_f2ad017b-9e7f-4873-a89a-a4d47f769d0f.avif', 11, 'H5'),
+(39, 'previews/7_6_800a59ff-7e64-45dc-8f80-496c3fbc883e.avif', 11, 'S1')
 ;
 
 --
@@ -54,59 +54,59 @@ INSERT INTO `Rooms` VALUES
 -- 3b. ROOM_PREVIEWS
 --
 INSERT INTO `Room_Previews` (`id_room_previews`, `id_rooms`, `preview_path`) VALUES
-(61, 85, 'previews/1_23_64e99999-5fcf-4624-85a2-e6b1647d9034.png'),
-(62, 86, 'previews/2_3_6da40f2f-f0e2-4a9e-83f7-0e20b088afa7.png'),
-(63, 87, 'previews/3_4_49cff866-3925-4b22-87cb-2dd752746dea.png'),
-(64, 88, 'previews/4_5_f54f671a-2ff8-4504-bbc6-8dc92e980477.png'),
-(65, 89, 'previews/5_2_e571c443-fe0d-4e1c-a89d-fa87d8f34f64.png'),
-(66, 90, 'previews/6_6_74641111-d1a6-4982-bf92-4da9fc667173.png'),
-(67, 91, 'previews/7_7_d6ffe2e5-10a0-4220-b1b5-2ea44431a4f0.png'),
-(68, 92, 'previews/8_26_8a689e81-ae3c-4578-a3eb-d65d0e19a743.png'),
-(69, 94, 'previews/10_25_2d796cb1-308b-4a73-9b49-1f6870ecf401.png'),
-(70, 95, 'previews/11_24_49d46b55-3e37-4706-a26b-5ad5ca30a185.png'),
-(71, 96, 'previews/12_8_ec4cb72f-4415-4aea-bf38-3ad1d06636ba.png'),
-(72, 97, 'previews/13_22_427f1525-d3d5-4ab9-abea-0d72c759d8e0.png'),
-(73, 98, 'previews/14_27_d0acf61c-401e-4660-929c-6bb787853e34.png'),
-(74, 99, 'previews/15_9_134a3c80-a30c-4519-b87a-8e338ae0e332.png'),
-(75, 100, 'previews/16_10_fc3e5dbe-0aff-42e5-9046-4236fe62392b.png'),
-(76, 101, 'previews/48_20_e5711afb-38f8-4f13-a486-bd6b5707ba25.png')
+(61, 85, 'previews/1_23_64e99999-5fcf-4624-85a2-e6b1647d9034.avif'),
+(62, 86, 'previews/2_3_6da40f2f-f0e2-4a9e-83f7-0e20b088afa7.avif'),
+(63, 87, 'previews/3_4_49cff866-3925-4b22-87cb-2dd752746dea.avif'),
+(64, 88, 'previews/4_5_f54f671a-2ff8-4504-bbc6-8dc92e980477.avif'),
+(65, 89, 'previews/5_2_e571c443-fe0d-4e1c-a89d-fa87d8f34f64.avif'),
+(66, 90, 'previews/6_6_74641111-d1a6-4982-bf92-4da9fc667173.avif'),
+(67, 91, 'previews/7_7_d6ffe2e5-10a0-4220-b1b5-2ea44431a4f0.avif'),
+(68, 92, 'previews/8_26_8a689e81-ae3c-4578-a3eb-d65d0e19a743.avif'),
+(69, 94, 'previews/10_25_2d796cb1-308b-4a73-9b49-1f6870ecf401.avif'),
+(70, 95, 'previews/11_24_49d46b55-3e37-4706-a26b-5ad5ca30a185.avif'),
+(71, 96, 'previews/12_8_ec4cb72f-4415-4aea-bf38-3ad1d06636ba.avif'),
+(72, 97, 'previews/13_22_427f1525-d3d5-4ab9-abea-0d72c759d8e0.avif'),
+(73, 98, 'previews/14_27_d0acf61c-401e-4660-929c-6bb787853e34.avif'),
+(74, 99, 'previews/15_9_134a3c80-a30c-4519-b87a-8e338ae0e332.avif'),
+(75, 100, 'previews/16_10_fc3e5dbe-0aff-42e5-9046-4236fe62392b.avif'),
+(76, 101, 'previews/48_20_e5711afb-38f8-4f13-a486-bd6b5707ba25.avif')
 ;
 
 --
 -- 4. PICTURES
 --
 INSERT INTO `Pictures` VALUES
-(117, 85, 'images/1_1_d2b0bb92-2cbb-46cf-98f9-f8028b478c80.png'),
-(118, 85, 'images/1_2_141f9f8b-b91e-4708-a495-ae29c5a1d5d0.png'),
-(119, 85, 'images/1_3_e5953927-2920-4d97-89d1-c307934f51e8.png'),
-(120, 85, 'images/1_4_4b8f7e86-b7ae-46ab-99d3-aa0742bdc462.png'),
-(121, 86, 'images/2_5_a7f072e3-877d-4830-87b1-2f422097cc9f.png'),
-(122, 87, 'images/3_6_2b241923-6b6f-4e15-b6e9-6acab3099347.png'),
-(123, 87, 'images/3_7_e7dc9bf6-6b8d-4a02-9167-d2971109d4de.png'),
-(124, 88, 'images/4_8_2044d668-9b41-442e-b128-fe29ae33cdad.png'),
-(125, 88, 'images/4_9_3aa44ce8-2806-4acb-9f28-f264f8e6da78.png'),
-(126, 89, 'images/5_10_0247365a-e2d7-499c-af31-acf9fffc5d79.png'),
-(127, 89, 'images/5_11_90636c54-3c50-4717-a2d9-f5e1a8e301ff.png'),
-(128, 90, 'images/6_12_0cd3aa33-3f17-4e32-afad-f0f4f77f03e2.png'),
-(129, 90, 'images/6_13_b2555afd-ca81-434b-ad3d-b0aa66b80c0a.png'),
-(130, 91, 'images/7_14_c526cca8-22b6-456a-82ee-c0ae0773363b.png'),
-(131, 91, 'images/7_15_45314fa0-d7a5-4fac-8bb1-573e54fa8341.png'),
-(132, 91, 'images/7_16_1d073e4e-3295-4ab1-b68e-3e32f81dde81.png'),
-(133, 91, 'images/7_17_94296902-abf1-47e5-97a5-5cffe5357261.png'),
-(134, 92, 'images/8_18_68cf2786-3137-4589-81ea-6d7db04c72fb.png'),
-(135, 93, 'images/9_19_3df8694e-f75c-4893-b1a4-a9b73aa1c5fd.png'),
-(136, 94, 'images/10_20_49acd6f1-0449-4fc9-ae41-56c4b05987ea.png'),
-(137, 95, 'images/11_21_23f24c5b-6547-46e0-ac1f-137cde34ad5e.png'),
-(138, 96, 'images/12_22_6a9d32e2-46de-481a-8478-392aab51981f.png'),
-(139, 96, 'images/12_23_845f5942-feb5-4a55-8d15-ee392b5f0a88.png'),
-(140, 96, 'images/12_24_2c08a95e-62a9-45af-91ea-dc974a7e2712.png'),
-(141, 97, 'images/13_25_0187e4e1-60ce-49bd-8d28-b23d5fb4de8f.png'),
-(142, 98, 'images/14_26_76f42a04-0a38-4a65-8eb2-11327614e5d7.png'),
-(143, 98, 'images/14_27_17a07714-1851-4182-90b5-29186a09c712.png'),
-(144, 99, 'images/15_40_fe259afd-f9fb-41ae-92f3-4c63abfc6053.png'),
-(145, 99, 'images/15_41_4a0130fd-b887-4a62-a639-c554173f704e.png'),
-(146, 100, 'images/16_39_67cb77fe-05f1-45ff-9bfc-f9a70f1e0663.png'),
-(147, 101, 'images/48_52_e64b5f30-b6ed-406d-b1a5-e294035c817d.png')
+(117, 85, 'images/1_1_d2b0bb92-2cbb-46cf-98f9-f8028b478c80.avif'),
+(118, 85, 'images/1_2_141f9f8b-b91e-4708-a495-ae29c5a1d5d0.avif'),
+(119, 85, 'images/1_3_e5953927-2920-4d97-89d1-c307934f51e8.avif'),
+(120, 85, 'images/1_4_4b8f7e86-b7ae-46ab-99d3-aa0742bdc462.avif'),
+(121, 86, 'images/2_5_a7f072e3-877d-4830-87b1-2f422097cc9f.avif'),
+(122, 87, 'images/3_6_2b241923-6b6f-4e15-b6e9-6acab3099347.avif'),
+(123, 87, 'images/3_7_e7dc9bf6-6b8d-4a02-9167-d2971109d4de.avif'),
+(124, 88, 'images/4_8_2044d668-9b41-442e-b128-fe29ae33cdad.avif'),
+(125, 88, 'images/4_9_3aa44ce8-2806-4acb-9f28-f264f8e6da78.avif'),
+(126, 89, 'images/5_10_0247365a-e2d7-499c-af31-acf9fffc5d79.avif'),
+(127, 89, 'images/5_11_90636c54-3c50-4717-a2d9-f5e1a8e301ff.avif'),
+(128, 90, 'images/6_12_0cd3aa33-3f17-4e32-afad-f0f4f77f03e2.avif'),
+(129, 90, 'images/6_13_b2555afd-ca81-434b-ad3d-b0aa66b80c0a.avif'),
+(130, 91, 'images/7_14_c526cca8-22b6-456a-82ee-c0ae0773363b.avif'),
+(131, 91, 'images/7_15_45314fa0-d7a5-4fac-8bb1-573e54fa8341.avif'),
+(132, 91, 'images/7_16_1d073e4e-3295-4ab1-b68e-3e32f81dde81.avif'),
+(133, 91, 'images/7_17_94296902-abf1-47e5-97a5-5cffe5357261.avif'),
+(134, 92, 'images/8_18_68cf2786-3137-4589-81ea-6d7db04c72fb.avif'),
+(135, 93, 'images/9_19_3df8694e-f75c-4893-b1a4-a9b73aa1c5fd.avif'),
+(136, 94, 'images/10_20_49acd6f1-0449-4fc9-ae41-56c4b05987ea.avif'),
+(137, 95, 'images/11_21_23f24c5b-6547-46e0-ac1f-137cde34ad5e.avif'),
+(138, 96, 'images/12_22_6a9d32e2-46de-481a-8478-392aab51981f.avif'),
+(139, 96, 'images/12_23_845f5942-feb5-4a55-8d15-ee392b5f0a88.avif'),
+(140, 96, 'images/12_24_2c08a95e-62a9-45af-91ea-dc974a7e2712.avif'),
+(141, 97, 'images/13_25_0187e4e1-60ce-49bd-8d28-b23d5fb4de8f.avif'),
+(142, 98, 'images/14_26_76f42a04-0a38-4a65-8eb2-11327614e5d7.avif'),
+(143, 98, 'images/14_27_17a07714-1851-4182-90b5-29186a09c712.avif'),
+(144, 99, 'images/15_40_fe259afd-f9fb-41ae-92f3-4c63abfc6053.avif'),
+(145, 99, 'images/15_41_4a0130fd-b887-4a62-a639-c554173f704e.avif'),
+(146, 100, 'images/16_39_67cb77fe-05f1-45ff-9bfc-f9a70f1e0663.avif'),
+(147, 101, 'images/48_52_e64b5f30-b6ed-406d-b1a5-e294035c817d.avif')
 ;
 
 --

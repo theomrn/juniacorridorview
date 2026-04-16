@@ -1,0 +1,9 @@
+node_modules
+seed
+*.sql
+tools
+.git
+*.md
+src/client/dist
+src/DataBaseApi/DataBaseApi/bin
+src/DataBaseApi/DataBaseApi/obj

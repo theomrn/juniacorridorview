@@ -5,3 +5,9 @@ services:
   libretranslate:
     ports:
       - "1234:5000"
+  api:
+    ports:
+      - "5078:5078"
+    volumes:
+      - ./seed/previews:/app/wwwroot/previews
+      - ./seed/images:/app/wwwroot/images
