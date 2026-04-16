@@ -25,7 +25,7 @@ services:
 
   # ── API traduction (LibreTranslate) ───────────────────────────────────────
   libretranslate:
-    image: libretranslate/libretranslate:latest
+    image: libretranslate/libretranslate:v1.6.1
     restart: unless-stopped
     environment:
       LT_LOAD_ONLY: "fr,en,es"   # ajuster selon les langues utilisées
@@ -51,11 +51,7 @@ services:
       LibreTranslate__ApiKey: ""
       ASPNETCORE_URLS: "http://+:5078"
     volumes:
-      - ./seed/previews:/app/wwwroot/previews
-      - ./seed/images:/app/wwwroot/images
       - ./src/DataBaseApi/DataBaseApi/firebase-service-account.json:/app/firebase-service-account.json:ro
-    ports:
-      - "5078:5078"
 
   # ── Client React (build statique servi par nginx) ─────────────────────────
   client:
@@ -69,6 +65,9 @@ services:
       - api
     ports:
       - "80:80"
+    volumes:
+      - ./seed/images:/usr/share/nginx/html/images:ro
+      - ./seed/previews:/usr/share/nginx/html/previews:ro
 
 volumes:
   db_data:
