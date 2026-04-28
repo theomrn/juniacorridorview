@@ -251,7 +251,7 @@ const Panorama360 = ({ infoPopups, selectedPicture, links, onLinkClick, onPositi
       popupGroup.add(mesh);
     };
   image.crossOrigin = "anonymous";
-    image.src = `http://localhost:5078/${popup.image_path}`;
+    image.src = `http://localhost/${popup.image_path}`;
     return popupGroup;
   };
 

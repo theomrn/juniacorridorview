@@ -52,6 +52,8 @@ services:
       ASPNETCORE_URLS: "http://+:5078"
     volumes:
       - ./src/DataBaseApi/DataBaseApi/firebase-service-account.json:/app/firebase-service-account.json:ro
+      - ./seed/images:/app/wwwroot/images
+      - ./seed/previews:/app/wwwroot/previews
 
   # ── Client React (build statique servi par nginx) ─────────────────────────
   client:
@@ -65,9 +67,6 @@ services:
       - api
     ports:
       - "80:80"
-    volumes:
-      - ./seed/images:/usr/share/nginx/html/images:ro
-      - ./seed/previews:/usr/share/nginx/html/previews:ro
 
 volumes:
   db_data:

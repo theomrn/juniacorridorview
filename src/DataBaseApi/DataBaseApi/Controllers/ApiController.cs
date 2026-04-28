@@ -354,10 +354,10 @@ public class ApiController : ControllerBase
 
     [HttpPut("update-infospot")]
     [RequestSizeLimit(50_000_000)]
-    public async Task<IActionResult> UpdateInfospot([FromForm] int id_info_popup, [FromForm] int id_pictures, [FromForm] double posX, [FromForm] double posY, [FromForm] double posZ, [FromForm] string text, [FromForm] string title, [FromForm] int? id_languages, [FromForm] int? id_visitor_type)
+    public async Task<IActionResult> UpdateInfospot([FromForm] int id_info_popup, [FromForm] int id_pictures, [FromForm] double posX, [FromForm] double posY, [FromForm] double posZ)
     {
         var file = Request.Form.Files.FirstOrDefault();
-        var res = await _db.UpdateInfospotAsync(id_info_popup, id_pictures, posX, posY, posZ, text, title, file, id_languages, id_visitor_type);
+        var res = await _db.UpdateInfospotAsync(id_info_popup, id_pictures, posX, posY, posZ, file);
         return Ok(new { updated = res });
     }
 
