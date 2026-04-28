@@ -495,16 +495,14 @@ public class ApiController : ControllerBase
 
         foreach (var idFloor in listIdFloors)
         {
-            var listIdRooms = await _db.GetRoomIdByIdFloorAsync(idFloor.Value);
-         
+            var listIdRooms = await _db.GetRoomIdByIdFloorAsync((int)idFloor.id_floors);
+
             foreach (var idRoom in listIdRooms)
             {
-                var listIdPictures = await _db.GetPicturesByRoomIdAsync(idRoom.Value);
-                await _db.DeleteRoomAsync(idRoom.Value);
+                await _db.DeleteRoomAsync((int)idRoom.id_rooms);
             }
 
-
-            await _db.DeleteFloorAsync(idFloor.Value);
+            await _db.DeleteFloorAsync((int)idFloor.id_floors);
         }
 
         await _db.DeleteBuildingAsync(id);

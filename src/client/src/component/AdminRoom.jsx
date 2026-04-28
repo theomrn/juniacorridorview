@@ -384,13 +384,8 @@ const AdminRoom = () => {
       formData.append('previewImage', newRoomData.previewImage);
     }
 
-    // Add images to form data
-    newRoomData.images.forEach(image => {
-      formData.append('images', image);
-    });
-
     try {
-      const createRoomPromise = api.createRoom(formData);
+      const createRoomPromise = api.createRoom(formData, newRoomData.images);
       const fetchRoomsPromise = createRoomPromise.then(async () => {
         await fetchRooms()
         setNewRoomModalOpen(false);

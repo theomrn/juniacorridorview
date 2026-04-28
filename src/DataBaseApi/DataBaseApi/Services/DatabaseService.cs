@@ -122,10 +122,10 @@ public class DatabaseService
         return await conn.QueryFirstOrDefaultAsync("SELECT * FROM Rooms WHERE id_rooms = @Id", new { Id = id_rooms });
     }
 
-    public async Task<dynamic?> GetRoomIdByIdFloorAsync(int id_floors)
+    public async Task<IEnumerable<dynamic>> GetRoomIdByIdFloorAsync(int id_floors)
     {
         using var conn = CreateConnection();
-        return await conn.QueryFirstOrDefaultAsync("SELECT id_rooms FROM Rooms WHERE id_floors = @Id", new { Id = id_floors });
+        return await conn.QueryAsync("SELECT id_rooms FROM Rooms WHERE id_floors = @Id", new { Id = id_floors });
     }
 
     public async Task<int> AddRoomAsync(string name, string number, int id_floors, double? plan_x, double? plan_y)
@@ -616,10 +616,10 @@ public class DatabaseService
         return await conn.QueryFirstOrDefaultAsync("SELECT * FROM Floors WHERE id_floors = @Id", new { Id = id_floors });
     }
 
-    public async Task<dynamic?> GetFloorIdByIdBuildingAsync(int id_buildings)
+    public async Task<IEnumerable<dynamic>> GetFloorIdByIdBuildingAsync(int id_buildings)
     {
         using var conn = CreateConnection();
-        return await conn.QueryFirstOrDefaultAsync("SELECT id_floors FROM Floors WHERE id_buildings = @Id", new { Id = id_buildings });
+        return await conn.QueryAsync("SELECT id_floors FROM Floors WHERE id_buildings = @Id", new { Id = id_buildings });
     }
 
     public async Task<dynamic?> GetPlanPathByIdBuildingAsync(int id_building)
