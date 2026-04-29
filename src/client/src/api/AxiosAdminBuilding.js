@@ -47,17 +47,12 @@ const getFloors = async () => {
 // }
 
 const insertBuilding = async (formdata) => {
-    // try {
-    //     const response = await fetch('/api/add-building', {
-    //         method: 'POST',
-    //         body: formdata
-    //     });
-    // } catch (error) {
-    //     console.error('Error inserting building', error);
-    // }
     try {
-        axios.post('/api/add-building', formdata);
-    }catch (error) {}
+        const response = await axios.post('/api/add-building', formdata);
+    } catch (error) {
+        console.error('Error inserting building', error);
+        throw error;
+    }
 }
 
 const insertFloor = async (formData) => {

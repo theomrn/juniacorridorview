@@ -122,10 +122,10 @@ public class DatabaseService
         return await conn.QueryFirstOrDefaultAsync("SELECT * FROM Rooms WHERE id_rooms = @Id", new { Id = id_rooms });
     }
 
-    public async Task<dynamic?> GetRoomIdByIdFloorAsync(int id_floors)
+    public async Task<IEnumerable<dynamic>> GetRoomIdByIdFloorAsync(int id_floors)
     {
         using var conn = CreateConnection();
-        return await conn.QueryFirstOrDefaultAsync("SELECT id_rooms FROM Rooms WHERE id_floors = @Id", new { Id = id_floors });
+        return await conn.QueryAsync("SELECT id_rooms FROM Rooms WHERE id_floors = @Id", new { Id = id_floors });
     }
 
     public async Task<int> AddRoomAsync(string name, string number, int id_floors, double? plan_x, double? plan_y)
@@ -301,53 +301,26 @@ public class DatabaseService
         return await conn.QueryAsync(sql, new { Id = id_pictures });
     }
 
-    public async Task<int> UpdateInfospotAsync(int id_info_popup, int id_pictures, double posX, double posY, double posZ, string text, string title, IFormFile? imageFile, int? id_languages, int? id_visitor_type)
+    public async Task<int> UpdateInfospotAsync(int id_info_popup, int id_pictures, double posX, double posY, double posZ, IFormFile? imageFile)
     {
         using var conn = CreateConnection();
 
-        // Update Info_Popup table (position and image)
         if (imageFile != null)
         {
-            // Delete old image if exists
             var old = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT image_path FROM Info_Popup WHERE id_info_popup = @Id", new { Id = id_info_popup });
             if (old != null && old.image_path != null)
-            {
                 TryDeleteFile((string)old.image_path);
-            }
+
             var path = await SaveFileAsync(imageFile, "images");
-            var sqlInfoPopup = "UPDATE Info_Popup SET id_pictures = @IdP, position_x = @X, position_y = @Y, position_z = @Z, image_path = @Img WHERE id_info_popup = @Id";
-            await conn.ExecuteAsync(sqlInfoPopup, new { IdP = id_pictures, X = posX, Y = posY, Z = posZ, Img = path, Id = id_info_popup });
+            return await conn.ExecuteAsync(
+                "UPDATE Info_Popup SET id_pictures = @IdP, position_x = @X, position_y = @Y, position_z = @Z, image_path = @Img WHERE id_info_popup = @Id",
+                new { IdP = id_pictures, X = posX, Y = posY, Z = posZ, Img = path, Id = id_info_popup });
         }
         else
         {
-            var sqlInfoPopup = "UPDATE Info_Popup SET id_pictures = @IdP, position_x = @X, position_y = @Y, position_z = @Z WHERE id_info_popup = @Id";
-            await conn.ExecuteAsync(sqlInfoPopup, new { IdP = id_pictures, X = posX, Y = posY, Z = posZ, Id = id_info_popup });
-        }
-
-        // Update Info_popup_translation table
-        if (id_languages.HasValue)
-        {
-            // Check if translation exists for this language
-            var existingTranslation = await conn.QueryFirstOrDefaultAsync<dynamic>(
-                "SELECT 1 FROM Info_popup_translation WHERE id_info_popup = @Id AND id_languages = @Lang",
-                new { Id = id_info_popup, Lang = id_languages.Value });
-
-            if (existingTranslation != null)
-            {
-                var sqlTranslation = "UPDATE Info_popup_translation SET title = @Title, text = @Text, id_visitor_type = @VisitorType WHERE id_info_popup = @Id AND id_languages = @Lang";
-                return await conn.ExecuteAsync(sqlTranslation, new { Title = title, Text = text, VisitorType = id_visitor_type, Id = id_info_popup, Lang = id_languages.Value });
-            }
-            else
-            {
-                // Insert new translation if it doesn't exist
-                return await InsertInfoPopUpTranslationAsync(id_info_popup, text, title, id_languages.Value, id_visitor_type);
-            }
-        }
-        else
-        {
-            // Update first translation found (backward compatibility)
-            var sqlTranslation = "UPDATE Info_popup_translation SET title = @Title, text = @Text, id_visitor_type = @VisitorType WHERE id_info_popup = @Id LIMIT 1";
-            return await conn.ExecuteAsync(sqlTranslation, new { Title = title, Text = text, VisitorType = id_visitor_type, Id = id_info_popup });
+            return await conn.ExecuteAsync(
+                "UPDATE Info_Popup SET id_pictures = @IdP, position_x = @X, position_y = @Y, position_z = @Z WHERE id_info_popup = @Id",
+                new { IdP = id_pictures, X = posX, Y = posY, Z = posZ, Id = id_info_popup });
         }
     }
 
@@ -616,10 +589,10 @@ public class DatabaseService
         return await conn.QueryFirstOrDefaultAsync("SELECT * FROM Floors WHERE id_floors = @Id", new { Id = id_floors });
     }
 
-    public async Task<dynamic?> GetFloorIdByIdBuildingAsync(int id_buildings)
+    public async Task<IEnumerable<dynamic>> GetFloorIdByIdBuildingAsync(int id_buildings)
     {
         using var conn = CreateConnection();
-        return await conn.QueryFirstOrDefaultAsync("SELECT id_floors FROM Floors WHERE id_buildings = @Id", new { Id = id_buildings });
+        return await conn.QueryAsync("SELECT id_floors FROM Floors WHERE id_buildings = @Id", new { Id = id_buildings });
     }
 
     public async Task<dynamic?> GetPlanPathByIdBuildingAsync(int id_building)

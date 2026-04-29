@@ -354,10 +354,10 @@ public class ApiController : ControllerBase
 
     [HttpPut("update-infospot")]
     [RequestSizeLimit(50_000_000)]
-    public async Task<IActionResult> UpdateInfospot([FromForm] int id_info_popup, [FromForm] int id_pictures, [FromForm] double posX, [FromForm] double posY, [FromForm] double posZ, [FromForm] string text, [FromForm] string title, [FromForm] int? id_languages, [FromForm] int? id_visitor_type)
+    public async Task<IActionResult> UpdateInfospot([FromForm] int id_info_popup, [FromForm] int id_pictures, [FromForm] double posX, [FromForm] double posY, [FromForm] double posZ)
     {
         var file = Request.Form.Files.FirstOrDefault();
-        var res = await _db.UpdateInfospotAsync(id_info_popup, id_pictures, posX, posY, posZ, text, title, file, id_languages, id_visitor_type);
+        var res = await _db.UpdateInfospotAsync(id_info_popup, id_pictures, posX, posY, posZ, file);
         return Ok(new { updated = res });
     }
 
@@ -495,16 +495,14 @@ public class ApiController : ControllerBase
 
         foreach (var idFloor in listIdFloors)
         {
-            var listIdRooms = await _db.GetRoomIdByIdFloorAsync(idFloor.Value);
-         
+            var listIdRooms = await _db.GetRoomIdByIdFloorAsync((int)idFloor.id_floors);
+
             foreach (var idRoom in listIdRooms)
             {
-                var listIdPictures = await _db.GetPicturesByRoomIdAsync(idRoom.Value);
-                await _db.DeleteRoomAsync(idRoom.Value);
+                await _db.DeleteRoomAsync((int)idRoom.id_rooms);
             }
 
-
-            await _db.DeleteFloorAsync(idFloor.Value);
+            await _db.DeleteFloorAsync((int)idFloor.id_floors);
         }
 
         await _db.DeleteBuildingAsync(id);
