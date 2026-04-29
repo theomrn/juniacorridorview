@@ -32,7 +32,7 @@ export const updateVisitorType = async (id_visitor_type, name) => {
 
 export const deleteVisitorType = async (id_visitor_type) => {
     try {
-        const response = await axios.delete(`/api/visitors/types/${id_visitor_type}`);
+        const response = await axios.delete(`/api/delete-visitor-type/${id_visitor_type}`);
         return response.data;
     } catch (error) {
         console.error('Error deleting visitor type:', error);
