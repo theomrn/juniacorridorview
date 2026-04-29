@@ -119,7 +119,13 @@ public class DatabaseService
     public async Task<dynamic?> GetRoomByIdAsync(int id_rooms)
     {
         using var conn = CreateConnection();
-        return await conn.QueryFirstOrDefaultAsync("SELECT * FROM Rooms WHERE id_rooms = @Id", new { Id = id_rooms });
+        var sql = @"SELECT r.id_rooms, r.name, r.number, r.id_floors, r.plan_x, r.plan_y,
+                           f.name AS floor_name, b.name AS building_name
+                    FROM Rooms r
+                    LEFT JOIN Floors f ON r.id_floors = f.id_floors
+                    LEFT JOIN Buildings b ON f.id_buildings = b.id_buildings
+                    WHERE r.id_rooms = @Id";
+        return await conn.QueryFirstOrDefaultAsync(sql, new { Id = id_rooms });
     }
 
     public async Task<IEnumerable<dynamic>> GetRoomIdByIdFloorAsync(int id_floors)
