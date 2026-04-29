@@ -38,6 +38,9 @@ const AdminRoomDetails = () => {
   const [isSelectingPosition, setIsSelectingPosition] = useState(false);
   const [selectedImageId, setSelectedImageId] = useState('');
   const [roomName, setRoomName] = useState('');
+  const [roomNumber, setRoomNumber] = useState('');
+  const [floorName, setFloorName] = useState('');
+  const [buildingName, setBuildingName] = useState('');
   const dataFetchedRef = useRef(false);
   const firstLoad = useRef(true);
   const [linkToEdit, setLinkToEdit] = useState(null);
@@ -125,6 +128,9 @@ const AdminRoomDetails = () => {
     try {
       const roomData = await api.getRoomDetails(id);
       setRoomName(roomData.name);
+      setRoomNumber(roomData.number);
+      setFloorName(roomData.floor_name);
+      setBuildingName(roomData.building_name);
 
       const picturesData = await api.getPicturesByRoomId(id);
       const picturesWithUrls = await Promise.all(
@@ -411,7 +417,8 @@ const AdminRoomDetails = () => {
 
   const handleModalPictureClick = async (imageUrl, pictureId) => {
     setIsLoadingModal(true);
-    setModalSelectedPicture(imageUrl);
+    const picture = pictures.find(pic => pic.id_pictures === pictureId);
+    setModalSelectedPicture(picture);
     setSelectedImageId(pictureId);
     const infospotsPromise = api.getInfoPopup(pictureId);
     const linksPromise = api.getLinks(pictureId);
@@ -754,7 +761,14 @@ const AdminRoomDetails = () => {
 
 
     <div className="admin-room-details-container flex flex-col items-center p-3">
-      
+
+      <div className="flex items-center gap-3 mt-4 font-title font-bold flex-wrap justify-center">
+        <span className="text-3xl text-junia-purple">{roomName}</span>
+        {roomNumber && <><span className="text-2xl text-junia-purple">—</span><span className="text-2xl text-junia-purple">{roomNumber}</span></>}
+        {floorName && <><span className="text-2xl text-junia-purple">—</span><span className="text-2xl text-junia-purple">{floorName}</span></>}
+        {buildingName && <><span className="text-2xl text-junia-purple">—</span><span className="text-2xl text-junia-purple">{buildingName}</span></>}
+      </div>
+
       <div className="image-panorama-container bg-white w-80 rounded-2xl mt-4 flex">
 
         <div className="image-list flex flex-col p-2 justify-between">
