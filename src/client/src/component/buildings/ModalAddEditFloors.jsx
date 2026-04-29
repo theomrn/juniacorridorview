@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import {toast} from "sonner";
 import * as api from "../../api/AxiosAdminBuilding";
 import { useTranslation } from 'react-i18next';
+import Loader from "../Loader";
 
 const ModalAddEditFloors = ({
     isOpen,
@@ -16,6 +17,7 @@ const ModalAddEditFloors = ({
 
     const [floorName, setFloorName] = useState("");
     const [file, setFile] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
@@ -64,6 +66,8 @@ const ModalAddEditFloors = ({
         formData.append('file', file);
         formData.append('id_buildings', id_buildings);
 
+        setIsLoading(true);
+
         if(editMode) {
             formData.append('id_floors', floor.id_floors);
             api.updateFloor(formData)
@@ -75,9 +79,9 @@ const ModalAddEditFloors = ({
                 .catch((error) => {
                     console.error('Error updating niveau:', error);
                     toast.error(t('errorModifyingFloor'));
-                });
+                })
+                .finally(() => setIsLoading(false));
         } else {
-            // Call the API to create a new floor
             api.insertFloor(formData)
                 .then(() => {
                     toast.success(t('floorAddedSuccess'));
@@ -87,12 +91,14 @@ const ModalAddEditFloors = ({
                 .catch((error) => {
                     console.error('Error creating niveau:', error);
                     toast.error(t('errorAddingFloor'));
-                });
+                })
+                .finally(() => setIsLoading(false));
         }
     }
 
     return(
         <>
+            <Loader show={isLoading} />
             {showAddEditFloor && isOpen && (
                 <div className="modal">
                     <div className="modal-content">
@@ -129,7 +135,8 @@ const ModalAddEditFloors = ({
                             </div>
                             <button
                                 type="submit"
-                                className="mt-4 p-2 bg-junia-orange hover:bg-junia-orange-dark rounded-3xl text-white font-bold shadow-md font-title text-center transition"
+                                disabled={isLoading}
+                                className="mt-4 p-2 bg-junia-orange hover:bg-junia-orange-dark rounded-3xl text-white font-bold shadow-md font-title text-center transition disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {editMode ? t('editFloorBtn') : t('addFloorBtn')}
                             </button>
